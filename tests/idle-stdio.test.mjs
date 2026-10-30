@@ -86,6 +86,21 @@ test('light stdio default stateful expiry returns explicit error and executes no
     assert.equal((await fixture.rows()).filter(row => row.value === 'must-not-execute').length, 0);
   });
 
+test('light stdio optional own-page release keeps clean stateless wake usable',
+  { skip: !WINDOWS, timeout: 10000 }, async t => {
+    const fixture = await setup(t, { restart_policy: 'stateless', release_idle_pages: true });
+    const first = await fixture.client.callTool({ name: 'echo', arguments: { value: 'before-page-release' } });
+    const start = (await fixture.rows()).find(row => row.kind === 'start');
+    await waitFor(() => !fixture.alive(start.pid, start.created));
+    const next = await fixture.client.callTool({ name: 'echo', arguments: { value: 'after-page-release' } });
+    assert.notEqual(next.structuredContent.pid, first.structuredContent.pid);
+    assert.equal(next.structuredContent.value, 'after-page-release');
+    const rows = await fixture.rows();
+    for (const value of ['before-page-release', 'after-page-release'])
+      assert.equal(rows.filter(row => row.kind === 'call' && row.value === value).length, 1);
+    assert.equal(fixture.stderr(), '');
+  });
+
 test('light stdio stateless restart revalidates instructions and approved tool metadata before a new call',
   { skip: !WINDOWS, timeout: 20000 }, async t => {
     for (const fixtureChange of ['annotations', 'schema', 'instructions', 'pagination']) {

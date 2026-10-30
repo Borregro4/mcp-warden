@@ -28,7 +28,6 @@ _spec.loader.exec_module(_base)
 Bridge = _base.Bridge
 encoded = _base.encoded
 parse = _base.parse
-digest = _base.digest
 redirect_diagnostics = _base.redirect_diagnostics
 
 
@@ -69,7 +68,7 @@ def _rpc_key(value):
         if not math.isfinite(value) or not value.is_integer():
             raise ProtocolStop('invalid_request_id')
         value = int(value)
-    return digest(value)  # Numeric 1 equals 1.0, but the string "1" remains distinct.
+    return (type(value), value)  # Numeric 1 equals 1.0, but the string "1" remains distinct.
 
 
 def _write_all(stream, raw):
@@ -102,6 +101,9 @@ class IdleBridge(Bridge):
             raise ValueError('invalid_configuration')
         self.policy = manifest.get('restart_policy', 'manual')
         if self.policy not in {'manual', 'stateless'}:
+            raise ValueError('invalid_configuration')
+        self.release_pages_on_idle = manifest.get('release_idle_pages', False)
+        if type(self.release_pages_on_idle) is not bool:
             raise ValueError('invalid_configuration')
         self.idle_seconds = _number(manifest.get('idle_session_timeout_seconds', 900), 0, 86400)
         self.handshake_seconds = _number(manifest.get('handshake_timeout_seconds', 30), .1, 600)
@@ -392,7 +394,9 @@ class IdleBridge(Bridge):
                 if self.init is not None and message['id'] == self.init['id'] and self.first_result is None:
                     if self.valid_result('initialize', message.get('result')):
                         self.first_result = message['result']
-        super().accept_backend(raw)
+        # This transport never enables the discovery cache/catalog phase. The
+        # inherited handler would only parse and hash this response again.
+        self.output(raw)
 
     def complete_replay(self):
         if self.uncertain:
@@ -468,6 +472,26 @@ class IdleBridge(Bridge):
                 and self._events.empty() and now - self.last_activity >= self.idle_seconds):
             self.stop_backend()
             self.state = 'sleeping'
+            if self.release_pages_on_idle and not self.uncertain:
+                self._release_own_idle_pages()
+
+    @staticmethod
+    def _release_own_idle_pages():
+        """Best effort, opt-in paging tradeoff for this proxy's resident pages only.
+
+        This does not free committed allocations. Refaults on wake can increase
+        latency and CPU; see docs/idle-page-release.md for the measured limits.
+        """
+        import ctypes
+        from ctypes import wintypes
+        try:
+            kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+            kernel.GetCurrentProcess.restype = wintypes.HANDLE
+            kernel.K32EmptyWorkingSet.argtypes = [wintypes.HANDLE]
+            kernel.K32EmptyWorkingSet.restype = wintypes.BOOL
+            return bool(kernel.K32EmptyWorkingSet(kernel.GetCurrentProcess()))
+        except (OSError, AttributeError, ValueError):
+            return False  # Optional memory policy must never break the MCP session.
 
     def run(self):
         if os.name != 'nt':

@@ -47,6 +47,7 @@ class BenchmarkReader(_metrics.WindowsReader):
             if not self.kernel.K32GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
                 raise OSError('process_private_usage_unavailable')
             observed['privateBytes'] = counters.PrivateUsage
+            observed['pageFaultCount'] = counters.PageFaultCount
             observed['parent'] = self.parents.get(pid)
             return observed
         finally:

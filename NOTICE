@@ -41,3 +41,13 @@ bundling dependencies must retain all applicable licenses and notices.
   Source: https://github.com/honojs/node-server
   Copyright (c) 2022 - present, Yusuke Wada and Hono contributors
   MIT License: see licenses/hono-node-server-2.1.5.txt.
+
+win-safesubprocess 0.1.0 (private-globals launch interception pattern)
+  Source: https://github.com/mokusatsu/win_safesubprocess
+  Source file: src/win_safesubprocess/_popen.py
+  Verified source blob: a89fea6e8e116683bfb1846ab27b02f116edb691
+  Copyright (c) 2026 win-safesubprocess contributors
+  MIT License: see licenses/win-safesubprocess-MIT.txt.
+  Adapted in runtime/lazy_stdio.py for a private Job per backend, including
+  process-only cleanup scope. No package dependency is added. CPython's own
+  current launch function is reused at runtime rather than copied here.

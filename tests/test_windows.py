@@ -28,7 +28,7 @@ class WindowsOwnershipTests(unittest.TestCase):
             bridge = lazy.Bridge({'command': 'missing-fixture', 'cache_dir': temporary})
             job = Mock()
             with patch.object(lazy, 'WindowsJob', return_value=job), \
-                    patch.object(lazy.subprocess, 'Popen', side_effect=FileNotFoundError):
+                    patch.object(lazy, '_OwnedPopen', side_effect=FileNotFoundError):
                 with self.assertRaises(FileNotFoundError):
                     bridge.start()
             job.close.assert_called_once_with()

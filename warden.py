@@ -8,14 +8,11 @@ from __future__ import annotations
 import argparse
 import ctypes
 from ctypes import wintypes
-import http.client
 import importlib.util
 import json
 import os
 from pathlib import Path
 import re
-import secrets
-import shutil
 import subprocess
 import sys
 import threading
@@ -23,7 +20,7 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.2.0-alpha.1"
+VERSION = "0.3.0-alpha.1"
 
 
 class WardenError(Exception):
@@ -36,6 +33,7 @@ def state_path(value: str | Path) -> Path:
 
 def initialize(state: Path, port: int = 18741, idle_seconds: float = 900,
                transport: str = 'gateway', restart_policy: str = 'manual') -> dict:
+    import secrets
     if transport not in {'gateway', 'stdio'} or restart_policy not in {'manual', 'stateless'}:
         raise WardenError('invalid transport or restart policy')
     if type(port) is not int or not 1024 <= port <= 65535:
@@ -112,6 +110,7 @@ def read_token(state: Path) -> str:
 
 
 def get_status(state: Path) -> dict:
+    import http.client
     config = load_config(state)
     token = read_token(state)
     connection = http.client.HTTPConnection("127.0.0.1", config["port"], timeout=3)
@@ -134,6 +133,7 @@ def get_status(state: Path) -> dict:
 
 
 def node_executable() -> str:
+    import shutil
     result = shutil.which("node")
     if not result:
         raise WardenError("Node.js is not on PATH")
@@ -346,6 +346,7 @@ def configuration(state: Path, profile: str, client: str) -> str:
 
 
 def doctor(state: Path | None, transport: str = 'gateway') -> dict:
+    import shutil
     node = shutil.which("node")
     node_supported = False
     if node and transport != 'stdio':

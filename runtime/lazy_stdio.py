@@ -6,7 +6,6 @@ See README.md for the manifest contract and cache trust/validity boundaries.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -76,10 +75,12 @@ def encoded(value):
 
 
 def digest(value):
+    import hashlib
     return hashlib.sha256(encoded(value)).hexdigest()
 
 
 def file_digest(path):
+    import hashlib
     # Same whole-file SHA-256 semantics, bounded-buffer reads even for large runtimes.
     with Path(path).open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -157,6 +158,8 @@ class WindowsJob:
         self.k.SetInformationJobObject.restype = w.BOOL
         self.k.AssignProcessToJobObject.argtypes = [w.HANDLE, w.HANDLE]
         self.k.AssignProcessToJobObject.restype = w.BOOL
+        self.k.ResumeThread.argtypes = [w.HANDLE]
+        self.k.ResumeThread.restype = w.DWORD
         self.k.CloseHandle.argtypes = [w.HANDLE]
         self.handle = self.k.CreateJobObjectW(None, None)
         if not self.handle:
@@ -214,6 +217,72 @@ class WindowsJob:
         if self.handle:
             self.k.CloseHandle(self.handle)
             self.handle = None
+
+
+class _CreateProcessProxy:
+    """Keep CPython's launch behavior while owning its exact suspended handles.
+
+    The private-globals interception pattern is adapted from MIT-licensed
+    win-safesubprocess; see NOTICE and licenses/win-safesubprocess-MIT.txt.
+    No module-global function or native API is patched.
+    """
+    def __init__(self, native, job):
+        self.native, self.job = native, job
+
+    def __getattr__(self, name):
+        return getattr(self.native, name)
+
+    def CreateProcess(self, *args, **kwargs):
+        # The running CPython implementation supplies flags positionally. Fail
+        # before spawning if that private call shape ever changes.
+        if len(args) < 6:
+            raise RuntimeError('unsupported_process_creation')
+        arguments = list(args)
+        arguments[5] = int(arguments[5]) | 0x00000004  # CREATE_SUSPENDED
+        handles = self.native.CreateProcess(*arguments, **kwargs)
+        process, thread, _, _ = handles
+        try:
+            from ctypes import wintypes
+            if not self.job.k.AssignProcessToJobObject(self.job.handle, wintypes.HANDLE(process)):
+                raise self.job.c.WinError(self.job.c.get_last_error())
+            if self.job.k.ResumeThread(wintypes.HANDLE(thread)) != 1:
+                raise RuntimeError('unexpected_suspend_count')
+            return handles
+        except BaseException:
+            # Popen has not received these handles yet. Clean up this exact
+            # unpublished child on every setup failure, including interrupts.
+            try:
+                try:
+                    self.native.TerminateProcess(process, 1)
+                finally:
+                    if self.native.WaitForSingleObject(process, 5000) != 0:
+                        raise RuntimeError('unpublished_child_cleanup_failed')
+            finally:
+                try:
+                    self.native.CloseHandle(thread)
+                finally:
+                    self.native.CloseHandle(process)
+            raise
+
+
+class _OwnedPopen(subprocess.Popen):
+    """One launch with a private API proxy; unrelated/concurrent launches stay intact."""
+    def __init__(self, *args, job, **kwargs):
+        self.warden_job = job
+        super().__init__(*args, **kwargs)
+
+    def _execute_child(self, *args, **kwargs):
+        from types import FunctionType
+        original = subprocess.Popen._execute_child
+        if (not isinstance(original, FunctionType) or '_winapi' not in original.__globals__
+                or 'CreateProcess' not in original.__code__.co_names):
+            raise RuntimeError('unsupported_process_creation')
+        namespace = dict(original.__globals__)
+        namespace['_winapi'] = _CreateProcessProxy(namespace['_winapi'], self.warden_job)
+        execute = FunctionType(original.__code__, namespace, original.__name__,
+            original.__defaults__, original.__closure__)
+        execute.__kwdefaults__ = original.__kwdefaults__
+        return execute(self, *args, **kwargs)
 
 
 class Bridge:
@@ -292,8 +361,8 @@ class Bridge:
             # automatically leave this Job when they are created.
             self.job = WindowsJob(include_descendants=self.cleanup_scope == "tree")
             try:
-                self.proc = subprocess.Popen(args, creationflags=0x08000000 | 0x00000004, **kwargs)
-                self.job.attach_and_resume(self.proc)
+                self.proc = _OwnedPopen(args, job=self.job,
+                    creationflags=0x08000000 | 0x00000004, **kwargs)
             except BaseException:
                 try:
                     if self.proc is not None:
