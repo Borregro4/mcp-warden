@@ -1,0 +1,25 @@
+{
+  "name": "mcp-warden",
+  "version": "0.1.0-alpha.1",
+  "description": "Windows lifecycle supervisor for local MCP sessions",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs && python -m unittest discover -s tests -p test_*.py",
+    "test:protocol": "node --test --test-concurrency=1 tests/*.test.mjs"
+  },
+  "dependencies": {
+    "supergateway": "4.2.0",
+    "@modelcontextprotocol/sdk": "1.32.0"
+  },
+  "overrides": {
+    "@modelcontextprotocol/node": "2.1.2",
+    "@hono/node-server": "2.1.5",
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "@modelcontextprotocol/client": "2.3.0",
+    "@modelcontextprotocol/server": "2.3.0",
+    "zod": "4.6.6"
+  }
+}

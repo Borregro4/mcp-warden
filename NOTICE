@@ -1,0 +1,43 @@
+MCP Warden
+Copyright (c) 2026 Borregro4 and contributors
+MIT License: see LICENSE.
+
+This project builds lifecycle policy around separately installed upstream
+packages. Their code, licenses and attribution remain their own. No upstream
+endorsement is implied.
+
+Supergateway 4.2.0
+  Source: https://github.com/supercorp-ai/supergateway
+  Copyright (c) 2024 Supercorp
+  MIT License: see licenses/supergateway-4.2.0.txt.
+  Used for stateful HTTP/SSE transport, peer forwarding and session counters.
+
+@modelcontextprotocol/sdk 1.32.0
+  Source: https://github.com/modelcontextprotocol/typescript-sdk
+  Copyright (c) 2024 Anthropic, PBC
+  MIT License in the pinned package: see licenses/mcp-sdk-1.32.0.txt.
+  The current upstream default branch has a different licensing notice;
+  this entry describes the pinned npm artifact, not every SDK version.
+
+@modelcontextprotocol/client 2.3.0 and @modelcontextprotocol/server 2.3.0
+  Source: https://github.com/modelcontextprotocol/typescript-sdk
+  Their package license files describe the MCP licensing transition:
+  Apache-2.0 for new and consented contributions; unconsented original MIT
+  contributions retain MIT; documentation excluding specifications is CC-BY-4.0.
+  Full notices: licenses/mcp-client-2.3.0.txt and licenses/mcp-server-2.3.0.txt.
+
+This source repository does not vendor node_modules. npm installation retains
+the license files of these and other transitive dependencies. A distributor
+bundling dependencies must retain all applicable licenses and notices.
+
+@modelcontextprotocol/node 2.1.2
+  Source: https://github.com/modelcontextprotocol/typescript-sdk
+  Its package license file retains the MCP Apache-2.0/MIT transition notice
+  described above. Full upstream license: licenses/mcp-node-2.1.2.txt.
+  Pinned with @hono/node-server 2.1.5 to address advisories affecting the older
+  versions resolved by Supergateway 4.2.0. These overrides are tested together.
+
+@hono/node-server 2.1.5
+  Source: https://github.com/honojs/node-server
+  Copyright (c) 2022 - present, Yusuke Wada and Hono contributors
+  MIT License: see licenses/hono-node-server-2.1.5.txt.
