@@ -1,0 +1,87 @@
+{
+  "preparedUtc": "2026-10-30T13:12:02.133Z",
+  "finishedUtc": "2026-10-30T13:14:08.573Z",
+  "runsPerVariant": 3,
+  "sourceChangedDuringRun": [],
+  "summaries": [
+    {
+      "variant": "direct",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 72.90020000000368,
+      "medianWarmMs": 0.25009999999019783,
+      "medianWakeMs": 0.6140999999988708,
+      "medianActivePrivateBytes": 44523520,
+      "medianIdlePrivateBytes": 44523520,
+      "medianIdleWorkingSetBytes": 55169024,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "snooze",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 105.05309999999736,
+      "medianWarmMs": 0.4673999999940861,
+      "medianWakeMs": 61.89870000000519,
+      "medianActivePrivateBytes": 92557312,
+      "medianIdlePrivateBytes": 49311744,
+      "medianIdleWorkingSetBytes": 16031744,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "warden-gateway",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 1164.089599999992,
+      "medianWarmMs": 4.7225000000034925,
+      "medianWakeMs": 657.8831000000064,
+      "medianActivePrivateBytes": 197386240,
+      "medianIdlePrivateBytes": 138899456,
+      "medianIdleWorkingSetBytes": 215973888,
+      "idleProcessCounts": [
+        8,
+        8,
+        8
+      ],
+      "explicitFirstWakeErrors": 3,
+      "errors": []
+    },
+    {
+      "variant": "warden-stdio",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 197.1518999999971,
+      "medianWarmMs": 0.4999000000025262,
+      "medianWakeMs": 80.3185999999987,
+      "medianActivePrivateBytes": 62164992,
+      "medianIdlePrivateBytes": 17580032,
+      "medianIdleWorkingSetBytes": 32935936,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    }
+  ],
+  "limits": [
+    "Single synthetic session with 32 MiB resident allocation, three runs; not representative of all MCP servers.",
+    "Snapshot memory includes all observed variant-owned descendants; working-set sums double-count shared pages.",
+    "Only direct baseline and mcp-snooze v0.1.0 compared. No quota, model or token cost is measured.",
+    "The Warden gateway variant requires explicit client reconnection after expiry; its failure and reconnect are included in wake time.",
+    "The Warden stdio variant is explicitly declared stateless and validates initialization and tool metadata before resuming a new request."
+  ]
+}

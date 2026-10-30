@@ -63,6 +63,15 @@ process. The client harness itself is excluded. Warden's shared supervisor is
 included in the gateway variant, so this single-session case does not demonstrate multi-session
 amortization.
 
+The version-3 sampler reuses `soak_metrics.select_tree` and `WindowsReader`.
+Every selected parent/child edge requires a child creation time at least as new
+as its parent's, and no child created after the snapshot began is adopted.
+Previously observed root creation identities are checked on later samples;
+an explicitly newly spawned SDK child may establish a new identity if Windows
+reused a PID. Merely matching a historical parent PID is insufficient. This
+avoids attributing unrelated processes to a newly reused PID. The same known
+identities are supplied for the final cleanup check, including former orphans.
+
 Private bytes and working-set bytes are reported separately. Working-set sums
 can double-count shared pages. CPU seconds are cumulative snapshots of the
 processes alive at that stage, not CPU utilization or total work including

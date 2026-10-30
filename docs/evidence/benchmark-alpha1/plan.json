@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "preparedUtc": "2026-10-30T12:09:58.113Z",
+  "platform": "win32",
+  "runsPerVariant": 3,
+  "variants": [
+    "direct",
+    "snooze",
+    "warden"
+  ],
+  "allocationMiB": 32,
+  "sessions": 1,
+  "idleSeconds": 2,
+  "warmCalls": 10,
+  "protocolClient": "@modelcontextprotocol/sdk 1.32.0",
+  "node": "v22.23.4",
+  "snooze": {
+    "version": "0.1.0",
+    "binarySha256": "43e02bbc1148718c3305e74974d0a57ae032e3e9c366b755d53519ee580971db"
+  },
+  "criteria": {
+    "sameWorkload": "Same 32 MiB resident Python fixture, SDK client, one session, ten echo calls and reverse callback.",
+    "cold": "Elapsed client connect, tools/list and first echo; includes starting variant processes.",
+    "warm": "Ten serial echo round trips, individual latency in milliseconds.",
+    "longCall": "Three-second call must complete under two-second idle deadline.",
+    "idle": "Resource sample after three seconds without client requests; retain proxy/supervisor cost.",
+    "wake": "Attempt echo; if explicitly expired, record failure, reconnect once and call. Include reconnect time.",
+    "resources": "Read-only Windows Toolhelp tree from explicitly spawned roots. Sum private bytes and working set; unavailable entries invalidate complete resource claim.",
+    "cleanup": "After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.",
+    "guards": "Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB."
+  },
+  "decisionRule": "Report raw observations and medians; no general winner or subscription/token saving inferred.",
+  "sourceHashes": {
+    "scripts/benchmark.mjs": "fe77e4683e75db27c108c1e87bc6cca589be62b52f49f20b62f95102b7932575",
+    "scripts/benchmark_backend.py": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8",
+    "scripts/benchmark_processes.py": "ea2a391862c6ada35b96a58922d2a28052210284fc359ed6a0f3c04c46243307",
+    "examples/echo_server.py": "f2d6f011c0f10b7585c2445a1cc202ef5dd036d7da83557d6713bfa11c082a8a",
+    "warden.py": "d090eafdf1eff44d630867fc40839482a4f5fe142f7524eb1b6fd30c5aa3de8c",
+    "runtime/gateway.mjs": "e69bb95192fd724763cd8983bb6de545ce5b80c54e23d2f16591241d389d9533",
+    "runtime/connect.mjs": "545f922c97f4e97a2494fd42aa3620add3276b2150b1d76c5d16e344243a3bc9",
+    "runtime/lazy_stdio.py": "f1ec9ea5411b1aa853d31eb08a1b7eb2f737dbbd20977626b0ffe62b5fb65c45",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "package-lock.json": "e4e4246119191941319da25db1efc685aaeabe5a1b34dbb4324f388c08ab0532"
+  }
+}

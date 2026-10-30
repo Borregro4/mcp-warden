@@ -1,0 +1,68 @@
+{
+  "preparedUtc": "2026-10-30T12:09:58.113Z",
+  "finishedUtc": "2026-10-30T12:11:36.353Z",
+  "runsPerVariant": 3,
+  "sourceChangedDuringRun": [],
+  "summaries": [
+    {
+      "variant": "direct",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 70.15129999999772,
+      "medianWarmMs": 0.24929999999585561,
+      "medianWakeMs": 0.529500000004191,
+      "medianActivePrivateBytes": 44707840,
+      "medianIdlePrivateBytes": 44707840,
+      "medianIdleWorkingSetBytes": 55369728,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "snooze",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 110.06389999999374,
+      "medianWarmMs": 0.42890000000079453,
+      "medianWakeMs": 57.33749999999418,
+      "medianActivePrivateBytes": 92594176,
+      "medianIdlePrivateBytes": 49405952,
+      "medianIdleWorkingSetBytes": 15921152,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "warden",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 1196.2167999999947,
+      "medianWarmMs": 4.925300000002608,
+      "medianWakeMs": 723.8178999999946,
+      "medianActivePrivateBytes": 196407296,
+      "medianIdlePrivateBytes": 138358784,
+      "medianIdleWorkingSetBytes": 214355968,
+      "idleProcessCounts": [
+        8,
+        8,
+        8
+      ],
+      "explicitFirstWakeErrors": 3,
+      "errors": []
+    }
+  ],
+  "limits": [
+    "Single synthetic session with 32 MiB resident allocation, three runs; not representative of all MCP servers.",
+    "Snapshot memory includes all observed variant-owned descendants; working-set sums double-count shared pages.",
+    "Only direct baseline and mcp-snooze v0.1.0 compared. No quota, model or token cost is measured.",
+    "Warden currently requires explicit client reconnection after expiry; that failure and reconnect are included in wake time."
+  ]
+}

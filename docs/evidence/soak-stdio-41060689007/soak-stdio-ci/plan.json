@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdUtc": "2026-10-30T13:11:13.536Z",
+  "sourceCommit": "8c4801db380ba3b9c1de059d93e0478f996047e6",
+  "options": {
+    "minutes": 60,
+    "idle": 900,
+    "sample": 30,
+    "targetMib": 256,
+    "abortMib": 768,
+    "minFreeGib": 3,
+    "out": "D:\\a\\mcp-warden\\mcp-warden\\work\\soak-stdio-ci"
+  },
+  "criteria": {
+    "duration": "Same active backend responds after at least 3600 monotonic seconds",
+    "integrity": "Each echo equals the sent tick and active backend PID stays stable",
+    "callbacks": "Reverse roots callbacks complete every five active ticks",
+    "metadata": "Every connection observes tools/list before its first tool call and contains the required synthetic tools",
+    "realIdle": "Idle backend disappears after 900 seconds, within 60 seconds grace; its Python proxy remains",
+    "autoWake": "Same SDK connection and Python proxy wake a fresh backend after clean expiry under explicit stateless policy",
+    "churn": "Three serial fresh owner connections close with their backend and proxy identities gone",
+    "resources": "Complete validated tree with zero unavailable candidates; sampled working set objective 256 MiB; abort above 768 MiB or free physical RAM below 3 GiB",
+    "cleanup": "No active proxies in status; direct PID+creation liveness queries find no observed child identity after shutdown, including orphans"
+  },
+  "sourceHashes": {
+    "runtime/idle_stdio.py": "df5bad96b42aa273e541a1df004f78a99c466fb44d60c2e6995b42d4da14295d",
+    "runtime/lazy_stdio.py": "3b1eb1bf4ea4007d307e6650d0d5b0b67ecb3aa1f5ff314cc0c2664d263ec543",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "warden.py": "be1eccf2279444d80dbf1a4cf73329a4e84c40adcd5664193c7ab918b4999759",
+    "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+    "scripts/soak-stdio.mjs": "8573747725a04c71e73b770c49947ed9c22e577bba6dbaa9f40bf7427c0b5e44",
+    "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+    "package-lock.json": "b8c2205b8457e5bbb5212c38f3d6aa5851441e01bd5eb0cc4759bd613fd24c2a"
+  },
+  "clock": "performance.now monotonic",
+  "rootPid": 2476,
+  "environment": "GitHub hosted Windows",
+  "scope": "Synthetic SDK -> real CLI STDIO; explicit stateless policy, no model calls or production MCP"
+}

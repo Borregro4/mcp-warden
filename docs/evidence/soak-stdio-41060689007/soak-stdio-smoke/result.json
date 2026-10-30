@@ -1,0 +1,47 @@
+{
+  "startedUtc": "2026-10-30T13:10:12.050Z",
+  "planSha256": "92c2f1a3c2f48458ba7c52c5f1258f6477b8a35fe849b1e40e54e1e26111c720",
+  "sourceHashes": {
+    "runtime/idle_stdio.py": "df5bad96b42aa273e541a1df004f78a99c466fb44d60c2e6995b42d4da14295d",
+    "runtime/lazy_stdio.py": "3b1eb1bf4ea4007d307e6650d0d5b0b67ecb3aa1f5ff314cc0c2664d263ec543",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "warden.py": "be1eccf2279444d80dbf1a4cf73329a4e84c40adcd5664193c7ab918b4999759",
+    "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+    "scripts/soak-stdio.mjs": "8573747725a04c71e73b770c49947ed9c22e577bba6dbaa9f40bf7427c0b5e44",
+    "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+    "package-lock.json": "b8c2205b8457e5bbb5212c38f3d6aa5851441e01bd5eb0cc4759bd613fd24c2a"
+  },
+  "checks": {
+    "metadata": true,
+    "realIdle": true,
+    "autoWake": true,
+    "churn": true,
+    "duration": true,
+    "integrity": true,
+    "callbacks": true,
+    "resources": true,
+    "cleanup": true
+  },
+  "failures": [],
+  "runtime": {
+    "platform": "win32",
+    "node": "v22.23.4",
+    "logicalCpus": 4
+  },
+  "limits": [
+    "Working-set sum can double-count shared pages",
+    "Samples are not continuous peaks",
+    "Transient sampler/status probes can exit between CPU samples",
+    "Synthetic STDIO endurance does not establish native Codex/Claude or general superiority"
+  ],
+  "cleanupRemainingIdentities": [],
+  "elapsedSeconds": 60.8343558,
+  "activeSeconds": 60.016472199999995,
+  "finishedUtc": "2026-10-30T13:11:12.881Z",
+  "activeTicks": 30,
+  "callbacks": 6,
+  "peakSampledOwnedWorkingSetBytes": 161255424,
+  "maxSampledCpuPercent": 1.3663023410283646,
+  "observedIdentities": 15,
+  "allCriteriaMet": true
+}

@@ -1,0 +1,9 @@
+{
+  "run": "https://github.com/Borregro4/mcp-warden/actions/runs/41060689007",
+  "commit": "8c4801db380ba3b9c1de059d93e0478f996047e6",
+  "artifact_id": 12983977589,
+  "artifact_sha256": "2144ae3642669a63635d15c1878ded492f8a31cbd50a078f09cc7cfa34256500",
+  "runtime_candidate": "f6ae705ce618720875e227fe58b0d9161e9e5d44",
+  "feature_candidate": "1051c2734acc5fcb2302270f8fca4c41fada3c46",
+  "note": "Runtime Git blobs identical; the soak harness/sampler also match feature1051. Native client evidence is separate."
+}

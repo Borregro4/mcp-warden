@@ -1,0 +1,19 @@
+{
+  "rootPid": 2476,
+  "processCount": 1,
+  "processes": [
+    {
+      "pid": 2476,
+      "created": "134378394732870956",
+      "workingSetBytes": 59187200,
+      "cpuSeconds": 0.34375
+    }
+  ],
+  "workingSetBytes": 59187200,
+  "availablePhysicalBytes": 14377672704,
+  "rejectedParentEdges": 0,
+  "unavailableTreeCandidates": 0,
+  "knownAlive": [],
+  "knownUnavailable": [],
+  "scope": "pid_and_creation_time_validated_test_tree"
+}

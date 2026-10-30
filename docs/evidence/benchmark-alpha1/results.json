@@ -1,0 +1,1804 @@
+{
+  "plan": {
+    "version": 1,
+    "preparedUtc": "2026-10-30T12:09:58.113Z",
+    "platform": "win32",
+    "runsPerVariant": 3,
+    "variants": [
+      "direct",
+      "snooze",
+      "warden"
+    ],
+    "allocationMiB": 32,
+    "sessions": 1,
+    "idleSeconds": 2,
+    "warmCalls": 10,
+    "protocolClient": "@modelcontextprotocol/sdk 1.32.0",
+    "node": "v22.23.4",
+    "snooze": {
+      "version": "0.1.0",
+      "binarySha256": "43e02bbc1148718c3305e74974d0a57ae032e3e9c366b755d53519ee580971db"
+    },
+    "criteria": {
+      "sameWorkload": "Same 32 MiB resident Python fixture, SDK client, one session, ten echo calls and reverse callback.",
+      "cold": "Elapsed client connect, tools/list and first echo; includes starting variant processes.",
+      "warm": "Ten serial echo round trips, individual latency in milliseconds.",
+      "longCall": "Three-second call must complete under two-second idle deadline.",
+      "idle": "Resource sample after three seconds without client requests; retain proxy/supervisor cost.",
+      "wake": "Attempt echo; if explicitly expired, record failure, reconnect once and call. Include reconnect time.",
+      "resources": "Read-only Windows Toolhelp tree from explicitly spawned roots. Sum private bytes and working set; unavailable entries invalidate complete resource claim.",
+      "cleanup": "After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.",
+      "guards": "Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB."
+    },
+    "decisionRule": "Report raw observations and medians; no general winner or subscription/token saving inferred.",
+    "sourceHashes": {
+      "scripts/benchmark.mjs": "fe77e4683e75db27c108c1e87bc6cca589be62b52f49f20b62f95102b7932575",
+      "scripts/benchmark_backend.py": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8",
+      "scripts/benchmark_processes.py": "ea2a391862c6ada35b96a58922d2a28052210284fc359ed6a0f3c04c46243307",
+      "examples/echo_server.py": "f2d6f011c0f10b7585c2445a1cc202ef5dd036d7da83557d6713bfa11c082a8a",
+      "warden.py": "d090eafdf1eff44d630867fc40839482a4f5fe142f7524eb1b6fd30c5aa3de8c",
+      "runtime/gateway.mjs": "e69bb95192fd724763cd8983bb6de545ce5b80c54e23d2f16591241d389d9533",
+      "runtime/connect.mjs": "545f922c97f4e97a2494fd42aa3620add3276b2150b1d76c5d16e344243a3bc9",
+      "runtime/lazy_stdio.py": "f1ec9ea5411b1aa853d31eb08a1b7eb2f737dbbd20977626b0ffe62b5fb65c45",
+      "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+      "package-lock.json": "e4e4246119191941319da25db1efc685aaeabe5a1b34dbb4324f388c08ab0532"
+    }
+  },
+  "results": [
+    {
+      "variant": "direct",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362201.8708951,
+          "roots": [
+            8884
+          ],
+          "processes": [
+            {
+              "pid": 8536,
+              "created": "134378357986446922",
+              "parent": 8884,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8884,
+              "created": "134378357986419007",
+              "parent": 6808,
+              "workingSetBytes": 48181248,
+              "privateBytes": 43474944,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44707840,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14287978496
+        },
+        "idle": {
+          "sampledAt": 1793362204.9411213,
+          "roots": [
+            8884
+          ],
+          "processes": [
+            {
+              "pid": 8536,
+              "created": "134378357986446922",
+              "parent": 8884,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8884,
+              "created": "134378357986419007",
+              "parent": 6808,
+              "workingSetBytes": 48181248,
+              "privateBytes": 43474944,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44707840,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14290980864
+        },
+        "awake": {
+          "sampledAt": 1793362205.0085435,
+          "roots": [
+            8884
+          ],
+          "processes": [
+            {
+              "pid": 8536,
+              "created": "134378357986446922",
+              "parent": 8884,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8884,
+              "created": "134378357986419007",
+              "parent": 6808,
+              "workingSetBytes": 48181248,
+              "privateBytes": 43474944,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44707840,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14291070976
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 166.72630000000004,
+      "warmMs": [
+        0.5923000000000229,
+        0.5271000000000186,
+        0.467200000000048,
+        0.4257999999999811,
+        0.5879999999999654,
+        0.7129999999999654,
+        0.4317000000000917,
+        0.5155999999999494,
+        0.3101999999998952,
+        0.24630000000001928
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.5246999999999389,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6779.2395,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362208.590257,
+          "roots": [
+            7608
+          ],
+          "processes": [
+            {
+              "pid": 3284,
+              "created": "134378358054604347",
+              "parent": 7608,
+              "workingSetBytes": 48193536,
+              "privateBytes": 43491328,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 7264,
+              "created": "134378358054175058",
+              "parent": 7608,
+              "workingSetBytes": 7081984,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 7608,
+              "created": "134378358054147301",
+              "parent": 6808,
+              "workingSetBytes": 8663040,
+              "privateBytes": 47869952,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 63938560,
+          "privateBytes": 92594176,
+          "cpuSeconds": 0.09375,
+          "availableSystemBytes": 14299590656
+        },
+        "idle": {
+          "sampledAt": 1793362211.6650624,
+          "roots": [
+            7608
+          ],
+          "processes": [
+            {
+              "pid": 7264,
+              "created": "134378358054175058",
+              "parent": 7608,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 7608,
+              "created": "134378358054147301",
+              "parent": 6808,
+              "workingSetBytes": 8826880,
+              "privateBytes": 48074752,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 15921152,
+          "privateBytes": 49319936,
+          "cpuSeconds": 0.046875,
+          "availableSystemBytes": 14337503232
+        },
+        "awake": {
+          "sampledAt": 1793362211.7988667,
+          "roots": [
+            7608
+          ],
+          "processes": [
+            {
+              "pid": 3612,
+              "created": "134378358116733951",
+              "parent": 7608,
+              "workingSetBytes": 47976448,
+              "privateBytes": 43327488,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 7264,
+              "created": "134378358054175058",
+              "parent": 7608,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 7608,
+              "created": "134378358054147301",
+              "parent": 6808,
+              "workingSetBytes": 9019392,
+              "privateBytes": 48304128,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64090112,
+          "privateBytes": 92876800,
+          "cpuSeconds": 0.09375,
+          "availableSystemBytes": 14291898368
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 107.55389999999898,
+      "warmMs": [
+        0.4225000000005821,
+        0.4385000000002037,
+        0.47110000000066066,
+        0.40489999999954307,
+        0.3831000000009226,
+        0.42890000000079453,
+        0.42989999999917927,
+        0.4190999999991618,
+        0.47379999999975553,
+        0.3855999999996129
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 60.8768,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6827.489599999999,
+      "passed": true
+    },
+    {
+      "variant": "warden",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362217.626483,
+          "roots": [
+            4340,
+            8572
+          ],
+          "processes": [
+            {
+              "pid": 632,
+              "created": "134378358137272264",
+              "parent": 8572,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 884,
+              "created": "134378358144091839",
+              "parent": 3580,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2268,
+              "created": "134378358138915459",
+              "parent": 2848,
+              "workingSetBytes": 7241728,
+              "privateBytes": 1257472,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2696,
+              "created": "134378358142730711",
+              "parent": 7252,
+              "workingSetBytes": 20598784,
+              "privateBytes": 11853824,
+              "cpuSeconds": 0.171875
+            },
+            {
+              "pid": 2848,
+              "created": "134378358138751153",
+              "parent": 8572,
+              "workingSetBytes": 69550080,
+              "privateBytes": 52277248,
+              "cpuSeconds": 0.5625
+            },
+            {
+              "pid": 3580,
+              "created": "134378358143914162",
+              "parent": 2696,
+              "workingSetBytes": 47992832,
+              "privateBytes": 43298816,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 4340,
+              "created": "134378358131969488",
+              "parent": 6808,
+              "workingSetBytes": 22876160,
+              "privateBytes": 14462976,
+              "cpuSeconds": 0.078125
+            },
+            {
+              "pid": 4548,
+              "created": "134378358131998375",
+              "parent": 4340,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6760,
+              "created": "134378358142761445",
+              "parent": 2696,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 7252,
+              "created": "134378358133139310",
+              "parent": 4340,
+              "workingSetBytes": 69386240,
+              "privateBytes": 52031488,
+              "cpuSeconds": 0.53125
+            },
+            {
+              "pid": 8572,
+              "created": "134378358137241636",
+              "parent": 6808,
+              "workingSetBytes": 24014848,
+              "privateBytes": 14880768,
+              "cpuSeconds": 0.140625
+            },
+            {
+              "pid": 9124,
+              "created": "134378358133176868",
+              "parent": 7252,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1343488,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 297811968,
+          "privateBytes": 196407296,
+          "cpuSeconds": 1.578125,
+          "availableSystemBytes": 14167568384
+        },
+        "idle": {
+          "sampledAt": 1793362220.70106,
+          "roots": [
+            4340,
+            8572
+          ],
+          "processes": [
+            {
+              "pid": 632,
+              "created": "134378358137272264",
+              "parent": 8572,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 2268,
+              "created": "134378358138915459",
+              "parent": 2848,
+              "workingSetBytes": 7241728,
+              "privateBytes": 1257472,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2848,
+              "created": "134378358138751153",
+              "parent": 8572,
+              "workingSetBytes": 69554176,
+              "privateBytes": 52277248,
+              "cpuSeconds": 0.5625
+            },
+            {
+              "pid": 4340,
+              "created": "134378358131969488",
+              "parent": 6808,
+              "workingSetBytes": 22876160,
+              "privateBytes": 14462976,
+              "cpuSeconds": 0.078125
+            },
+            {
+              "pid": 4548,
+              "created": "134378358131998375",
+              "parent": 4340,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 7252,
+              "created": "134378358133139310",
+              "parent": 4340,
+              "workingSetBytes": 69435392,
+              "privateBytes": 52064256,
+              "cpuSeconds": 0.53125
+            },
+            {
+              "pid": 8572,
+              "created": "134378358137241636",
+              "parent": 6808,
+              "workingSetBytes": 24014848,
+              "privateBytes": 14880768,
+              "cpuSeconds": 0.140625
+            },
+            {
+              "pid": 9124,
+              "created": "134378358133176868",
+              "parent": 7252,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1343488,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 214892544,
+          "privateBytes": 138809344,
+          "cpuSeconds": 1.34375,
+          "availableSystemBytes": 14221303808
+        },
+        "awake": {
+          "sampledAt": 1793362221.5083876,
+          "roots": [
+            4340,
+            8572,
+            5632
+          ],
+          "processes": [
+            {
+              "pid": 1744,
+              "created": "134378358212391652",
+              "parent": 7984,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 3940,
+              "created": "134378358208664345",
+              "parent": 7844,
+              "workingSetBytes": 7237632,
+              "privateBytes": 1261568,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 4340,
+              "created": "134378358131969488",
+              "parent": 6808,
+              "workingSetBytes": 22876160,
+              "privateBytes": 14462976,
+              "cpuSeconds": 0.078125
+            },
+            {
+              "pid": 4548,
+              "created": "134378358131998375",
+              "parent": 4340,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 5632,
+              "created": "134378358207412731",
+              "parent": 6808,
+              "workingSetBytes": 24039424,
+              "privateBytes": 15454208,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 6304,
+              "created": "134378358207439579",
+              "parent": 5632,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 6900,
+              "created": "134378358213350226",
+              "parent": 7984,
+              "workingSetBytes": 47894528,
+              "privateBytes": 43261952,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 7252,
+              "created": "134378358133139310",
+              "parent": 4340,
+              "workingSetBytes": 69697536,
+              "privateBytes": 52064256,
+              "cpuSeconds": 0.546875
+            },
+            {
+              "pid": 7844,
+              "created": "134378358208503866",
+              "parent": 5632,
+              "workingSetBytes": 77422592,
+              "privateBytes": 60268544,
+              "cpuSeconds": 0.59375
+            },
+            {
+              "pid": 7984,
+              "created": "134378358212362644",
+              "parent": 7252,
+              "workingSetBytes": 20676608,
+              "privateBytes": 12464128,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 8424,
+              "created": "134378358213562805",
+              "parent": 6900,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 9124,
+              "created": "134378358133176868",
+              "parent": 7252,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1343488,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 305991680,
+          "privateBytes": 205582336,
+          "cpuSeconds": 1.515625,
+          "availableSystemBytes": 14153703424
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1311.9408000000003,
+      "warmMs": [
+        6.088300000003073,
+        5.5218000000022585,
+        5.041000000001077,
+        5.818599999998696,
+        6.5755000000026484,
+        4.686900000000605,
+        4.102900000001682,
+        3.6916000000019267,
+        3.3338999999978114,
+        3.266700000000128
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 735.8349999999991,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 19681.294700000002,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362235.1064687,
+          "roots": [
+            4652
+          ],
+          "processes": [
+            {
+              "pid": 4652,
+              "created": "134378358319257208",
+              "parent": 6808,
+              "workingSetBytes": 8667136,
+              "privateBytes": 47943680,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 5688,
+              "created": "134378358319285342",
+              "parent": 4652,
+              "workingSetBytes": 7081984,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 6688,
+              "created": "134378358319710594",
+              "parent": 4652,
+              "workingSetBytes": 48140288,
+              "privateBytes": 43433984,
+              "cpuSeconds": 0.078125
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 63889408,
+          "privateBytes": 92606464,
+          "cpuSeconds": 0.125,
+          "availableSystemBytes": 14285099008
+        },
+        "idle": {
+          "sampledAt": 1793362238.1745365,
+          "roots": [
+            4652
+          ],
+          "processes": [
+            {
+              "pid": 4652,
+              "created": "134378358319257208",
+              "parent": 6808,
+              "workingSetBytes": 8826880,
+              "privateBytes": 48164864,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 5688,
+              "created": "134378358319285342",
+              "parent": 4652,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 15921152,
+          "privateBytes": 49405952,
+          "cpuSeconds": 0.046875,
+          "availableSystemBytes": 14332596224
+        },
+        "awake": {
+          "sampledAt": 1793362238.299192,
+          "roots": [
+            4652
+          ],
+          "processes": [
+            {
+              "pid": 4652,
+              "created": "134378358319257208",
+              "parent": 6808,
+              "workingSetBytes": 9056256,
+              "privateBytes": 48414720,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 5688,
+              "created": "134378358319285342",
+              "parent": 4652,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 7500,
+              "created": "134378358381825425",
+              "parent": 4652,
+              "workingSetBytes": 48058368,
+              "privateBytes": 43438080,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64208896,
+          "privateBytes": 93093888,
+          "cpuSeconds": 0.09375,
+          "availableSystemBytes": 14286495744
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 112.20390000000043,
+      "warmMs": [
+        0.45820000000094296,
+        0.49420000000100117,
+        0.46929999999701977,
+        0.40249999999650754,
+        0.3773000000001048,
+        0.4532000000035623,
+        0.45420000000012806,
+        0.3945000000021537,
+        0.44799999999668216,
+        0.43500000000494765
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 57.32259999999951,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6808.652000000002,
+      "passed": true
+    },
+    {
+      "variant": "warden",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362243.1503484,
+          "roots": [
+            9136,
+            1504
+          ],
+          "processes": [
+            {
+              "pid": 1504,
+              "created": "134378358392978093",
+              "parent": 6808,
+              "workingSetBytes": 23764992,
+              "privateBytes": 14589952,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 2264,
+              "created": "134378358399378960",
+              "parent": 2956,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1257472,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2564,
+              "created": "134378358393007458",
+              "parent": 1504,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2868,
+              "created": "134378358394215961",
+              "parent": 6560,
+              "workingSetBytes": 7237632,
+              "privateBytes": 1265664,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2956,
+              "created": "134378358399164272",
+              "parent": 7696,
+              "workingSetBytes": 48115712,
+              "privateBytes": 43401216,
+              "cpuSeconds": 0.0625
+            },
+            {
+              "pid": 4284,
+              "created": "134378358398017399",
+              "parent": 7696,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6560,
+              "created": "134378358394059848",
+              "parent": 1504,
+              "workingSetBytes": 68689920,
+              "privateBytes": 51859456,
+              "cpuSeconds": 0.609375
+            },
+            {
+              "pid": 7696,
+              "created": "134378358397988135",
+              "parent": 8204,
+              "workingSetBytes": 20717568,
+              "privateBytes": 12247040,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 8080,
+              "created": "134378358388553227",
+              "parent": 9136,
+              "workingSetBytes": 7258112,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8204,
+              "created": "134378358389530795",
+              "parent": 9136,
+              "workingSetBytes": 69980160,
+              "privateBytes": 52273152,
+              "cpuSeconds": 0.484375
+            },
+            {
+              "pid": 8860,
+              "created": "134378358389561114",
+              "parent": 8204,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1331200,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 9136,
+              "created": "134378358388523524",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14483456,
+              "cpuSeconds": 0.109375
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 297570304,
+          "privateBytes": 196476928,
+          "cpuSeconds": 1.5625,
+          "availableSystemBytes": 14179389440
+        },
+        "idle": {
+          "sampledAt": 1793362246.2210171,
+          "roots": [
+            9136,
+            1504
+          ],
+          "processes": [
+            {
+              "pid": 1504,
+              "created": "134378358392978093",
+              "parent": 6808,
+              "workingSetBytes": 23764992,
+              "privateBytes": 14589952,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 2564,
+              "created": "134378358393007458",
+              "parent": 1504,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2868,
+              "created": "134378358394215961",
+              "parent": 6560,
+              "workingSetBytes": 7237632,
+              "privateBytes": 1265664,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6560,
+              "created": "134378358394059848",
+              "parent": 1504,
+              "workingSetBytes": 68689920,
+              "privateBytes": 51859456,
+              "cpuSeconds": 0.625
+            },
+            {
+              "pid": 8080,
+              "created": "134378358388553227",
+              "parent": 9136,
+              "workingSetBytes": 7258112,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8204,
+              "created": "134378358389530795",
+              "parent": 9136,
+              "workingSetBytes": 69992448,
+              "privateBytes": 52301824,
+              "cpuSeconds": 0.484375
+            },
+            {
+              "pid": 8860,
+              "created": "134378358389561114",
+              "parent": 8204,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1331200,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 9136,
+              "created": "134378358388523524",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14483456,
+              "cpuSeconds": 0.109375
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 214355968,
+          "privateBytes": 138358784,
+          "cpuSeconds": 1.390625,
+          "availableSystemBytes": 14235553792
+        },
+        "awake": {
+          "sampledAt": 1793362247.0192978,
+          "roots": [
+            9136,
+            1504,
+            4332
+          ],
+          "processes": [
+            {
+              "pid": 2696,
+              "created": "134378358463891551",
+              "parent": 9148,
+              "workingSetBytes": 7237632,
+              "privateBytes": 1257472,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 2848,
+              "created": "134378358468630857",
+              "parent": 4928,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1236992,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 4332,
+              "created": "134378358462604395",
+              "parent": 6808,
+              "workingSetBytes": 23748608,
+              "privateBytes": 14557184,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 4512,
+              "created": "134378358467431694",
+              "parent": 8204,
+              "workingSetBytes": 20602880,
+              "privateBytes": 12435456,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 4928,
+              "created": "134378358468417767",
+              "parent": 4512,
+              "workingSetBytes": 48140288,
+              "privateBytes": 43507712,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 6748,
+              "created": "134378358462630254",
+              "parent": 4332,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 7336,
+              "created": "134378358467461614",
+              "parent": 4512,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8080,
+              "created": "134378358388553227",
+              "parent": 9136,
+              "workingSetBytes": 7258112,
+              "privateBytes": 1294336,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8204,
+              "created": "134378358389530795",
+              "parent": 9136,
+              "workingSetBytes": 70230016,
+              "privateBytes": 52301824,
+              "cpuSeconds": 0.484375
+            },
+            {
+              "pid": 8860,
+              "created": "134378358389561114",
+              "parent": 8204,
+              "workingSetBytes": 7315456,
+              "privateBytes": 1331200,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 9136,
+              "created": "134378358388523524",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14483456,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 9148,
+              "created": "134378358463729521",
+              "parent": 4332,
+              "workingSetBytes": 68382720,
+              "privateBytes": 50188288,
+              "cpuSeconds": 0.5
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 297390080,
+          "privateBytes": 195063808,
+          "cpuSeconds": 1.4375,
+          "availableSystemBytes": 14170554368
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1178.9155000000028,
+      "warmMs": [
+        5.741600000001199,
+        5.367200000000594,
+        4.8012000000017,
+        5.482499999998254,
+        5.58969999999681,
+        4.229199999994307,
+        3.8770000000004075,
+        3.570800000001327,
+        3.28689999999915,
+        3.3421999999991385
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 723.8178999999946,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 18725.1238,
+      "passed": true
+    },
+    {
+      "variant": "direct",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362260.6003642,
+          "roots": [
+            8084
+          ],
+          "processes": [
+            {
+              "pid": 4976,
+              "created": "134378358574652173",
+              "parent": 8084,
+              "workingSetBytes": 7200768,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8084,
+              "created": "134378358574623452",
+              "parent": 6808,
+              "workingSetBytes": 48168960,
+              "privateBytes": 43483136,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55369728,
+          "privateBytes": 44724224,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14308016128
+        },
+        "idle": {
+          "sampledAt": 1793362263.6713083,
+          "roots": [
+            8084
+          ],
+          "processes": [
+            {
+              "pid": 4976,
+              "created": "134378358574652173",
+              "parent": 8084,
+              "workingSetBytes": 7200768,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8084,
+              "created": "134378358574623452",
+              "parent": 6808,
+              "workingSetBytes": 48168960,
+              "privateBytes": 43483136,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55369728,
+          "privateBytes": 44724224,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14315356160
+        },
+        "awake": {
+          "sampledAt": 1793362263.7379715,
+          "roots": [
+            8084
+          ],
+          "processes": [
+            {
+              "pid": 4976,
+              "created": "134378358574652173",
+              "parent": 8084,
+              "workingSetBytes": 7200768,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8084,
+              "created": "134378358574623452",
+              "parent": 6808,
+              "workingSetBytes": 48168960,
+              "privateBytes": 43483136,
+              "cpuSeconds": 0.046875
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55369728,
+          "privateBytes": 44724224,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14315466752
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 68.12199999999575,
+      "warmMs": [
+        0.3047000000005937,
+        0.22940000000380678,
+        0.24109999999927823,
+        0.23610000000189757,
+        0.23079999999754364,
+        0.24929999999585561,
+        0.29690000000118744,
+        0.2322000000058324,
+        0.22630000000208383,
+        0.22520000000076834
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.5682999999989988,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6665.8850999999995,
+      "passed": true
+    },
+    {
+      "variant": "warden",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362268.566779,
+          "roots": [
+            3076,
+            6736
+          ],
+          "processes": [
+            {
+              "pid": 3076,
+              "created": "134378358642473251",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14499840,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 3160,
+              "created": "134378358653289206",
+              "parent": 7268,
+              "workingSetBytes": 48275456,
+              "privateBytes": 43585536,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 3204,
+              "created": "134378358642502820",
+              "parent": 3076,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1298432,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 6692,
+              "created": "134378358648334521",
+              "parent": 6736,
+              "workingSetBytes": 68685824,
+              "privateBytes": 51470336,
+              "cpuSeconds": 0.609375
+            },
+            {
+              "pid": 6736,
+              "created": "134378358647199154",
+              "parent": 6808,
+              "workingSetBytes": 23990272,
+              "privateBytes": 14852096,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 7268,
+              "created": "134378358652252126",
+              "parent": 8828,
+              "workingSetBytes": 20803584,
+              "privateBytes": 12521472,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 7504,
+              "created": "134378358652281116",
+              "parent": 7268,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1224704,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 8248,
+              "created": "134378358648491994",
+              "parent": 6692,
+              "workingSetBytes": 7229440,
+              "privateBytes": 1249280,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8308,
+              "created": "134378358647233451",
+              "parent": 6736,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8828,
+              "created": "134378358643502582",
+              "parent": 3076,
+              "workingSetBytes": 69607424,
+              "privateBytes": 51728384,
+              "cpuSeconds": 0.515625
+            },
+            {
+              "pid": 8836,
+              "created": "134378358653457780",
+              "parent": 3160,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1232896,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 9124,
+              "created": "134378358643533092",
+              "parent": 8828,
+              "workingSetBytes": 7311360,
+              "privateBytes": 1327104,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 297639936,
+          "privateBytes": 196235264,
+          "cpuSeconds": 1.5625,
+          "availableSystemBytes": 14190673920
+        },
+        "idle": {
+          "sampledAt": 1793362271.6419978,
+          "roots": [
+            3076,
+            6736
+          ],
+          "processes": [
+            {
+              "pid": 3076,
+              "created": "134378358642473251",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14499840,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 3204,
+              "created": "134378358642502820",
+              "parent": 3076,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1298432,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 6692,
+              "created": "134378358648334521",
+              "parent": 6736,
+              "workingSetBytes": 68689920,
+              "privateBytes": 51470336,
+              "cpuSeconds": 0.609375
+            },
+            {
+              "pid": 6736,
+              "created": "134378358647199154",
+              "parent": 6808,
+              "workingSetBytes": 23990272,
+              "privateBytes": 14852096,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 8248,
+              "created": "134378358648491994",
+              "parent": 6692,
+              "workingSetBytes": 7229440,
+              "privateBytes": 1249280,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8308,
+              "created": "134378358647233451",
+              "parent": 6736,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 8828,
+              "created": "134378358643502582",
+              "parent": 3076,
+              "workingSetBytes": 69623808,
+              "privateBytes": 51761152,
+              "cpuSeconds": 0.515625
+            },
+            {
+              "pid": 9124,
+              "created": "134378358643533092",
+              "parent": 8828,
+              "workingSetBytes": 7311360,
+              "privateBytes": 1327104,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 214204416,
+          "privateBytes": 137703424,
+          "cpuSeconds": 1.40625,
+          "availableSystemBytes": 14251048960
+        },
+        "awake": {
+          "sampledAt": 1793362272.4370816,
+          "roots": [
+            3076,
+            6736,
+            1884
+          ],
+          "processes": [
+            {
+              "pid": 1884,
+              "created": "134378358716850930",
+              "parent": 6808,
+              "workingSetBytes": 23949312,
+              "privateBytes": 14852096,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 2444,
+              "created": "134378358717994165",
+              "parent": 1884,
+              "workingSetBytes": 68587520,
+              "privateBytes": 50737152,
+              "cpuSeconds": 0.546875
+            },
+            {
+              "pid": 3076,
+              "created": "134378358642473251",
+              "parent": 6808,
+              "workingSetBytes": 22900736,
+              "privateBytes": 14499840,
+              "cpuSeconds": 0.09375
+            },
+            {
+              "pid": 3204,
+              "created": "134378358642502820",
+              "parent": 3076,
+              "workingSetBytes": 7262208,
+              "privateBytes": 1298432,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 3252,
+              "created": "134378358718145467",
+              "parent": 2444,
+              "workingSetBytes": 7254016,
+              "privateBytes": 1273856,
+              "cpuSeconds": 0.03125
+            },
+            {
+              "pid": 3264,
+              "created": "134378358722850236",
+              "parent": 6488,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1228800,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 4932,
+              "created": "134378358716879766",
+              "parent": 1884,
+              "workingSetBytes": 7196672,
+              "privateBytes": 1245184,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6488,
+              "created": "134378358722700292",
+              "parent": 7100,
+              "workingSetBytes": 47812608,
+              "privateBytes": 43147264,
+              "cpuSeconds": 0.046875
+            },
+            {
+              "pid": 7100,
+              "created": "134378358721793882",
+              "parent": 8828,
+              "workingSetBytes": 20656128,
+              "privateBytes": 12361728,
+              "cpuSeconds": 0.109375
+            },
+            {
+              "pid": 8828,
+              "created": "134378358643502582",
+              "parent": 3076,
+              "workingSetBytes": 69783552,
+              "privateBytes": 51761152,
+              "cpuSeconds": 0.5625
+            },
+            {
+              "pid": 8944,
+              "created": "134378358721821295",
+              "parent": 7100,
+              "workingSetBytes": 7188480,
+              "privateBytes": 1236992,
+              "cpuSeconds": 0
+            },
+            {
+              "pid": 9124,
+              "created": "134378358643533092",
+              "parent": 8828,
+              "workingSetBytes": 7311360,
+              "privateBytes": 1327104,
+              "cpuSeconds": 0
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 297091072,
+          "privateBytes": 194969600,
+          "cpuSeconds": 1.578125,
+          "availableSystemBytes": 14189318144
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1196.2167999999947,
+      "warmMs": [
+        7.151499999992666,
+        4.925300000002608,
+        5.27270000000135,
+        6.37840000000142,
+        6.2528999999922235,
+        5.020600000003469,
+        4.2321999999985565,
+        3.5662000000011176,
+        3.366199999989476,
+        3.5309999999881256
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 720.366200000004,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 18727.934500000003,
+      "passed": true
+    },
+    {
+      "variant": "direct",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362285.9971275,
+          "roots": [
+            6740
+          ],
+          "processes": [
+            {
+              "pid": 3156,
+              "created": "134378358828615863",
+              "parent": 6740,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6740,
+              "created": "134378358828587804",
+              "parent": 6808,
+              "workingSetBytes": 47902720,
+              "privateBytes": 43192320,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55095296,
+          "privateBytes": 44433408,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14327795712
+        },
+        "idle": {
+          "sampledAt": 1793362289.0682106,
+          "roots": [
+            6740
+          ],
+          "processes": [
+            {
+              "pid": 3156,
+              "created": "134378358828615863",
+              "parent": 6740,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6740,
+              "created": "134378358828587804",
+              "parent": 6808,
+              "workingSetBytes": 47902720,
+              "privateBytes": 43192320,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55095296,
+          "privateBytes": 44433408,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14332915712
+        },
+        "awake": {
+          "sampledAt": 1793362289.1374853,
+          "roots": [
+            6740
+          ],
+          "processes": [
+            {
+              "pid": 3156,
+              "created": "134378358828615863",
+              "parent": 6740,
+              "workingSetBytes": 7192576,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 6740,
+              "created": "134378358828587804",
+              "parent": 6808,
+              "workingSetBytes": 47902720,
+              "privateBytes": 43192320,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55095296,
+          "privateBytes": 44433408,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14333509632
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 70.15129999999772,
+      "warmMs": [
+        0.2541999999957625,
+        0.2661999999982072,
+        0.5166999999928521,
+        0.23119999999471474,
+        0.21799999999348074,
+        0.21529999999620486,
+        0.2330999999976484,
+        0.23079999999026768,
+        0.2455000000045402,
+        0.21619999999529682
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.529500000004191,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6666.629700000005,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793362292.7058167,
+          "roots": [
+            3884
+          ],
+          "processes": [
+            {
+              "pid": 2696,
+              "created": "134378358895296565",
+              "parent": 3884,
+              "workingSetBytes": 7081984,
+              "privateBytes": 1241088,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 3884,
+              "created": "134378358895268821",
+              "parent": 6808,
+              "workingSetBytes": 8765440,
+              "privateBytes": 48054272,
+              "cpuSeconds": 0.03125
+            },
+            {
+              "pid": 6672,
+              "created": "134378358895721337",
+              "parent": 3884,
+              "workingSetBytes": 47927296,
+              "privateBytes": 43212800,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 63774720,
+          "privateBytes": 92508160,
+          "cpuSeconds": 0.109375,
+          "availableSystemBytes": 14321672192
+        },
+        "idle": {
+          "sampledAt": 1793362295.7894511,
+          "roots": [
+            3884
+          ],
+          "processes": [
+            {
+              "pid": 2696,
+              "created": "134378358895296565",
+              "parent": 3884,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1253376,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 3884,
+              "created": "134378358895268821",
+              "parent": 6808,
+              "workingSetBytes": 8896512,
+              "privateBytes": 48263168,
+              "cpuSeconds": 0.03125
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 15990784,
+          "privateBytes": 49516544,
+          "cpuSeconds": 0.046875,
+          "availableSystemBytes": 14366535680
+        },
+        "awake": {
+          "sampledAt": 1793362295.9164302,
+          "roots": [
+            3884
+          ],
+          "processes": [
+            {
+              "pid": 2696,
+              "created": "134378358895296565",
+              "parent": 3884,
+              "workingSetBytes": 7094272,
+              "privateBytes": 1253376,
+              "cpuSeconds": 0.015625
+            },
+            {
+              "pid": 3884,
+              "created": "134378358895268821",
+              "parent": 6808,
+              "workingSetBytes": 9093120,
+              "privateBytes": 48508928,
+              "cpuSeconds": 0.03125
+            },
+            {
+              "pid": 5112,
+              "created": "134378358957977952",
+              "parent": 3884,
+              "workingSetBytes": 48099328,
+              "privateBytes": 43483136,
+              "cpuSeconds": 0.0625
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64286720,
+          "privateBytes": 93245440,
+          "cpuSeconds": 0.109375,
+          "availableSystemBytes": 14318542848
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 110.06389999999374,
+      "warmMs": [
+        0.4710999999952037,
+        0.3819000000075903,
+        0.4030999999959022,
+        0.35040000001026783,
+        0.3494000000064261,
+        0.4511999999958789,
+        0.46850000000267755,
+        0.35790000000270084,
+        0.35220000000845175,
+        0.3715000000083819
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 57.33749999999418,
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6824.959900000002,
+      "passed": true
+    }
+  ]
+}

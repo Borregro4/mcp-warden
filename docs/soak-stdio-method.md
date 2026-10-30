@@ -33,7 +33,9 @@ backend, dependency lockfile and harness. The result includes the plan hash.
    serially. Their proxy and backend identities must disappear. At most two
    proxies are present concurrently.
 6. Final shutdown must reach zero live proxies in CLI status and no previously
-   observed test-owned child identity in the final process-tree sample.
+   observed test-owned child identity when queried directly by PID and creation
+   time. This query also checks orphans whose parent is no longer in the tree;
+   unavailable liveness is unknown, never assumed to be an exit.
 
 ## Resource budgets and evidence
 
@@ -44,7 +46,10 @@ memory. These are budgets for this test, not universal MCP limits. Missing the
 complete.
 
 The Windows sampler includes the Node SDK harness, Python proxies and backend
-fixtures. It excludes the short-lived sampler itself. Summed working sets can
+fixtures. Every parent edge is checked against process creation time to reject
+stale PPIDs after PID reuse. Any unavailable candidate makes resource scope
+incomplete and fails that check; its cost is never assumed to be zero. It
+excludes the short-lived sampler itself. Summed working sets can
 double-count shared pages. CPU is computed from cumulative process times over
 observation intervals and normalized by logical CPU count; short-lived probes
 that exit between samples are not fully represented. Thirty-second snapshots

@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-30",
+  "method": "Retrospective recorded-row audit: child.created >= recorded parent.created, recorded parent present for non-root rows, stable root identities and matching recorded rootIdentities. Live v3 sampling separately validates snapshot cutoff and root birth before selection.",
+  "audits": [
+    {
+      "run": "https://github.com/Borregro4/mcp-warden/actions/runs/41053233941",
+      "artifact": 12975337522,
+      "artifactSha256": "161015e4f6cbaa7df956b7bf980b6969119070ac2a04fa09aab2e88de66748a2",
+      "samples": 27,
+      "observed_rows": 138,
+      "planVersion": 1,
+      "sampler_rejected_edges": null,
+      "sampler_rejected_roots": null,
+      "sampler_unavailable_processes": 0,
+      "issues": [],
+      "recordedRows": "benchmark-alpha1/results.json"
+    },
+    {
+      "run": "https://github.com/Borregro4/mcp-warden/actions/runs/41058954673",
+      "artifact": 12978457631,
+      "artifactSha256": "cae815303cbed1274c7a2ac4e9d79ab278dc1717df34a345648980f55a4692cb",
+      "samples": 36,
+      "observed_rows": 168,
+      "planVersion": 2,
+      "sampler_rejected_edges": null,
+      "sampler_rejected_roots": null,
+      "sampler_unavailable_processes": 0,
+      "issues": [],
+      "recordedRows": "benchmark-f6/results.json"
+    },
+    {
+      "run": "https://github.com/Borregro4/mcp-warden/actions/runs/41061173880",
+      "artifact": 12980555110,
+      "artifactSha256": "9434db8b8cfaad4210b1498a3fa46d1b0fc02d68d46c0eb564678fa2ac0363d4",
+      "samples": 36,
+      "observed_rows": 168,
+      "planVersion": 3,
+      "sampler_rejected_edges": 6,
+      "sampler_rejected_roots": 0,
+      "sampler_unavailable_processes": 0,
+      "issues": [],
+      "recordedRows": "benchmark-v3/results.json"
+    }
+  ]
+}

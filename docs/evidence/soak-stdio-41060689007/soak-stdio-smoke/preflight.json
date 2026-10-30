@@ -1,0 +1,19 @@
+{
+  "rootPid": 4332,
+  "processCount": 1,
+  "processes": [
+    {
+      "pid": 4332,
+      "created": "134378394117645257",
+      "workingSetBytes": 59060224,
+      "cpuSeconds": 0.3125
+    }
+  ],
+  "workingSetBytes": 59060224,
+  "availablePhysicalBytes": 14348247040,
+  "rejectedParentEdges": 0,
+  "unavailableTreeCandidates": 0,
+  "knownAlive": [],
+  "knownUnavailable": [],
+  "scope": "pid_and_creation_time_validated_test_tree"
+}

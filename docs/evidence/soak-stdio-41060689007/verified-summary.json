@@ -1,0 +1,248 @@
+{
+  "soak-stdio-smoke": {
+    "planCommit": "8c4801db380ba3b9c1de059d93e0478f996047e6",
+    "options": {
+      "minutes": 1,
+      "idle": 5,
+      "sample": 2,
+      "targetMib": 256,
+      "abortMib": 768,
+      "minFreeGib": 3,
+      "out": "D:\\a\\mcp-warden\\mcp-warden\\work\\soak-stdio-smoke"
+    },
+    "allCriteriaMet": true,
+    "checks": {
+      "metadata": true,
+      "realIdle": true,
+      "autoWake": true,
+      "churn": true,
+      "duration": true,
+      "integrity": true,
+      "callbacks": true,
+      "resources": true,
+      "cleanup": true
+    },
+    "activeSeconds": 60.016472199999995,
+    "elapsedSeconds": 60.8343558,
+    "startedUtc": "2026-10-30T13:10:12.050Z",
+    "finishedUtc": "2026-10-30T13:11:12.881Z",
+    "activeTicks": 30,
+    "callbacks": 6,
+    "samples": 30,
+    "peakWorkingSetBytes": 161255424,
+    "peakWorkingSetMiB": 153.78515625,
+    "maxSampledCpuPercent": 1.3663023410283646,
+    "cleanupRemainingIdentities": [],
+    "failures": [],
+    "events": [
+      {
+        "event": "sessions_started",
+        "elapsedSeconds": 0.6039985,
+        "at": "2026-10-30T13:10:12.654Z",
+        "activePid": 3512,
+        "idlePid": 4744,
+        "activeOwner": 6160,
+        "idleOwner": 8908
+      },
+      {
+        "event": "real_idle_expired",
+        "elapsedSeconds": 6.8629823,
+        "at": "2026-10-30T13:10:18.913Z",
+        "elapsedSinceIdleCallSeconds": 6.1877186,
+        "idleOwner": 8908,
+        "oldBackendPid": 4744
+      },
+      {
+        "event": "same_client_auto_woke",
+        "elapsedSeconds": 6.9892681,
+        "at": "2026-10-30T13:10:19.039Z",
+        "ownerPid": 8908,
+        "backendPid": 7856
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 7.3628911,
+        "at": "2026-10-30T13:10:19.413Z",
+        "index": 0,
+        "identities": [
+          {
+            "pid": 5472,
+            "created": "134378394191738576"
+          },
+          {
+            "pid": 844,
+            "created": "134378394192737527"
+          }
+        ]
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 7.6883077,
+        "at": "2026-10-30T13:10:19.738Z",
+        "index": 1,
+        "identities": [
+          {
+            "pid": 1656,
+            "created": "134378394195101924"
+          },
+          {
+            "pid": 8060,
+            "created": "134378394196102053"
+          }
+        ]
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 8.0138249,
+        "at": "2026-10-30T13:10:20.064Z",
+        "index": 2,
+        "identities": [
+          {
+            "pid": 2396,
+            "created": "134378394198331788"
+          },
+          {
+            "pid": 4372,
+            "created": "134378394199335585"
+          }
+        ]
+      },
+      {
+        "event": "serial_churn_completed",
+        "elapsedSeconds": 8.1060787,
+        "at": "2026-10-30T13:10:20.156Z",
+        "count": 3
+      },
+      {
+        "event": "active_duration_completed",
+        "elapsedSeconds": 60.620484899999994,
+        "at": "2026-10-30T13:11:12.668Z",
+        "activeSeconds": 60.016472199999995,
+        "ticks": 30
+      }
+    ]
+  },
+  "soak-stdio-ci": {
+    "planCommit": "8c4801db380ba3b9c1de059d93e0478f996047e6",
+    "options": {
+      "minutes": 60,
+      "idle": 900,
+      "sample": 30,
+      "targetMib": 256,
+      "abortMib": 768,
+      "minFreeGib": 3,
+      "out": "D:\\a\\mcp-warden\\mcp-warden\\work\\soak-stdio-ci"
+    },
+    "allCriteriaMet": true,
+    "checks": {
+      "metadata": true,
+      "realIdle": true,
+      "autoWake": true,
+      "churn": true,
+      "duration": true,
+      "integrity": true,
+      "callbacks": true,
+      "resources": true,
+      "cleanup": true
+    },
+    "activeSeconds": 3600.0065795000005,
+    "elapsedSeconds": 3600.8226545,
+    "startedUtc": "2026-10-30T13:11:13.577Z",
+    "finishedUtc": "2026-10-30T14:11:14.224Z",
+    "activeTicks": 120,
+    "callbacks": 24,
+    "samples": 120,
+    "peakWorkingSetBytes": 160931840,
+    "peakWorkingSetMiB": 153.4765625,
+    "maxSampledCpuPercent": 0.22138058327373306,
+    "cleanupRemainingIdentities": [],
+    "failures": [],
+    "events": [
+      {
+        "event": "sessions_started",
+        "elapsedSeconds": 0.6043806999999999,
+        "at": "2026-10-30T13:11:14.181Z",
+        "activePid": 1648,
+        "idlePid": 5244,
+        "activeOwner": 1824,
+        "idleOwner": 2560
+      },
+      {
+        "event": "real_idle_expired",
+        "elapsedSeconds": 930.8693959999999,
+        "at": "2026-10-30T13:26:44.402Z",
+        "elapsedSinceIdleCallSeconds": 930.1905324,
+        "idleOwner": 2560,
+        "oldBackendPid": 5244
+      },
+      {
+        "event": "same_client_auto_woke",
+        "elapsedSeconds": 930.9958051,
+        "at": "2026-10-30T13:26:44.528Z",
+        "ownerPid": 2560,
+        "backendPid": 1348
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 931.3738631,
+        "at": "2026-10-30T13:26:44.906Z",
+        "index": 0,
+        "identities": [
+          {
+            "pid": 3624,
+            "created": "134378404046759306"
+          },
+          {
+            "pid": 3816,
+            "created": "134378404047789829"
+          }
+        ]
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 931.6979451,
+        "at": "2026-10-30T13:26:45.230Z",
+        "index": 1,
+        "identities": [
+          {
+            "pid": 6284,
+            "created": "134378404049984246"
+          },
+          {
+            "pid": 6564,
+            "created": "134378404050983238"
+          }
+        ]
+      },
+      {
+        "event": "churn_identities_observed",
+        "elapsedSeconds": 932.0173601,
+        "at": "2026-10-30T13:26:45.550Z",
+        "index": 2,
+        "identities": [
+          {
+            "pid": 7116,
+            "created": "134378404053260906"
+          },
+          {
+            "pid": 4708,
+            "created": "134378404054254350"
+          }
+        ]
+      },
+      {
+        "event": "serial_churn_completed",
+        "elapsedSeconds": 932.1081578000001,
+        "at": "2026-10-30T13:26:45.640Z",
+        "count": 3
+      },
+      {
+        "event": "active_duration_completed",
+        "elapsedSeconds": 3600.6109933000002,
+        "at": "2026-10-30T14:11:14.012Z",
+        "activeSeconds": 3600.0065795000005,
+        "ticks": 120
+      }
+    ]
+  }
+}

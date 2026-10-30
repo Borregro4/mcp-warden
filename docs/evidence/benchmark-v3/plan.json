@@ -1,0 +1,48 @@
+{
+  "version": 3,
+  "preparedUtc": "2026-10-30T13:12:02.133Z",
+  "platform": "win32",
+  "runsPerVariant": 3,
+  "variants": [
+    "direct",
+    "snooze",
+    "warden-gateway",
+    "warden-stdio"
+  ],
+  "allocationMiB": 32,
+  "sessions": 1,
+  "idleSeconds": 2,
+  "warmCalls": 10,
+  "protocolClient": "@modelcontextprotocol/sdk 1.32.0",
+  "node": "v22.23.4",
+  "snooze": {
+    "version": "0.1.0",
+    "binarySha256": "43e02bbc1148718c3305e74974d0a57ae032e3e9c366b755d53519ee580971db"
+  },
+  "criteria": {
+    "sameWorkload": "Same 32 MiB resident Python fixture, SDK client, one session, ten echo calls and reverse callback.",
+    "cold": "Elapsed client connect, tools/list and first echo; includes starting variant processes.",
+    "warm": "Ten serial echo round trips, individual latency in milliseconds.",
+    "longCall": "Three-second call must complete under two-second idle deadline.",
+    "idle": "Resource sample after three seconds without client requests; retain proxy/supervisor cost.",
+    "wake": "Attempt echo. Gateway may explicitly expire: record failure and one reconnect in its time. Stateless stdio must resume on the same client connection after metadata validation.",
+    "resources": "Canonical Windows ownership selection validates every parent/child creation time against snapshot cutoff and previously observed root birth identities. Sum private bytes and working set; unavailable entries invalidate a complete resource claim.",
+    "cleanup": "After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.",
+    "guards": "Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB."
+  },
+  "decisionRule": "Report raw observations and medians; no general winner or subscription/token saving inferred.",
+  "sourceHashes": {
+    "scripts/benchmark.mjs": "7463ac97b4c50621e3c0efedc64984223a60115fa8ea281bc509ad0e02ceefb1",
+    "scripts/benchmark_backend.py": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8",
+    "scripts/benchmark_processes.py": "48ccc5fce323ccff8e8731a27ce7bf16c3ec20558ca858db5b439b51b3696318",
+    "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+    "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+    "warden.py": "be1eccf2279444d80dbf1a4cf73329a4e84c40adcd5664193c7ab918b4999759",
+    "runtime/gateway.mjs": "25e0b891683921bf07c615ea0551de405084de77d7e4b297753a92aca89ab104",
+    "runtime/connect.mjs": "f0fad1e1fdbd77a92b733d139318de91e1e55f47ccff9415dbcfae1cd4245aa9",
+    "runtime/lazy_stdio.py": "3b1eb1bf4ea4007d307e6650d0d5b0b67ecb3aa1f5ff314cc0c2664d263ec543",
+    "runtime/idle_stdio.py": "df5bad96b42aa273e541a1df004f78a99c466fb44d60c2e6995b42d4da14295d",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "package-lock.json": "b8c2205b8457e5bbb5212c38f3d6aa5851441e01bd5eb0cc4759bd613fd24c2a"
+  }
+}

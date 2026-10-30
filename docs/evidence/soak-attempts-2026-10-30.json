@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "scope": "Synthetic Windows SDK and real CLI endurance attempts; not native model workflows",
+  "attempts": [
+    {
+      "run_url": "https://github.com/Borregro4/mcp-warden/actions/runs/41053370314",
+      "source_commit": "2aa0bdc431781bd8c775c36ccf5df5e9ff5dc4b8",
+      "mode": "legacy_gateway",
+      "outcome": "harness_failed_before_workload",
+      "reason": "Output parent directory did not exist; mkdir used recursive:false.",
+      "hour_validated": false
+    },
+    {
+      "run_url": "https://github.com/Borregro4/mcp-warden/actions/runs/41053728227",
+      "source_commit": "3d1dd3c9726930835362d7c9ec4355ba6dd06e54",
+      "runtime_base_commit": "e67fb8848c07bfdd129b3666726ff8edc6e21ad9",
+      "mode": "legacy_gateway",
+      "outcome": "incomplete_harness_session_cleanup_error",
+      "planned_seconds": 3600,
+      "elapsed_seconds": 902.6753266000001,
+      "idle_observed_seconds": 900.0885372,
+      "passed_observations": ["real_idle_expiry", "fresh_reconnection"],
+      "reason": "Direct HTTP SDK close did not DELETE its session; later churn reached the configured two-session capacity.",
+      "artifact_id": 12977050186,
+      "artifact_zip_sha256": "45d174ac3c461b1d3a3c0e786270791b1b9d5217f3c944d775372b294ffd3023",
+      "reported_peak_working_set_bytes": 292483072,
+      "resource_and_cleanup_qualification": "Original sampler lacked creation-time validation per parent edge and direct known-orphan queries. No older-than-root rows were found in its 31 samples, but this does not retrospectively validate all ancestry or orphan absence.",
+      "hour_validated": false
+    },
+    {
+      "run_url": "https://github.com/Borregro4/mcp-warden/actions/runs/41059011420",
+      "source_commit": "7e004636cd06cac4b80da2cbb3f90c2f6c95cacc",
+      "runtime_base_commit": "f6ae705ce618720875e227fe58b0d9161e9e5d44",
+      "mode": "lightweight_stdio_stateless",
+      "smoke_active_seconds": 60.007946499999996,
+      "smoke_functional_result": "Accelerated echo/callback/idle/auto-wake checks completed; resource and orphan checks used the subsequently corrected sampler.",
+      "hour_elapsed_seconds": 0.9652593999999999,
+      "outcome": "invalid_resource_attribution_aborted_by_guard",
+      "reason": "Sampler adopted 136 process identities, including many created before the Node root, due to stale PPID links after PID reuse. Its 3.1 GB sum is not attributable to Warden.",
+      "artifact_id": 12978705728,
+      "artifact_zip_sha256": "fd821b14505e4ab9b3f13c25a8b1b0ba05350120a6ffbe1ae8c2316fbfb2b6f7",
+      "hour_validated": false
+    },
+    {
+      "run_url": "https://github.com/Borregro4/mcp-warden/actions/runs/41060425549",
+      "source_commit": "1ec5d027748d1d420f55437b19c28ff89c2c6c24",
+      "runtime_base_commit": "f6ae705ce618720875e227fe58b0d9161e9e5d44",
+      "mode": "lightweight_stdio_stateless",
+      "outcome": "cancelled_to_complete_resource_scope_checks",
+      "smoke_step_started_utc": "2026-10-30T13:07:25Z",
+      "smoke_step_completed_utc": "2026-10-30T13:08:26Z",
+      "hour_step_started_utc": "2026-10-30T13:08:26Z",
+      "hour_step_cancelled_utc": "2026-10-30T13:08:32Z",
+      "reason": "Added explicit failure for unavailable tree candidates instead of assuming zero cost; cancellation did not indicate a runtime failure.",
+      "hour_validated": false
+    },
+    {
+      "run_url": "https://github.com/Borregro4/mcp-warden/actions/runs/41060689007",
+      "source_commit": "8c4801db380ba3b9c1de059d93e0478f996047e6",
+      "runtime_base_commit": "f6ae705ce618720875e227fe58b0d9161e9e5d44",
+      "mode": "lightweight_stdio_stateless",
+      "outcome": "all_nine_predeclared_criteria_passed",
+      "smoke_step_result": "success",
+      "hour_step_started_utc": "2026-10-30T13:11:12Z",
+      "hour_step_completed_utc": "2026-10-30T14:11:14Z",
+      "active_seconds": 3600.0065795000005,
+      "sampled_peak_working_set_bytes": 160931840,
+      "artifact_id": 12983977589,
+      "artifact_zip_sha256": "2144ae3642669a63635d15c1878ded492f8a31cbd50a078f09cc7cfa34256500",
+      "hour_validated": true,
+      "reason": "Verified all nine checks, plan digest, 120 samples, actual idle/wake receipts, serial churn and zero remaining known identities. Native model checks remain separate."
+    }
+  ]
+}

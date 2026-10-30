@@ -10,7 +10,7 @@ Supervisor local del ciclo de vida de servidores MCP en Windows. El modo ligero 
 
 Varias sesiones de programación pueden dejar varias copias del mismo servidor MCP ejecutándose. Para cerrarlas correctamente hace falta saber qué sesión inició cada proceso, si hay llamadas o callbacks pendientes y si sus procesos hijos son privados o compartidos.
 
-MCP Warden agrega esa gestión alrededor de [Supergateway](https://github.com/supercorp-ai/supergateway), que se encarga del transporte HTTP/SSE. Vincula cada sesión a un PID de Windows **y su hora de creación**, protege las operaciones pendientes y permite vencer una sesión inactiva aunque conserve un stream GET abierto.
+El proxy ligero administra al servidor directamente. El modo HTTP/SSE opcional agrega esa gestión alrededor de [Supergateway](https://github.com/supercorp-ai/supergateway). Warden comprueba el PID de Windows **y su hora de creación**, protege las operaciones pendientes y permite vencer una sesión HTTP inactiva aunque conserve un stream GET abierto.
 
 ## Inicio rápido del modo ligero
 
@@ -90,6 +90,8 @@ Edita `config.json` dentro de tu carpeta de estado. Cada perfil tiene un manifie
 {
   "profiles": {
     "mi-servidor": {
+      "transport": "stdio",
+      "restart_policy": "manual",
       "idle_session_timeout_seconds": 900,
       "manifest": {
         "command": "C:\\ruta\\absoluta\\servidor.exe",
@@ -102,7 +104,7 @@ Edita `config.json` dentro de tu carpeta de estado. Cada perfil tiene un manifie
 }
 ```
 
-Es un fragmento de perfil, no la configuración completa. Conserva las rutas y los demás campos que generó `init`. Reinicia el supervisor después de cambiar su configuración y genera la entrada de tu perfil.
+Es un fragmento de perfil, no la configuración completa. Conserva las rutas y los demás campos que generó `init` y genera la entrada de tu perfil. Las conexiones stdio nuevas leen el perfil actualizado. Si usas `transport: "gateway"`, reinicia el supervisor después de cambiar su configuración.
 
 | Opción | Efecto |
 | --- | --- |
@@ -121,7 +123,7 @@ Las opciones de capacidad y tamaño de solicitud van en el nivel principal de
 estricto de RAM o CPU. Al alcanzar la capacidad, las operaciones existentes
 continúan y las sesiones nuevas reciben HTTP 429.
 
-`python warden.py status --state .warden-state --json` incluye sesiones,
+En el modo gateway, `python warden.py status --state .warden-state --json` incluye sesiones,
 solicitudes pendientes, callbacks y muestras por perfil de memoria de trabajo
 en bytes y segundos acumulados de CPU. Las muestras cubren el puente y su
 servidor directo, **no todo el árbol de procesos hijos**, el gateway ni las
@@ -167,7 +169,9 @@ Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), la
 [comparación con proyectos relacionados](docs/alternatives.md) y la
 [medición de la primera alfa](docs/benchmark-results-2026-10-30.md).
 Ese resultado mostró por qué hacía falta reducir el costo del modo stdio;
-no acredita superioridad general frente a otros supervisores.
+no acredita superioridad general frente a otros supervisores. La
+[comparación del modo ligero](docs/benchmark-lightweight-2026-10-30.md) registra
+la mejora de memoria y las métricas donde mcp-snooze sigue adelante.
 
 ## Licencia y atribución
 

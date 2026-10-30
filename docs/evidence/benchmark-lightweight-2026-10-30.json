@@ -1,0 +1,97 @@
+{
+  "source": {
+    "run": "https://github.com/Borregro4/mcp-warden/actions/runs/41058954673",
+    "job": 124073507663,
+    "testedCommit": "f6ae705ce618720875e227fe58b0d9161e9e5d44",
+    "ordinaryWindowsTests": "https://github.com/Borregro4/mcp-warden/actions/runs/41058954613",
+    "artifactId": 12978457631,
+    "artifactSha256": "cae815303cbed1274c7a2ac4e9d79ab278dc1717df34a345648980f55a4692cb"
+  },
+  "summary": {
+    "preparedUtc": "2026-10-30T12:55:21.591Z",
+    "finishedUtc": "2026-10-30T12:57:20.567Z",
+    "runsPerVariant": 3,
+    "sourceChangedDuringRun": [],
+    "summaries": [
+      {
+        "variant": "direct",
+        "planned": 3,
+        "passed": 3,
+        "medianColdMs": 74.53510000000824,
+        "medianWarmMs": 0.22470000000612345,
+        "medianWakeMs": 0.5262999999977183,
+        "medianActivePrivateBytes": 44449792,
+        "medianIdlePrivateBytes": 44449792,
+        "medianIdleWorkingSetBytes": 55083008,
+        "idleProcessCounts": [
+          2,
+          2,
+          2
+        ],
+        "explicitFirstWakeErrors": 0,
+        "errors": []
+      },
+      {
+        "variant": "snooze",
+        "planned": 3,
+        "passed": 3,
+        "medianColdMs": 100.85190000000875,
+        "medianWarmMs": 0.37819999999919673,
+        "medianWakeMs": 59.96190000000206,
+        "medianActivePrivateBytes": 92590080,
+        "medianIdlePrivateBytes": 49397760,
+        "medianIdleWorkingSetBytes": 15966208,
+        "idleProcessCounts": [
+          2,
+          2,
+          2
+        ],
+        "explicitFirstWakeErrors": 0,
+        "errors": []
+      },
+      {
+        "variant": "warden-gateway",
+        "planned": 3,
+        "passed": 3,
+        "medianColdMs": 1083.6342000000004,
+        "medianWarmMs": 4.161800000001676,
+        "medianWakeMs": 656.4717999999993,
+        "medianActivePrivateBytes": 197468160,
+        "medianIdlePrivateBytes": 139448320,
+        "medianIdleWorkingSetBytes": 215433216,
+        "idleProcessCounts": [
+          8,
+          8,
+          8
+        ],
+        "explicitFirstWakeErrors": 3,
+        "errors": []
+      },
+      {
+        "variant": "warden-stdio",
+        "planned": 3,
+        "passed": 3,
+        "medianColdMs": 200.72140000000945,
+        "medianWarmMs": 0.5148000000044703,
+        "medianWakeMs": 81.06850000000122,
+        "medianActivePrivateBytes": 61366272,
+        "medianIdlePrivateBytes": 16781312,
+        "medianIdleWorkingSetBytes": 32624640,
+        "idleProcessCounts": [
+          2,
+          2,
+          2
+        ],
+        "explicitFirstWakeErrors": 0,
+        "errors": []
+      }
+    ],
+    "limits": [
+      "Single synthetic session with 32 MiB resident allocation, three runs; not representative of all MCP servers.",
+      "Snapshot memory includes all observed variant-owned descendants; working-set sums double-count shared pages.",
+      "Only direct baseline and mcp-snooze v0.1.0 compared. No quota, model or token cost is measured.",
+      "The Warden gateway variant requires explicit client reconnection after expiry; its failure and reconnect are included in wake time.",
+      "The Warden stdio variant is explicitly declared stateless and validates initialization and tool metadata before resuming a new request."
+    ]
+  }
+}
