@@ -1,0 +1,60 @@
+name: Windows lightweight STDIO endurance
+
+on:
+  push:
+    branches:
+      - validation/stdio-soak
+    paths:
+      - '.github/workflows/soak-stdio.yml'
+      - 'scripts/soak-stdio.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-warden-stdio-soak-validation
+  cancel-in-progress: false
+
+jobs:
+  soak:
+    runs-on: windows-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - name: Check harness syntax
+        run: |
+          node --check scripts/soak-stdio.mjs
+          python -m py_compile scripts/soak_metrics.py
+      - name: Run regular regression suite
+        run: npm test
+      - name: Smoke test autorewake and cleanup
+        run: node scripts/soak-stdio.mjs --minutes 1 --idle 5 --sample 2 --targetMib 256 --abortMib 768 --minFreeGib 3 --out work/soak-stdio-smoke
+      - name: Run real-time 60-minute STDIO endurance
+        run: node scripts/soak-stdio.mjs --minutes 60 --idle 900 --sample 30 --targetMib 256 --abortMib 768 --minFreeGib 3 --out work/soak-stdio-ci
+      - name: Upload selected synthetic observations
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: windows-stdio-soak-sanitized
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            work/soak-stdio-smoke/plan.json
+            work/soak-stdio-smoke/preflight.json
+            work/soak-stdio-smoke/observations.jsonl
+            work/soak-stdio-smoke/result.json
+            work/soak-stdio-ci/plan.json
+            work/soak-stdio-ci/preflight.json
+            work/soak-stdio-ci/observations.jsonl
+            work/soak-stdio-ci/result.json
