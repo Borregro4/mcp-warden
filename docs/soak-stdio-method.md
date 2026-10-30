@@ -47,7 +47,9 @@ complete.
 
 The Windows sampler includes the Node SDK harness, Python proxies and backend
 fixtures. Every parent edge is checked against process creation time to reject
-stale PPIDs after PID reuse. It excludes the short-lived sampler itself. Summed working sets can
+stale PPIDs after PID reuse. Any unavailable candidate makes resource scope
+incomplete and fails that check; its cost is never assumed to be zero. It
+excludes the short-lived sampler itself. Summed working sets can
 double-count shared pages. CPU is computed from cumulative process times over
 observation intervals and normalized by logical CPU count; short-lived probes
 that exit between samples are not fully represented. Thirty-second snapshots

@@ -38,7 +38,7 @@ const criteria = {
   realIdle: 'Idle backend disappears after ' + options.idle + ' seconds, within 60 seconds grace; its Python proxy remains',
   autoWake: 'Same SDK connection and Python proxy wake a fresh backend after clean expiry under explicit stateless policy',
   churn: 'Three serial fresh owner connections close with their backend and proxy identities gone',
-  resources: 'Sampled test-tree working set objective ' + options.targetMib + ' MiB; abort above ' + options.abortMib +
+  resources: 'Complete validated tree with zero unavailable candidates; sampled working set objective ' + options.targetMib + ' MiB; abort above ' + options.abortMib +
     ' MiB or free physical RAM below ' + options.minFreeGib + ' GiB',
   cleanup: 'No active proxies in status; direct PID+creation liveness queries find no observed child identity after shutdown, including orphans',
 };
@@ -129,6 +129,7 @@ async function sample(label) {
   previousCpu = new Map(snapshot.processes.map(value => [value.pid + ':' + value.created, value.cpuSeconds]));
   peak = Math.max(peak, snapshot.workingSetBytes);
   await log('sample', { label, resources: snapshot, cpuPercent, status: view });
+  assert.equal(snapshot.unavailableTreeCandidates, 0, 'resource_tree_scope_incomplete');
   if (ticks % 10 === 0) console.log(JSON.stringify({ event: 'progress', ticks,
     elapsedSeconds: (now - began) / 1000, sampledWorkingSetBytes: snapshot.workingSetBytes,
     proxies: view.sessionCount, cpuPercent }));
@@ -140,6 +141,7 @@ async function sample(label) {
 try {
   const preflight = resources();
   await writeFile(path.join(out, 'preflight.json'), JSON.stringify(preflight, null, 2));
+  assert.equal(preflight.unavailableTreeCandidates, 0, 'resource_preflight_scope_incomplete');
   assert.ok(preflight.availablePhysicalBytes >= options.minFreeGib * 1024 ** 3, 'resource_preflight_available_memory');
   const init = spawnSync(python, ['-I', '-B', path.join(ROOT, 'warden.py'), 'init', '--state', state,
     '--transport', 'stdio', '--restart-policy', 'stateless', '--idle-seconds', String(options.idle)],
@@ -227,8 +229,15 @@ try {
   } catch { checks.cleanup = false; }
   let remaining = [];
   for (let attempt = 0; attempt < 5; attempt++) {
-    const after = resources([...observed.values()]);
-    remaining = after.knownAlive.filter(value => value.pid !== process.pid);
+    try {
+      const after = resources([...observed.values()]);
+      remaining = after.knownAlive.filter(value => value.pid !== process.pid);
+    } catch (error) {
+      failures.push({ phase: 'cleanup_identity_query', error: error.name, message: String(error.message).slice(0, 300) });
+      checks.cleanup = false;
+      remaining = [{ status: 'unknown_liveness' }];
+      break;
+    }
     if (!remaining.length) break;
     await delay(500);
   }
