@@ -1,103 +1,125 @@
-"""Read-only Windows resource samples for explicit benchmark-owned PID trees.
+"""Read-only benchmark samples using the canonical ownership validator.
 
-No process is killed, and no command line or environment is inspected.
+Only explicit roots and timestamp-validated descendants are measured. No
+command lines or environments are read, and no process is killed.
 """
 import argparse
 import ctypes
 from ctypes import wintypes
+import importlib.util
 import json
 import os
+from pathlib import Path
 import time
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--roots', nargs='+', type=int, required=True)
-args = parser.parse_args()
-if os.name != 'nt':
-    parser.error('Windows only')
+_spec = importlib.util.spec_from_file_location('benchmark_canonical_metrics',
+    Path(__file__).resolve().with_name('soak_metrics.py'))
+_metrics = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_metrics)
 
-ULONG_PTR = ctypes.c_size_t
-class ProcessEntry(ctypes.Structure):
-    _fields_ = [('dwSize', wintypes.DWORD), ('cntUsage', wintypes.DWORD),
-        ('th32ProcessID', wintypes.DWORD), ('th32DefaultHeapID', ULONG_PTR),
-        ('th32ModuleID', wintypes.DWORD), ('cntThreads', wintypes.DWORD),
-        ('th32ParentProcessID', wintypes.DWORD), ('pcPriClassBase', wintypes.LONG),
-        ('dwFlags', wintypes.DWORD), ('szExeFile', wintypes.WCHAR * 260)]
 
-class Counters(ctypes.Structure):
-    _fields_ = [('cb', wintypes.DWORD), ('PageFaultCount', wintypes.DWORD),
-        *[(name, ctypes.c_size_t) for name in ('PeakWorkingSetSize', 'WorkingSetSize',
-        'QuotaPeakPagedPoolUsage', 'QuotaPagedPoolUsage', 'QuotaPeakNonPagedPoolUsage',
-        'QuotaNonPagedPoolUsage', 'PagefileUsage', 'PeakPagefileUsage', 'PrivateUsage')]]
+class PrivateCounters(_metrics.MemoryCounters):
+    _fields_ = [('PrivateUsage', ctypes.c_size_t)]
 
-class MemoryStatus(ctypes.Structure):
-    _fields_ = [('dwLength', wintypes.DWORD), ('dwMemoryLoad', wintypes.DWORD),
-        *[(name, ctypes.c_ulonglong) for name in ('ullTotalPhys', 'ullAvailPhys',
-        'ullTotalPageFile', 'ullAvailPageFile', 'ullTotalVirtual', 'ullAvailVirtual',
-        'ullAvailExtendedVirtual')]]
 
-kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-kernel.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
-kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
-kernel.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
-kernel.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
-kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
-kernel.OpenProcess.restype = wintypes.HANDLE
-kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
-kernel.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
-kernel.GlobalMemoryStatusEx.argtypes = [ctypes.POINTER(MemoryStatus)]
+class BenchmarkReader(_metrics.WindowsReader):
+    def __init__(self):
+        super().__init__()
+        self.kernel.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.c_void_p, wintypes.DWORD]
+        self.parents = {}
 
-snapshot = kernel.CreateToolhelp32Snapshot(2, 0)
-if snapshot == ctypes.c_void_p(-1).value:
-    raise OSError('process snapshot unavailable')
-parents = {}
-try:
-    entry = ProcessEntry()
-    entry.dwSize = ctypes.sizeof(entry)
-    ok = kernel.Process32FirstW(snapshot, ctypes.byref(entry))
-    while ok:
-        parents[entry.th32ProcessID] = entry.th32ParentProcessID
-        ok = kernel.Process32NextW(snapshot, ctypes.byref(entry))
-finally:
-    kernel.CloseHandle(snapshot)
+    def query(self, pid):
+        observed = super().query(pid)
+        if observed is None:
+            return None
+        handle = self.kernel.OpenProcess(0x100000 | 0x1000, False, pid)
+        if not handle:
+            raise OSError('process_private_usage_unavailable')
+        try:
+            times = [wintypes.FILETIME() for _ in range(4)]
+            counters = PrivateCounters()
+            counters.cb = ctypes.sizeof(counters)
+            if not self.kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
+                raise OSError('process_identity_unavailable')
+            created = times[0].dwLowDateTime | times[0].dwHighDateTime << 32
+            if str(created) != observed['created']:
+                raise OSError('process_identity_changed_during_sample')
+            if not self.kernel.K32GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
+                raise OSError('process_private_usage_unavailable')
+            observed['privateBytes'] = counters.PrivateUsage
+            observed['parent'] = self.parents.get(pid)
+            return observed
+        finally:
+            self.kernel.CloseHandle(handle)
 
-selected = {pid for pid in args.roots if pid in parents}
-while True:
-    children = {pid for pid, parent in parents.items() if parent in selected}
-    if children <= selected:
-        break
-    selected |= children
 
-rows, unavailable = [], []
-for pid in sorted(selected):
-    handle = kernel.OpenProcess(0x1000 | 0x0010, False, pid)
-    if not handle:
-        unavailable.append(pid)
-        continue
-    try:
-        counters = Counters()
-        counters.cb = ctypes.sizeof(counters)
-        times = [wintypes.FILETIME() for _ in range(4)]
-        if not kernel.K32GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
-            unavailable.append(pid)
+def collect(reader, roots, expected):
+    snapshot, cutoff = reader.snapshot()
+    reader.parents = dict(snapshot)
+    cache, unavailable = {}, set()
+
+    def query(pid):
+        if pid not in cache:
+            try:
+                cache[pid] = reader.query(pid)
+            except OSError:
+                unavailable.add(pid)
+                raise
+        return cache[pid]
+
+    selected, root_identities = {}, {}
+    rejected_edges, rejected_roots = 0, []
+    for root in sorted(set(roots)):
+        if root <= 0 or root not in reader.parents:
             continue
-        if not kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
-            unavailable.append(pid)
+        try:
+            value = query(root)
+            if value is None:
+                continue
+            if root in expected and str(value['created']) != expected[root]:
+                rejected_roots.append({'pid': root, 'expectedCreated': expected[root],
+                    'observedCreated': value['created']})
+                continue
+            if int(value['created']) > cutoff:
+                unavailable.add(root)
+                continue
+            values, rejected, _ = _metrics.select_tree(snapshot, root, query, cutoff, (os.getpid(),))
+        except (OSError, ValueError):
+            unavailable.add(root)
             continue
-        ticks = [t.dwLowDateTime | t.dwHighDateTime << 32 for t in times]
-        rows.append({'pid': pid, 'created': str(ticks[0]), 'parent': parents[pid],
-            'workingSetBytes': counters.WorkingSetSize, 'privateBytes': counters.PrivateUsage,
-            'cpuSeconds': (ticks[2] + ticks[3]) / 10_000_000})
-    finally:
-        kernel.CloseHandle(handle)
+        root_identities[str(root)] = value['created']
+        rejected_edges += rejected
+        selected.update((row['pid'], row) for row in values)
+    rows = list(selected.values())
+    return {'sampledAt': time.time(), 'roots': roots, 'rootIdentities': root_identities,
+        'processes': rows, 'processCount': len(rows), 'unavailable': sorted(unavailable),
+        'workingSetBytes': sum(row['workingSetBytes'] for row in rows),
+        'privateBytes': sum(row['privateBytes'] for row in rows),
+        'cpuSeconds': sum(row['cpuSeconds'] for row in rows),
+        'availableSystemBytes': reader.available(), 'rejectedParentEdges': rejected_edges,
+        'rejectedRootIdentities': rejected_roots,
+        'scope': 'explicit_roots_and_creation_validated_descendants'}
 
-memory = MemoryStatus()
-memory.dwLength = ctypes.sizeof(memory)
-if not kernel.GlobalMemoryStatusEx(ctypes.byref(memory)):
-    raise OSError('system memory status unavailable')
-print(json.dumps({'sampledAt': time.time(), 'roots': args.roots, 'processes': rows,
-    'processCount': len(rows), 'unavailable': unavailable,
-    'workingSetBytes': sum(row['workingSetBytes'] for row in rows),
-    'privateBytes': sum(row['privateBytes'] for row in rows),
-    'cpuSeconds': sum(row['cpuSeconds'] for row in rows),
-    'availableSystemBytes': memory.ullAvailPhys}))
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--roots', nargs='+', type=int, required=True)
+    parser.add_argument('--root-birth', action='append', default=[])
+    args = parser.parse_args()
+    if os.name != 'nt':
+        parser.error('Windows only')
+    expected = {}
+    for pair in args.root_birth:
+        try:
+            pid_text, created = pair.split(':', 1)
+            pid = int(pid_text)
+            if pid not in args.roots or not created.isdigit() or not 0 < int(created) < 2**64:
+                raise ValueError()
+            expected[pid] = str(int(created))
+        except ValueError:
+            parser.error('invalid explicit root birth identity')
+    print(json.dumps(collect(BenchmarkReader(), args.roots, expected)))
+
+
+if __name__ == '__main__':
+    main()

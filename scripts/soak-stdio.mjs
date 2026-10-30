@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
+import { writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
@@ -37,9 +38,9 @@ const criteria = {
   realIdle: 'Idle backend disappears after ' + options.idle + ' seconds, within 60 seconds grace; its Python proxy remains',
   autoWake: 'Same SDK connection and Python proxy wake a fresh backend after clean expiry under explicit stateless policy',
   churn: 'Three serial fresh owner connections close with their backend and proxy identities gone',
-  resources: 'Sampled test-tree working set objective ' + options.targetMib + ' MiB; abort above ' + options.abortMib +
+  resources: 'Complete validated tree with zero unavailable candidates; sampled working set objective ' + options.targetMib + ' MiB; abort above ' + options.abortMib +
     ' MiB or free physical RAM below ' + options.minFreeGib + ' GiB',
-  cleanup: 'No active proxies in status and no observed child identity alive after client shutdown',
+  cleanup: 'No active proxies in status; direct PID+creation liveness queries find no observed child identity after shutdown, including orphans',
 };
 const plan = { version: 1, createdUtc: new Date().toISOString(), sourceCommit: process.env.GITHUB_SHA ?? null,
   options, criteria, sourceHashes, clock: 'performance.now monotonic', rootPid: process.pid,
@@ -63,11 +64,19 @@ const report = { startedUtc: new Date().toISOString(), planSha256: hash(planText
     'Synthetic STDIO endurance does not establish native Codex/Claude or general superiority'] };
 const log = async (event, data = {}) => appendFile(path.join(out, 'observations.jsonl'), JSON.stringify({
   event, elapsedSeconds: (performance.now() - began) / 1000, at: new Date().toISOString(), ...data }) + '\n');
-function resources() {
-  const result = spawnSync(python, ['-I', '-B', path.join(ROOT, 'scripts/soak_metrics.py'), String(process.pid)],
+function resources(identities = null) {
+  const args = ['-I', '-B', path.join(ROOT, 'scripts/soak_metrics.py'), String(process.pid)];
+  if (identities !== null) {
+    const file = path.join(out, 'identity-query.json');
+    writeFileSync(file, JSON.stringify(identities.map(value => ({ pid: value.pid, created: value.created }))));
+    args.push('--identities', file);
+  }
+  const result = spawnSync(python, args,
     { encoding: 'utf8', windowsHide: true, timeout: 10000 });
   assert.equal(result.status, 0, 'resource_sampler_failed');
-  return JSON.parse(result.stdout);
+  const data = JSON.parse(result.stdout);
+  if (identities !== null) assert.equal(data.knownUnavailable.length, 0, 'known_process_liveness_unavailable');
+  return data;
 }
 function status() {
   const result = spawnSync(python, ['-I', '-B', path.join(ROOT, 'warden.py'), 'status', '--state', state,
@@ -120,6 +129,7 @@ async function sample(label) {
   previousCpu = new Map(snapshot.processes.map(value => [value.pid + ':' + value.created, value.cpuSeconds]));
   peak = Math.max(peak, snapshot.workingSetBytes);
   await log('sample', { label, resources: snapshot, cpuPercent, status: view });
+  assert.equal(snapshot.unavailableTreeCandidates, 0, 'resource_tree_scope_incomplete');
   if (ticks % 10 === 0) console.log(JSON.stringify({ event: 'progress', ticks,
     elapsedSeconds: (now - began) / 1000, sampledWorkingSetBytes: snapshot.workingSetBytes,
     proxies: view.sessionCount, cpuPercent }));
@@ -131,6 +141,7 @@ async function sample(label) {
 try {
   const preflight = resources();
   await writeFile(path.join(out, 'preflight.json'), JSON.stringify(preflight, null, 2));
+  assert.equal(preflight.unavailableTreeCandidates, 0, 'resource_preflight_scope_incomplete');
   assert.ok(preflight.availablePhysicalBytes >= options.minFreeGib * 1024 ** 3, 'resource_preflight_available_memory');
   const init = spawnSync(python, ['-I', '-B', path.join(ROOT, 'warden.py'), 'init', '--state', state,
     '--transport', 'stdio', '--restart-policy', 'stateless', '--idle-seconds', String(options.idle)],
@@ -164,8 +175,7 @@ try {
       if (idleSample && idleSample.backendPid === null) {
         const sinceIdle = (performance.now() - idleStarted) / 1000;
         assert.ok(sinceIdle >= options.idle - 1 && sinceIdle <= options.idle + 60, 'idle_deadline_outside_expected_window');
-        assert.ok(!current.snapshot.processes.some(value => value.pid === idleIdentity.pid
-          && value.created === idleIdentity.created), 'idle_backend_still_alive');
+        assert.equal(resources([idleIdentity]).knownAlive.length, 0, 'idle_backend_still_alive');
         assert.ok(current.snapshot.processes.some(value => value.pid === idleOwner), 'idle_proxy_exited');
         checks.realIdle = true;
         await log('real_idle_expired', { elapsedSinceIdleCallSeconds: sinceIdle, idleOwner, oldBackendPid: idlePid });
@@ -184,10 +194,13 @@ try {
           const churn = await connect();
           const answer = await churn.client.callTool({ name: 'echo', arguments: { value: 'churn-' + i } });
           const identity = resources().processes.filter(value => value.pid === churn.ownerPid || value.pid === answer.structuredContent.pid);
+          assert.equal(identity.length, 2, 'churn_proxy_and_backend_identity_missing');
+          assert.equal(new Set(identity.map(value => value.pid + ':' + value.created)).size, 2, 'churn_identities_not_distinct');
+          for (const value of identity) observed.set(value.pid + ':' + value.created, value);
+          await log('churn_identities_observed', { index: i, identities: identity.map(value => ({ pid: value.pid, created: value.created })) });
           await churn.client.close();
           await waitFor(() => {
-            const remaining = resources().processes;
-            return identity.every(value => !remaining.some(item => item.pid === value.pid && item.created === value.created));
+            return resources(identity).knownAlive.length === 0;
           });
         }
         checks.churn = true;
@@ -216,8 +229,15 @@ try {
   } catch { checks.cleanup = false; }
   let remaining = [];
   for (let attempt = 0; attempt < 5; attempt++) {
-    const after = resources();
-    remaining = after.processes.filter(value => value.pid !== process.pid && observed.has(value.pid + ':' + value.created));
+    try {
+      const after = resources([...observed.values()]);
+      remaining = after.knownAlive.filter(value => value.pid !== process.pid);
+    } catch (error) {
+      failures.push({ phase: 'cleanup_identity_query', error: error.name, message: String(error.message).slice(0, 300) });
+      checks.cleanup = false;
+      remaining = [{ status: 'unknown_liveness' }];
+      break;
+    }
     if (!remaining.length) break;
     await delay(500);
   }

@@ -33,12 +33,12 @@ const idleSeconds = 2;
 const allocationMiB = 32;
 const warmCalls = 10;
 await mkdir(output, { recursive: true });
-const sourceFiles = ['scripts/benchmark.mjs', 'scripts/benchmark_backend.py', 'scripts/benchmark_processes.py',
+const sourceFiles = ['scripts/benchmark.mjs', 'scripts/benchmark_backend.py', 'scripts/benchmark_processes.py', 'scripts/soak_metrics.py',
   'examples/echo_server.py', 'warden.py', 'runtime/gateway.mjs', 'runtime/connect.mjs',
   'runtime/lazy_stdio.py', 'runtime/idle_stdio.py', 'runtime/owned_bridge.py', 'package-lock.json'];
 const sourceHashes = Object.fromEntries(await Promise.all(sourceFiles.map(async name => [name, await hash(path.join(ROOT, name))])));
 const plan = {
-  version: 2, preparedUtc: new Date().toISOString(), platform: 'win32', runsPerVariant: runs,
+  version: 3, preparedUtc: new Date().toISOString(), platform: 'win32', runsPerVariant: runs,
   variants: ['direct', 'snooze', 'warden-gateway', 'warden-stdio'], allocationMiB, sessions: 1, idleSeconds, warmCalls,
   protocolClient: '@modelcontextprotocol/sdk 1.32.0', node: process.version,
   snooze: { version: run(snooze, ['--version']).trim(), binarySha256: await hash(snooze) },
@@ -49,7 +49,7 @@ const plan = {
     longCall: 'Three-second call must complete under two-second idle deadline.',
     idle: 'Resource sample after three seconds without client requests; retain proxy/supervisor cost.',
     wake: 'Attempt echo. Gateway may explicitly expire: record failure and one reconnect in its time. Stateless stdio must resume on the same client connection after metadata validation.',
-    resources: 'Read-only Windows Toolhelp tree from explicitly spawned roots. Sum private bytes and working set; unavailable entries invalidate complete resource claim.',
+    resources: 'Canonical Windows ownership selection validates every parent/child creation time against snapshot cutoff and previously observed root birth identities. Sum private bytes and working set; unavailable entries invalidate a complete resource claim.',
     cleanup: 'After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.',
     guards: 'Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB.'
   },
@@ -63,9 +63,10 @@ async function freePort() {
   await once(server, 'listening'); const port = server.address().port;
   await new Promise(resolve => server.close(resolve)); return port;
 }
-async function sample(roots) {
+async function sample(roots, expected = new Map()) {
   const value = JSON.parse(run(python, ['-I', '-B', path.join(ROOT, 'scripts', 'benchmark_processes.py'),
-    '--roots', ...(roots.length ? roots : [0]).map(String)]));
+    '--roots', ...(roots.length ? roots : [0]).map(String),
+    ...[...expected].filter(([pid]) => roots.includes(pid)).flatMap(([pid, born]) => ['--root-birth', pid + ':' + born])]));
   if (value.availableSystemBytes < 3 * 1024 ** 3 || value.privateBytes > 768 * 1024 ** 2) {
     const error = new Error('benchmark resource guard');
     error.observation = value;
@@ -92,14 +93,16 @@ async function variant(name, repetition) {
   const roots = [];
   const clients = [];
   const identities = new Map();
+  const rootIdentities = new Map();
   const item = { variant: name, repetition, measurements: {}, errors: [], expectedFirstWakeError: false };
   let supervisor;
   let spec;
   const began = performance.now();
   let coldStarted = began;
   const observe = async label => {
-    const value = await sample(roots);
+    const value = await sample(roots, rootIdentities);
     item.measurements[label] = value;
+    for (const [pid, born] of Object.entries(value.rootIdentities)) rootIdentities.set(Number(pid), born);
     for (const row of value.processes) identities.set(row.pid, row.created);
     return value;
   };
@@ -111,6 +114,7 @@ async function variant(name, repetition) {
     transport.stderr.on('data', chunk => { stderrBytes += chunk.length; });
     clients.push(client);
     await client.connect(transport, { timeout: 10000 });
+    rootIdentities.delete(transport.pid); // This exact SDK child was newly spawned, even if its PID was reused.
     roots.push(transport.pid);
     return { client, transport, diagnosticSize: () => stderrBytes };
   };
@@ -188,7 +192,7 @@ async function variant(name, repetition) {
       if (supervisor.exitCode === null) { supervisor.kill(); await once(supervisor, 'exit'); }
     }
     await delay(300);
-    const after = await sample([...identities.keys()]);
+    const after = await sample([...identities.keys()], identities);
     item.cleanupRemaining = after.processes.filter(row => identities.get(row.pid) === row.created);
     item.elapsedMs = performance.now() - began;
     item.passed = item.errors.length === 0 && item.callbackPassed && item.longCallPassed && item.wakePassed
