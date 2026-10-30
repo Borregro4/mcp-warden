@@ -1,0 +1,24 @@
+{
+  "renderer": "Pillow",
+  "version": "12.3.0",
+  "rendererSha256": "69512e0c55441dc76f0050a30b15fc16fed460a12a492f1667fe769f62b506e6",
+  "dimensions": [
+    900,
+    570
+  ],
+  "frames": 8,
+  "durationMs": 40000,
+  "loop": 0,
+  "lastFrameMs": 9000,
+  "inputSha256": {
+    "plan.json": "f48c0261f00bfc2c25ad163e4c4dfe227fbabe04abda9941a95febd0e3c349a0",
+    "events.jsonl": "4b9db189df71088153658ce9dc77c7d8cafbe8cbd0ef8e530b4cf9cffdf500cd",
+    "result.json": "f561559d254fa470c67a786ad1eb6a82b4ab583ac2f00d1ef25ff0baa65c5a39"
+  },
+  "outputSha256": {
+    "demo.gif": "7aab150e4f3fd482a9c242c5bed6d63c5e3879b0a28786d099c246b1b670e5a1",
+    "demo-poster.png": "6277a9f9b75668c0d9ceee54c657f47a30f0a7183e5761fa676483dc3eef9f5f"
+  },
+  "fontFamily": "local monospace font; not bundled",
+  "scope": "Editorial terminal replay of actual verified observations; no desktop capture."
+}

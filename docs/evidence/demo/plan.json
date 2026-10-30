@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-10-30T15:47:00.874Z",
+  "sourceCommit": "5c95856307e6610c9a1cf2b19a2f6d5cd208deea",
+  "sourceHashes": {
+    "warden.py": "be1eccf2279444d80dbf1a4cf73329a4e84c40adcd5664193c7ab918b4999759",
+    "runtime/idle_stdio.py": "df5bad96b42aa273e541a1df004f78a99c466fb44d60c2e6995b42d4da14295d",
+    "runtime/lazy_stdio.py": "3b1eb1bf4ea4007d307e6650d0d5b0b67ecb3aa1f5ff314cc0c2664d263ec543",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+    "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+    "scripts/demo.mjs": "801f0b6206fcde2648c78a43d9fba3ed27097be155a87f8d67571d19571e3d21",
+    "package-lock.json": "b8c2205b8457e5bbb5212c38f3d6aa5851441e01bd5eb0cc4759bd613fd24c2a"
+  },
+  "runtime": {
+    "platform": "win32",
+    "node": "v24.18.1",
+    "sdk": "1.32.0",
+    "python": "3.12.10"
+  },
+  "clock": "performance.now() monotonic seconds; UTC labels are wall clock",
+  "scenario": "SDK demo · synthetic backend · accelerated idle",
+  "idleSeconds": 2,
+  "longRpcSeconds": 4,
+  "profile": "example",
+  "restartPolicy": "stateless",
+  "connectionCount": 1,
+  "publication": "Only public/ is suitable for review; state/ contains local configuration, token and stderr. Nonces are replaced with labels; their SHA-256 hashes cover the original UTF-8 values.",
+  "limits": [
+    "Synthetic backend only; no model calls or native app compatibility claim.",
+    "Working-set samples cover the proxy and direct backend; shared pages can be counted twice.",
+    "CLI status is sampled by the proxy every two seconds and can lag direct PID+FILETIME probes.",
+    "The animation is an editorial replay of these real observations, not a desktop recording."
+  ]
+}

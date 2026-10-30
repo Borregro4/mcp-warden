@@ -2,176 +2,85 @@
 
 [English](README.md)
 
-Supervisor local del ciclo de vida de servidores MCP en Windows. El modo ligero usa un proxy stdio de Python y su servidor. El modo gateway opcional agrega sesiones HTTP y límites centrales de admisión. Ambos protegen el trabajo en curso y limpian sus procesos propios.
+**Recupera memoria de servidores MCP inactivos en Windows y protege las llamadas en curso.**
 
-**Versión alfa.** Esta entrega se enfoca en las sesiones y la propiedad de procesos en Windows. No selecciona modelos de IA, limita cuotas de suscripción ni acredita ahorro de tokens o dinero. Consulta las [pruebas y los límites vigentes](VALIDATION.md) antes de adoptarlo.
+MCP Warden cierra los servidores MCP locales que administra después de una
+inactividad limpia. Un perfil explícitamente stateless puede iniciar otro
+servidor para la siguiente llamada. Es una **alfa para Windows**, con pruebas
+acotadas en Codex CLI y Claude Code; revisa los
+[límites de estado y compatibilidad](VALIDATION.md#limits) antes de usar un servidor real.
 
-## Para qué sirve
+**[Sigue la guía de primera ejecución →](docs/first-run.es.md)** ·
+[English guide](docs/first-run.md) ·
+[Descarga v0.2.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.2.0-alpha.1)
 
-Varias sesiones de programación pueden dejar varias copias del mismo servidor MCP ejecutándose. Para cerrarlas correctamente hace falta saber qué sesión inició cada proceso, si hay llamadas o callbacks pendientes y si sus procesos hijos son privados o compartidos.
+## Empieza con un servidor de prueba
 
-El proxy ligero administra al servidor directamente. El modo HTTP/SSE opcional agrega esa gestión alrededor de [Supergateway](https://github.com/supercorp-ai/supergateway). Warden comprueba el PID de Windows **y su hora de creación**, protege las operaciones pendientes y permite vencer una sesión HTTP inactiva aunque conserve un stream GET abierto.
+La guía cubre desde la descarga o clonación hasta obtener un resultado real:
 
-## Inicio rápido del modo ligero
+1. Comprueba Windows, Python 3.12+ y tu Codex CLI o Claude Code instalado, con sesión iniciada.
+2. Crea el perfil sintético de echo incluido. El modo stdio ligero no necesita npm, un proceso Node, un puerto HTTP ni un gateway abierto.
+3. Respalda la configuración del cliente y agrega sólo la entrada que genera Warden.
+4. Llama a echo con un valor nuevo, revisa el PID devuelto y, si quieres, observa el cierre por inactividad y la reactivación.
+5. Quita únicamente esa entrada para deshacer la configuración.
 
-Requisitos: Windows y Python 3.12 en `PATH`. Este modo no necesita un proceso
-Node, instalación npm, puerto HTTP ni supervisor en primer plano.
+No hay instalador, servicio ni cambios automáticos en la configuración del cliente.
+Se conserva la [referencia para servidores reales y el gateway HTTP opcional](docs/first-run.es.md#referencia).
 
-El servidor incluido es sintético y no conserva estado necesario entre llamadas.
-Para probarlo:
+## Observa el ciclo de vida
 
-```powershell
-python warden.py init --state .warden-state --transport stdio --restart-policy stateless
-python warden.py doctor --state .warden-state --transport stdio
-python warden.py configuration --state .warden-state --profile example --client codex
-# O imprime la configuración para Claude:
-python warden.py configuration --state .warden-state --profile example --client claude
-```
+![Servidor MCP sintético: activo, cierre por inactividad y reactivación](assets/demo.gif)
 
-Agrega la entrada generada al cliente. El cliente inicia `connect` cuando hace
-falta. Consulta las identidades de los proxies activos con:
+La demo usa un servidor sintético. Ilustra el ciclo de vida; no acredita
+ahorros con tus propios servidores.
+[Método y alcance de la demo](docs/demo.md).
 
-```powershell
-python warden.py status --state .warden-state --transport stdio --json
-```
+## Qué se comprobó
 
-Usa `restart_policy: "stateless"` únicamente cuando sea aceptable perder la
-memoria del servidor, sus cursores y selecciones. La política predeterminada es
-`manual`: una conexión vencida pide reconectar. Puedes conservar un servidor
-con estado desactivando el vencimiento con `idle_session_timeout_seconds: 0`.
+- **Codex CLI 0.166.0-alpha.5.1:** tres llamadas MCP reales, valores exactos, un mismo PID del servidor y limpieza. No se probó el cierre y reinicio por inactividad en Codex nativo.
+- **Claude Code 2.1.309 mediante Agent SDK oficial 0.2.175:** dos turnos reales, cierre limpio por inactividad y un servidor nuevo en la misma conexión stdio.
+- **Prueba sintética de resistencia con SDK:** una hora completada con un plazo de inactividad de 900 segundos, callbacks, reactivación, reemplazo del propietario y limpieza final.
 
-El reinicio stateless mantiene la conexión stdio, inicializa otro servidor,
-comprueba sus instrucciones y el catálogo de herramientas observado previamente,
-y envía la solicitud nueva una vez. Cambios de esquemas o permisos declarados,
-catálogos paginados, falta de un catálogo de referencia, cancelaciones y resultados
-inciertos requieren una conexión nueva. Las llamadas anteriores no se repiten.
+[VALIDATION.md](VALIDATION.md) registra versiones, métodos, intentos fallidos
+y la diferencia entre pruebas nativas, cargas con SDK y pruebas de interfaz.
+La [comparación de cuatro variantes](docs/benchmark-lightweight-2026-10-30.md)
+incluye las diferencias de memoria y latencia. También se conserva el
+[resultado desfavorable del gateway original](docs/benchmark-results-2026-10-30.md);
+mcp-snooze mantuvo menor latencia y menor memoria de trabajo en la comparación
+del modo ligero.
 
-Este modo limita los mensajes a 1 MiB y las colas a 16 entradas. Los límites
-globales de sesiones pertenecen al modo gateway. Las muestras de estado cubren
-el proxy y su servidor directo; no incluyen a todos sus descendientes.
+## Límites que debes conocer
 
-## Gateway HTTP opcional
+- El reinicio stateless pierde la memoria del servidor, sus cursores y selecciones. Úsalo sólo si eso es aceptable. Los perfiles manuales, que son la opción predeterminada, piden reconectar después del vencimiento; no se repiten llamadas completadas.
+- La limpieza con Windows Job Objects corresponde a procesos hijos privados del servidor. Los descendientes compartidos necesitan otra política, y no está calificado el intervalo entre crear el proceso y asignarlo al Job.
+- Administra el ciclo de vida de programas locales de confianza. No impone un límite estricto de RAM o CPU, elige modelos ni acredita ahorro de tokens o gestión de cuotas.
+- Las muestras cubren el proxy y el servidor directo, no todos los descendientes ni el cliente. El estado puede contener configuración sensible y stderr; el historial no se depura automáticamente.
+- Son pruebas acotadas con CLI y SDK; no acreditan compatibilidad universal, estabilidad por varios días ni una interfaz de escritorio probada.
 
-Requisitos: Windows, Python 3.12 y Node.js 22 o posterior en `PATH`. Usa una terminal normal, sin permisos de administrador.
+## Ayuda a orientar la primera versión
 
-Desde una copia del repositorio:
+¿Usas Windows con Codex CLI o Claude Code y ya tienes servidores MCP?
+[Prueba el piloto y comparte tus resultados](docs/pilot.md). Sirve tanto una
+primera ejecución exitosa como una falla reproducible o un servidor que
+necesite conservar estado. Revisa que los diagnósticos no contengan datos
+privados antes de compartirlos.
 
-```powershell
-npm ci --ignore-scripts
-python warden.py init --state .warden-state
-python warden.py doctor --state .warden-state
-python warden.py serve --state .warden-state
-```
-
-Deja esa terminal abierta. En otra terminal:
-
-```powershell
-python warden.py status --state .warden-state
-python warden.py configuration --state .warden-state --profile example --client codex
-# O genera la entrada JSON para Claude:
-python warden.py configuration --state .warden-state --profile example --client claude
-```
-
-`init` crea una carpeta local con el token, la configuración del gateway y un servidor de ejemplo. `configuration` imprime fragmentos de configuración: revisa el que corresponda y agrégalo a tu cliente. Ese comando no modifica la configuración existente. `serve` se ejecuta en primer plano; Ctrl+C en esa terminal cierra sus sesiones.
-
-La entrada stdio generada ejecuta:
-
-```powershell
-python warden.py connect --state .warden-state --profile example
-```
-
-`connect` es un transporte MCP: reserva stdout para el protocolo. Configura tu cliente para ejecutarlo en lugar de usarlo de forma interactiva.
-
-## Conectar un servidor propio
-
-Edita `config.json` dentro de tu carpeta de estado. Cada perfil tiene un manifiesto para su servidor. Empieza con un servidor de prueba y conserva una copia de la configuración anterior del cliente.
-
-```json
-{
-  "profiles": {
-    "mi-servidor": {
-      "transport": "stdio",
-      "restart_policy": "manual",
-      "idle_session_timeout_seconds": 900,
-      "manifest": {
-        "command": "C:\\ruta\\absoluta\\servidor.exe",
-        "args": [],
-        "env": {},
-        "cleanup_scope": "tree"
-      }
-    }
-  }
-}
-```
-
-Es un fragmento de perfil, no la configuración completa. Conserva las rutas y los demás campos que generó `init` y genera la entrada de tu perfil. Las conexiones stdio nuevas leen el perfil actualizado. Si usas `transport: "gateway"`, reinicia el supervisor después de cambiar su configuración.
-
-| Opción | Efecto |
-| --- | --- |
-| `transport: "stdio"` | Proxy ligero sin supervisor en primer plano. `gateway` conserva la compatibilidad con configuraciones anteriores. |
-| `restart_policy: "stateless"` | Autoriza el reinicio tras inactividad limpia en el modo ligero. El valor predeterminado `manual` pide reconectar. |
-| `idle_session_timeout_seconds` | Plazo de inactividad por perfil. `0` desactiva el vencimiento. El valor predeterminado es 900 segundos. |
-| `cleanup_scope: "tree"` | El árbol privado del servidor queda dentro de un Job Object de Windows y se limpia con su sesión. |
-| `cleanup_scope: "process"` | Sólo se limpia el proceso del servidor; sus hijos pueden ser compartidos y seguir ejecutándose. |
-| `manifest.env` | Variables que necesita el servidor. Si contienen credenciales, trata la carpeta de estado como información sensible. |
-| `max_sessions` | Capacidad global de sesiones, incluidas las que se están iniciando o cerrando. Valor predeterminado: 32. |
-| `max_sessions_per_profile` | Capacidad de sesiones por perfil de servidor. Valor predeterminado: 16. |
-| `max_request_bytes` | Tamaño máximo del cuerpo JSON entrante. Valor predeterminado: 1 MiB. |
-
-Las opciones de capacidad y tamaño de solicitud van en el nivel principal de
-`config.json`. La capacidad controla la admisión de sesiones; no impone un límite
-estricto de RAM o CPU. Al alcanzar la capacidad, las operaciones existentes
-continúan y las sesiones nuevas reciben HTTP 429.
-
-En el modo gateway, `python warden.py status --state .warden-state --json` incluye sesiones,
-solicitudes pendientes, callbacks y muestras por perfil de memoria de trabajo
-en bytes y segundos acumulados de CPU. Las muestras cubren el puente y su
-servidor directo, **no todo el árbol de procesos hijos**, el gateway ni las
-aplicaciones cliente. Una muestra ausente o antigua no significa consumo cero.
-Estas métricas no miden cuotas de suscripción ni consumo de tokens.
-
-Usa `process` cuando el servidor inicie servicios compartidos intencionalmente. Usa `tree` para hijos privados. Reiniciar una sesión pierde la memoria del servidor, sus cursores y selecciones; el propio servidor determina qué pasa con los archivos persistentes.
-
-## Qué protege
-
-- La inicialización, el cuerpo de un POST que sigue llegando y su respuesta pendiente.
-- Las solicitudes en ambas direcciones, incluidos los callbacks del servidor al cliente.
-- La actividad del servidor que renueva el plazo de inactividad.
-- La identidad del propietario mediante PID y hora de creación, para rechazar PID reutilizados.
-
-Un stream pasivo no mantiene viva indefinidamente una sesión gateway sin trabajo. Cancelar no demuestra que el servidor haya terminado. Cuando una sesión gateway vencida devuelve HTTP 404, `connect` pide reconectar y cierra la conexión. El reinicio stateless ligero sigue las condiciones anteriores. La compatibilidad probada se registra en [VALIDATION.md](VALIDATION.md).
-
-Los clientes stdio modernos pueden enviar `server/discover` antes de inicializar.
-Warden responde con un error JSON-RPC asociado al ID correcto y conserva la
-conexión para la negociación anterior con `initialize`. Es compatibilidad con
-esa consulta previa; no implementa toda la revisión de protocolo 2026-07-28.
-
-## Datos locales y alcance
-
-El gateway escucha en `127.0.0.1`, exige un token local y valida Host y Origin. Guarda la carpeta de estado bajo tu cuenta y fuera de Git. Contiene configuración, token, manifiestos de sesiones y diagnósticos del servidor. Los mensajes de stderr del servidor pueden contener información privada, aunque los eventos del gateway eviten registrar el contenido de las llamadas.
-
-Está pensado para clientes y servidores locales de confianza. Los servidores conservan su propio acceso a archivos, red y credenciales. MCP Warden no termina aplicaciones ajenas por nombre, instala un servicio de Windows ni cambia silenciosamente la configuración global del cliente.
-
-Los manifiestos de ejecución y los diagnósticos se conservan localmente después
-de cerrar las sesiones. Esta versión alfa no depura automáticamente ese historial
-ni impone cuotas de espacio en disco.
-
-## Desarrollo
+## Desarrollo y evidencia
 
 ```powershell
 npm ci --ignore-scripts
 npm test
 ```
 
-Las pruebas usan servidores sintéticos locales y carpetas temporales. El [workflow de CI](.github/workflows/test.yml) ejecuta la suite en Windows. Tener el archivo del workflow no acredita una ejecución remota exitosa: revisa su resultado y [VALIDATION.md](VALIDATION.md).
+Las pruebas usan servidores sintéticos locales y carpetas temporales. El
+[workflow de Windows](.github/workflows/test.yml) y sus resultados son cosas
+distintas; [VALIDATION.md](VALIDATION.md) enlaza las ejecuciones.
 
-Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), la
-[comparación con proyectos relacionados](docs/alternatives.md) y la
-[medición de la primera alfa](docs/benchmark-results-2026-10-30.md).
-Ese resultado mostró por qué hacía falta reducir el costo del modo stdio;
-no acredita superioridad general frente a otros supervisores. La
-[comparación del modo ligero](docs/benchmark-lightweight-2026-10-30.md) registra
-la mejora de memoria y las métricas donde mcp-snooze sigue adelante.
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md),
+[los proyectos relacionados](docs/alternatives.md), el
+[método de medición](docs/benchmark-method.md) y el
+[plan de resistencia](docs/soak-stdio-method.md) con su
+[resultado completado](docs/soak-stdio-results-2026-10-30.md).
 
 ## Licencia y atribución
 

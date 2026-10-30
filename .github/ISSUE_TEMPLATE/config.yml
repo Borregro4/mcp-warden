@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup guides / Guías de instalación
+    url: https://github.com/Borregro4/mcp-warden#readme
+    about: Read the first-run guide and current validation limits before testing.
+  - name: Security reporting / Reportar una vulnerabilidad
+    url: https://github.com/Borregro4/mcp-warden/blob/main/SECURITY.md
+    about: Follow the private reporting process. If unavailable, open a blank issue requesting a private channel without sensitive details.

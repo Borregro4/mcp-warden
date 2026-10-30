@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "checks": {
+    "isolatedInit": true,
+    "handshakeAndCatalog": true,
+    "echoIntegrity": true,
+    "pendingProtection": true,
+    "cleanIdle": true,
+    "sameSdkConnection": true,
+    "newBackendGeneration": true,
+    "memoryScope": true,
+    "cleanup": true
+  },
+  "checkCount": 9,
+  "elapsedSeconds": 10.0440828,
+  "sourceCommit": "5c95856307e6610c9a1cf2b19a2f6d5cd208deea",
+  "observedBackends": [
+    {
+      "pid": 52432,
+      "created": "134378488215571846"
+    },
+    {
+      "pid": 73652,
+      "created": "134378488298210662"
+    }
+  ],
+  "scope": "SDK demo · synthetic backend · accelerated idle",
+  "modelCalls": 0,
+  "connectionCount": 1
+}

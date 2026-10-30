@@ -1,0 +1,79 @@
+name: Client compatibility / Compatibilidad
+description: Record one exact client, backend and scenario; success and failure both help.
+title: "[Compatibility] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A successful scenario is evidence for that combination only. See the existing [validation and limits](https://github.com/Borregro4/mcp-warden/blob/main/VALIDATION.md).
+        This issue is public. Do not attach credentials, complete client configuration, conversation logs, private paths, session IDs or raw backend stderr.
+        Puedes responder en español. No se requiere correo ni una configuración completa.
+  - type: input
+    id: warden-version
+    attributes:
+      label: Warden version or commit
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Client name and exact version
+      description: Distinguish CLI, desktop app, extension and SDK. If an SDK launches the client, give both versions.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      description: Omit device/account names and product IDs. Other operating systems are not currently qualified.
+    validations:
+      required: true
+  - type: input
+    id: backend
+    attributes:
+      label: MCP backend and exact version
+      description: Name/version only; example means the included synthetic backend. No environment values or private command arguments.
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Warden mode
+      options:
+        - Lightweight stdio
+        - HTTP gateway
+        - Unknown or failed before setup
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Observed result
+      options:
+        - Passed the described scenario
+        - Partially passed
+        - Failed
+        - Not yet tested
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Exact scenario, duration and result
+      description: Describe setup, calls/turns, idle wait, reconnect or wake, and final cleanup actually observed. Include relevant non-secret policy values only. Separate what you tested from what is unknown.
+    validations:
+      required: true
+  - type: textarea
+    id: failed-step
+    attributes:
+      label: Failed step or remaining limit
+      description: Optional for success. Give expected vs observed behavior and a short sanitized error if useful; do not attach full logs.
+    validations:
+      required: false
+  - type: textarea
+    id: memory
+    attributes:
+      label: Optional memory observation
+      description: Separate Private bytes and Working set, units, active/idle timing, process scope and direct-backend baseline if available. Memory does not establish token or subscription savings.
+    validations:
+      required: false
