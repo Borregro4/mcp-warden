@@ -2,171 +2,81 @@
 
 [Español](README.es.md)
 
-A local lifecycle supervisor for MCP servers on Windows. The lightweight mode runs a Python stdio proxy and its backend. The optional gateway mode provides stateful HTTP sessions and central admission limits. Both protect work in progress and clean up owned processes.
+**Reclaim memory from idle MCP servers on Windows while protecting in-flight tool calls.**
 
-**Alpha software.** This release focuses on session lifecycle and Windows process ownership. It does not select AI models, enforce subscription quotas, or claim token or cost savings. See [validation and current limits](VALIDATION.md) before adopting it.
+MCP Warden stops owned local MCP backends after clean inactivity. An explicitly
+stateless profile can start a fresh backend for the next call. This is a
+**Windows alpha**, with bounded Codex CLI and Claude Code checks; review the
+[state-loss and compatibility limits](VALIDATION.md#limits) before using a real server.
 
-## Why it exists
+**[Try the first-run guide →](docs/first-run.md)** ·
+[Guía en español](docs/first-run.es.md) ·
+[Download v0.2.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.2.0-alpha.1)
 
-Several coding sessions can leave several copies of the same MCP backend running. Closing a backend safely requires more information than its process name: the supervisor needs to know which session owns it, whether a request or callback is pending, and whether its children are private or shared.
+## Start with one test server
 
-The lightweight proxy manages a backend directly. The optional HTTP/SSE mode adds lifecycle policy around [Supergateway](https://github.com/supercorp-ai/supergateway). Warden checks Windows PID **and creation time**, protects in-flight requests and callbacks, and lets an idle HTTP session expire even when a passive GET stream remains open.
+The guide walks from download or clone to a real tool result:
 
-## Lightweight quick start
+1. Check Windows, Python 3.12+, and your installed, signed-in Codex CLI or Claude Code.
+2. Create the included synthetic echo profile. Lightweight stdio needs no npm install, Node process, HTTP port, or foreground gateway.
+3. Back up your client config and add only the generated Warden entry.
+4. Call echo with a new value, inspect its returned PID, and optionally observe idle stop and wake.
+5. Remove just that entry to undo the setup.
 
-Requirements: Windows and Python 3.12 on `PATH`. This runtime mode needs no
-Node process, npm installation, HTTP listener or foreground gateway.
+No installer, service, or automatic client-config changes. The optional
+[HTTP gateway and real-backend reference](docs/first-run.md#reference) remain available.
 
-The included example is synthetic and stateless. For this example:
+## See the lifecycle
 
-```powershell
-python warden.py init --state .warden-state --transport stdio --restart-policy stateless
-python warden.py doctor --state .warden-state --transport stdio
-python warden.py configuration --state .warden-state --profile example --client codex
-# Or print the Claude configuration:
-python warden.py configuration --state .warden-state --profile example --client claude
-```
+![Synthetic MCP backend: active, idle stop, and wake](assets/demo.gif)
 
-Add the printed entry to your client. The client launches `connect` when needed.
-Observe validated running proxy identities with:
+The demo uses a synthetic backend. It illustrates lifecycle behavior; it is
+not a claim about savings for your own servers.
+[Demo method and scope](docs/demo.md).
 
-```powershell
-python warden.py status --state .warden-state --transport stdio --json
-```
+## What has been checked
 
-Declare `restart_policy: "stateless"` only when losing backend memory, cursors
-and selections is acceptable. The default policy is `manual`: an expired
-connection reports that a client reconnect is required. For stateful backends,
-you can disable idle expiry with `idle_session_timeout_seconds: 0`.
+- **Codex CLI 0.166.0-alpha.5.1:** three real MCP calls, exact returned values, common backend PID, and cleanup. Native Codex idle/wake was not tested.
+- **Claude Code 2.1.309 through official Agent SDK 0.2.175:** two real turns, clean idle stop, and a fresh backend over the same stdio connection.
+- **Synthetic SDK endurance:** one completed hour with a 900-second idle policy, callbacks, wake, owner replacement, and final cleanup.
 
-Stateless wake keeps the stdio connection open, reinitializes the backend,
-validates its initialization instructions and previously observed tool metadata,
-then sends the new request once. Changed schemas or approval annotations,
-paginated discovery, missing discovery baseline, cancellation or uncertain
-outcomes require a fresh client connection. Old tool calls are never replayed.
+See [VALIDATION.md](VALIDATION.md) for versions, methods, failed attempts,
+and the difference between native checks, SDK workloads, and GUI testing.
+The [four-way comparison](docs/benchmark-lightweight-2026-10-30.md) records
+memory and latency tradeoffs. The [original gateway's adverse result](docs/benchmark-results-2026-10-30.md)
+is also preserved; mcp-snooze retained lower latency and a smaller working set
+in the lightweight comparison.
 
-This mode bounds input frames to 1 MiB and queues to 16 entries. It does not
-provide the gateway's global/per-profile session admission limits. Status
-samples cover the proxy and direct backend; they do not include every descendant.
+## Know the limits
 
-## Optional HTTP gateway
+- Stateless restart loses backend memory, cursors, and selections. Use it only when that is acceptable. Default/manual profiles require a client reconnect after expiry; completed calls are never replayed.
+- Windows Job cleanup is for owned private children. Shared descendants need a different policy, and the creation-to-Job-assignment gap is not qualified.
+- This is a lifecycle supervisor for trusted local programs, with no hard RAM/CPU sandbox, model routing, token savings, or subscription-quota management.
+- Status samples cover the proxy and direct backend, not every descendant or the client app. State can contain sensitive configuration and stderr; disk history is not automatically pruned.
+- These are bounded CLI/SDK checks, not universal compatibility, multi-day reliability, or desktop GUI validation.
 
-Requirements: Windows, Python 3.12, and Node.js 22 or newer on `PATH`. Run in a normal user terminal.
+## Help shape the first release
 
-From a source checkout:
+Use Windows with Codex CLI or Claude Code and already have MCP servers?
+[Try the pilot and share structured feedback](docs/pilot.md). A successful
+first run, a reproducible failure, or a server that must retain state is useful
+evidence. Review diagnostics for private data before sharing.
 
-```powershell
-npm ci --ignore-scripts
-python warden.py init --state .warden-state
-python warden.py doctor --state .warden-state
-python warden.py serve --state .warden-state
-```
-
-Leave that terminal open. In a second terminal:
-
-```powershell
-python warden.py status --state .warden-state
-python warden.py configuration --state .warden-state --profile example --client codex
-# Or generate the JSON entry for Claude:
-python warden.py configuration --state .warden-state --profile example --client claude
-```
-
-`init` creates a local state directory with a bearer token, gateway configuration, and an example backend. `configuration` prints client configuration snippets; review and add the relevant snippet to your client. It does not edit existing client settings. `serve` runs in the foreground; use Ctrl+C in that terminal to shut down its sessions.
-
-The generated stdio entry invokes:
-
-```powershell
-python warden.py connect --state .warden-state --profile example
-```
-
-`connect` is an MCP transport, so its stdout is reserved for protocol messages. Configure a client to invoke it instead of running it interactively.
-
-## Configure a real backend
-
-Edit `config.json` in your state directory. Each named profile contains a backend manifest. Start with a dedicated test server and keep a copy of your existing client settings.
-
-```json
-{
-  "profiles": {
-    "my-server": {
-      "transport": "stdio",
-      "restart_policy": "manual",
-      "idle_session_timeout_seconds": 900,
-      "manifest": {
-        "command": "C:\\absolute\\path\\to\\server.exe",
-        "args": [],
-        "env": {},
-        "cleanup_scope": "tree"
-      }
-    }
-  }
-}
-```
-
-This is a profile fragment, not a complete configuration. Preserve the paths and other fields generated by `init`, then generate the entry for your profile. New stdio connections read the updated profile. If using `transport: "gateway"`, restart the foreground supervisor after changing its configuration.
-
-| Setting | Meaning |
-| --- | --- |
-| `transport: "stdio"` | Lightweight proxy; no foreground supervisor needed. `gateway` remains the compatibility default for older configs. |
-| `restart_policy: "stateless"` | Explicit opt-in to clean idle restart in lightweight mode. Default `manual` preserves an explicit reconnect boundary. |
-| `idle_session_timeout_seconds` | Idle deadline per profile. `0` disables idle expiry. The default is 900 seconds. |
-| `cleanup_scope: "tree"` | Private backend process tree belongs to a Windows Job Object and is cleaned up with the session. |
-| `cleanup_scope: "process"` | Clean up only the backend process; descendants may be shared and may remain running. |
-| `manifest.env` | Explicit environment values needed by that backend. Treat the state directory as sensitive when this contains credentials. |
-| `max_sessions` | Global session capacity, including startup and cleanup. Default: 32. |
-| `max_sessions_per_profile` | Session capacity per backend profile. Default: 16. |
-| `max_request_bytes` | Maximum incoming JSON request body. Default: 1 MiB. |
-
-The capacity and request-size settings belong at the top level of `config.json`.
-Capacity is admission control, not a RAM or CPU hard limit. Existing work continues
-when capacity is reached; new sessions receive HTTP 429.
-
-In gateway mode, `python warden.py status --state .warden-state --json` includes sessions, pending
-requests, callbacks and per-profile samples of working-set bytes and cumulative
-CPU seconds. Samples cover the bridge and its direct backend, **not the entire
-descendant tree**, the gateway or client apps. Missing or older samples are not
-zero usage. These metrics do not measure subscription quotas or token consumption.
-
-Choose `process` for a backend that deliberately launches shared services. Use `tree` only for private children. A session reset loses backend memory, cursors, and selections; persistent files are governed by the backend itself.
-
-## What is protected
-
-- Initialization, an arriving POST body, and its unfinished response.
-- Pending requests in both directions, including server-to-client callbacks.
-- Backend activity that refreshes the idle deadline.
-- Windows owner identity, checked using PID and creation time to reject PID reuse.
-
-A passive event stream does not keep an otherwise idle gateway session alive indefinitely. Cancellation does not prove that a backend has stopped working. When an expired gateway session returns HTTP 404, `connect` reports a fixed MCP error requesting reconnection and closes the connection. Lightweight stateless restart follows the stricter rules above. Actual application compatibility is recorded in [VALIDATION.md](VALIDATION.md).
-
-Modern stdio clients may probe `server/discover` before initialization. Warden
-returns a correlated JSON-RPC method error and keeps the connection open for
-the documented legacy `initialize` fallback. This is compatibility with that
-probe, not an implementation of the complete 2026-07-28 protocol era.
-
-## Local data and boundaries
-
-The gateway binds to `127.0.0.1`, requires a local bearer token, and validates HTTP Host and Origin. Keep the state directory under your account and out of Git. It contains configuration, a token, session manifests, and backend diagnostic files. Backend stderr may contain private data even though gateway events avoid RPC payloads.
-
-This is a supervisor for trusted local clients and backends, not a sandbox against malicious tools. Backends retain their own filesystem, network, and credential access. MCP Warden does not kill unrelated apps by process name, install a Windows service, or silently change global client configuration.
-
-Runtime manifests and diagnostic files are retained locally after sessions end.
-This alpha does not automatically prune disk history or enforce disk quotas.
-
-## Development
+## Development and evidence
 
 ```powershell
 npm ci --ignore-scripts
 npm test
 ```
 
-Tests use synthetic local backends and temporary state. The [CI workflow](.github/workflows/test.yml) runs the suite on Windows. A workflow file alone is not a successful remote run; consult its run result and [VALIDATION.md](VALIDATION.md).
+Tests use synthetic local backends and temporary state. The
+[Windows CI workflow](.github/workflows/test.yml) is separate from its run
+results, linked in [VALIDATION.md](VALIDATION.md).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), the
-[comparison with related projects](docs/alternatives.md), and
-[the measured first-alpha comparison](docs/benchmark-results-2026-10-30.md).
-That result showed why a lower-cost stdio mode was needed. The
-[lightweight comparison](docs/benchmark-lightweight-2026-10-30.md) records the
-new mode's memory improvement and the metrics on which mcp-snooze remains ahead.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md),
+[related projects](docs/alternatives.md), the [benchmark method](docs/benchmark-method.md),
+and the [endurance plan](docs/soak-stdio-method.md) and
+[completed result](docs/soak-stdio-results-2026-10-30.md).
 
 ## License and attribution
 

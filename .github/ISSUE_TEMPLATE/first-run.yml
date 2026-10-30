@@ -1,0 +1,88 @@
+name: First-run feedback / Primer uso
+description: Tell us where a Windows installation worked or got stuck. English or Spanish is welcome.
+title: "[First run] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the [first-run guide](https://github.com/Borregro4/mcp-warden/blob/main/docs/first-run.md). A blocked attempt is useful feedback too.
+        This issue is public. Do not include credentials, complete client configuration, conversation logs, private paths, session IDs or raw backend stderr. No email is needed.
+        For a vulnerability, follow [SECURITY.md](https://github.com/Borregro4/mcp-warden/blob/main/SECURITY.md) instead.
+        Puedes responder en español. Comparte sólo versiones, pasos y observaciones sin datos privados.
+  - type: input
+    id: warden-version
+    attributes:
+      label: Warden version or commit
+      description: Optional; leave blank or say unknown if unavailable.
+      placeholder: "For example: v0.2.0-alpha.1, or unknown"
+    validations:
+      required: false
+  - type: input
+    id: client
+    attributes:
+      label: Client and exact version
+      description: Codex CLI, Claude Code or another client. Say unknown if you could not obtain the version.
+      placeholder: "Client name + version"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      description: Optional version/build; leave blank or say unknown. Omit the device name, account name and product ID.
+      placeholder: "Windows version/build, or unknown"
+    validations:
+      required: false
+  - type: input
+    id: backend
+    attributes:
+      label: MCP backend and version
+      description: Optional; use example for the included synthetic backend, or unknown if unavailable. Omit command arguments, environment values and private paths.
+      placeholder: "example (included synthetic backend), or unknown"
+    validations:
+      required: false
+  - type: dropdown
+    id: setup-time
+    attributes:
+      label: Time spent on this setup attempt
+      description: Optional; include time until you stopped if installation did not finish. An estimate or Not measured is fine.
+      options:
+        - Under 5 minutes
+        - 5 to 15 minutes
+        - 16 to 30 minutes
+        - More than 30 minutes
+        - Not measured
+    validations:
+      required: false
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Installation outcome
+      description: Without help means the published guide was enough; coding-assistant or maintainer help counts as help.
+      options:
+        - Completed using only the guide
+        - Completed with help
+        - Blocked or stopped before completion
+    validations:
+      required: true
+  - type: textarea
+    id: step
+    attributes:
+      label: Last completed step or failed step
+      description: Name the guide step, what you expected and what happened. A short sanitized error is optional. If it worked, say completed.
+    validations:
+      required: true
+  - type: textarea
+    id: memory
+    attributes:
+      label: Optional memory observation
+      description: If measured, separate Private bytes from Working set; include units, direct vs Warden setup, active/idle timing and which processes were included. Not measured is fine. Do not attach full status/configuration dumps.
+    validations:
+      required: false
+  - type: textarea
+    id: next
+    attributes:
+      label: Optional next-day or day-7 update
+      description: You may instead add this later as a comment here. Say Day 1 or Day 7, still using / stopped / not tried, the backend, and one reason. No follow-up or contact details are required.
+    validations:
+      required: false

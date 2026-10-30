@@ -1,0 +1,68 @@
+name: Bug report / Error
+description: Report a reproducible lifecycle or setup problem without private logs.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This report is public. Use a synthetic reproduction where possible. Do not post credentials, complete client configuration, conversation logs, private paths, session IDs or raw backend stderr.
+        Security-sensitive reports belong in the process described by [SECURITY.md](https://github.com/Borregro4/mcp-warden/blob/main/SECURITY.md).
+        Puedes responder en español. No se requiere correo ni una configuración completa.
+  - type: input
+    id: warden-version
+    attributes:
+      label: Warden version or commit
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Client and exact version
+      description: Say unknown if unavailable, or no client if the failure occurs before connection.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      description: Omit device/account names and product IDs.
+    validations:
+      required: true
+  - type: input
+    id: backend
+    attributes:
+      label: MCP backend and version
+      description: Name/version only, or example for the included synthetic backend. No environment values or private command arguments.
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Warden mode
+      options:
+        - Lightweight stdio
+        - HTTP gateway
+        - Unknown or failed before setup
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction and failed step
+      description: Give numbered steps using the included example if possible. Include only relevant non-secret policy values, such as idle timeout and restart policy. Do not paste your full configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+      description: Include whether it repeats, what remained running, and whether reconnecting helped. A short redacted error excerpt is optional.
+    validations:
+      required: true
+  - type: textarea
+    id: resources
+    attributes:
+      label: Optional resource observation
+      description: Separate Private bytes and Working set, with units, sampling time and observed process scope. Leave blank if not relevant. Do not attach raw status or backend logs.
+    validations:
+      required: false

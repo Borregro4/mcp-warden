@@ -1,5 +1,7 @@
 node_modules/
 .warden-state/
+.mcp.json
+.codex/config.toml
 state/
 run/
 __pycache__/
