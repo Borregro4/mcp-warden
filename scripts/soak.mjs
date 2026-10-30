@@ -26,6 +26,7 @@ for (let i = 2; i < process.argv.length; i += 2) {
 if (process.platform !== 'win32' || !options.out || options.minutes < 1 || options.idle < 1 || options.sample < 1)
   throw new Error('Windows and explicit output directory required');
 const out = options.out;
+await mkdir(path.dirname(out), { recursive: true });
 await mkdir(out, { recursive: false });
 const hash = value => createHash('sha256').update(value).digest('hex');
 const sourceHashes = {};
@@ -56,7 +57,7 @@ assert.equal(pythonProbe.status, 0, 'python_probe_failed');
 const python = pythonProbe.stdout.trim();
 const clients = [], owners = [], failures = [], checks = {};
 let gateway, config, token, port, idleStarted, idleExpiredAt, activePid;
-let ticks = 0, callbacks = 0, peak = 0, maxCpuPercent = 0, reconnectDone = false;
+let ticks = 0, callbacks = 0, peak = 0, maxCpuPercent = 0, reconnectDone = false, activeSeconds = null;
 let previousSampleTime, previousCpu = new Map();
 const observed = new Map();
 const began = performance.now();
@@ -135,6 +136,9 @@ async function sample(label) {
   previousCpu = new Map(snapshot.processes.map(value => [value.pid + ':' + value.created, value.cpuSeconds]));
   peak = Math.max(peak, snapshot.workingSetBytes);
   await log('sample', { label, resources: snapshot, cpuPercent, health: status });
+  if (ticks % 10 === 0) console.log(JSON.stringify({ event: 'progress', ticks,
+    elapsedSeconds: (now - began) / 1000, sessions: status.sessionCount,
+    sampledWorkingSetBytes: snapshot.workingSetBytes, cpuPercent }));
   assert.ok(status.sessionCount <= 2, 'session_capacity_exceeded');
   assert.ok(snapshot.workingSetBytes <= options.abortMib * 1024 ** 2, 'resource_abort_owned_working_set');
   assert.ok(snapshot.availablePhysicalBytes >= options.minFreeGib * 1024 ** 3, 'resource_abort_available_memory');
@@ -215,7 +219,8 @@ try {
   const finalEcho = await active.callTool({ name: 'echo', arguments: { value: 'final-after-full-duration' } });
   assert.equal(finalEcho.structuredContent.pid, activePid);
   assert.equal(finalEcho.structuredContent.value, 'final-after-full-duration');
-  checks.duration = performance.now() - idleStarted >= options.minutes * 60 * 1000;
+  activeSeconds = (performance.now() - idleStarted) / 1000;
+  checks.duration = activeSeconds >= options.minutes * 60;
   checks.integrity = true;
   checks.callbacks = callbacks >= Math.max(1, Math.floor(ticks / 5));
   checks.resources = peak <= options.targetMib * 1024 ** 2;
@@ -241,7 +246,7 @@ try {
   report.cleanupRemainingIdentities = remaining;
   checks.cleanup = checks.cleanup === true && remaining.length === 0;
   report.elapsedSeconds = (performance.now() - began) / 1000;
-  report.activeSeconds = idleStarted ? (performance.now() - idleStarted) / 1000 : null;
+  report.activeSeconds = activeSeconds;
   report.finishedUtc = new Date().toISOString();
   report.activeTicks = ticks; report.callbacks = callbacks;
   report.peakSampledOwnedWorkingSetBytes = peak;
