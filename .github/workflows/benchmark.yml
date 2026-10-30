@@ -1,7 +1,17 @@
 name: Windows synthetic comparison
 on:
   push:
-    branches: ['validation/benchmark', 'improve/native-lightweight']
+    branches: ['validation/benchmark', 'improve/native-lightweight', 'improve/resident-latency']
+    paths:
+      - '.github/workflows/benchmark.yml'
+      - 'runtime/**'
+      - 'warden.py'
+      - 'examples/**'
+      - 'package*.json'
+      - 'scripts/benchmark*'
+      - 'scripts/soak_metrics.py'
+      - 'tests/test_benchmark_metrics.py'
+      - 'tests/benchmark-*.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,6 +31,21 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci --ignore-scripts
+      - name: Prepare immutable Warden v0.2 baseline without dependencies
+        shell: pwsh
+        run: |
+          $commit = '5c95856307e6610c9a1cf2b19a2f6d5cd208deea'
+          git -c http.extraheader= fetch --no-tags --depth=1 https://github.com/Borregro4/mcp-warden.git $commit
+          if ($LASTEXITCODE -ne 0) { throw 'Immutable baseline fetch failed' }
+          $resolved = (git rev-parse FETCH_HEAD).Trim()
+          if ($LASTEXITCODE -ne 0 -or $resolved -ne $commit) { throw 'Immutable baseline commit mismatch' }
+          $baseline = Join-Path $env:RUNNER_TEMP 'warden-v02-baseline'
+          New-Item -ItemType Directory -Path $baseline | Out-Null
+          $archive = Join-Path $env:RUNNER_TEMP 'warden-v02-baseline.tar'
+          git -c core.autocrlf=false archive --format=tar --output=$archive $commit
+          if ($LASTEXITCODE -ne 0) { throw 'Immutable baseline archive failed' }
+          tar -xf $archive -C $baseline
+          if ($LASTEXITCODE -ne 0) { throw 'Immutable baseline extraction failed' }
       - name: Download and verify upstream release
         shell: pwsh
         run: |
@@ -31,12 +56,13 @@ jobs:
           $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($actual -ne '1694342e4d7f4cf64cfdd17e65edc10280a7727be438bd9328ff8824b0442880') { throw 'Upstream archive digest mismatch' }
           Expand-Archive -LiteralPath $archive -DestinationPath $thirdParty
-      - name: Run predeclared four-way comparison
+      - name: Run predeclared version-4 six-way comparison
         shell: pwsh
         run: |
           $binary = Join-Path $env:RUNNER_TEMP 'snooze-official/mcp-snooze.exe'
           $results = Join-Path $env:RUNNER_TEMP 'benchmark-raw'
-          node scripts/benchmark.mjs --snooze $binary --out $results --runs 3
+          $baseline = Join-Path $env:RUNNER_TEMP 'warden-v02-baseline'
+          node scripts/benchmark.mjs --snooze $binary --baseline $baseline --out $results --runs 3
       - name: Select synthetic report files only
         if: always()
         shell: pwsh

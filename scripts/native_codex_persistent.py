@@ -38,6 +38,7 @@ class JsonlRpc:
         self.incoming = queue.Queue()
         self.events = []
         self.unexpected_requests = []
+        self.event_observer = None
         self.next_id = 1
         self.sensitive_ids = set()
         self.log_lock = threading.Lock()
@@ -88,6 +89,9 @@ class JsonlRpc:
                 'message': 'Interactive requests are unavailable in this bounded workload'}})
         elif 'method' in value:
             self.events.append(value)
+            observer = getattr(self, 'event_observer', None)
+            if observer is not None:
+                observer(value)
         return value
 
     def receive(self, timeout):
@@ -167,6 +171,13 @@ def isolated_config(effective, connector, server, tools):
     servers[server] = {**connector, 'enabled': True, 'required': True,
         'enabled_tools': tools, 'default_tools_approval_mode': 'auto',
         'startup_timeout_sec': 120, 'tool_timeout_sec': 60}
+    # The user authorized these two mutating operations only in the test's
+    # allowlisted filesystem server/workspace. Auto follows annotations and
+    # would otherwise require interaction for filesystem writes.
+    approved_writes = {name: {'approval_mode': 'approve'} for name in ('write_file', 'edit_file')
+                       if name in tools and server == 'warden-work'}
+    if approved_writes:
+        servers[server]['tools'] = approved_writes
     config['mcp_servers'] = servers
     return config
 
@@ -191,10 +202,82 @@ def completed_items(events, thread_id, turn_id):
             and e['params'].get('turnId') == turn_id]
 
 
-def transport_probe(rpc, plan, thread_id):
+def observe_backend_now(plan):
+    """Observe while an MCP result is delivered, before a slow final reply.
+
+    A two-second smoke deadline can expire before the model's final message.
+    Only Warden's published backend PID is accepted. A process-tree child can
+    be a console helper rather than the backend and is never substituted.
+    """
+    health = status_snapshot(plan['warden_state'])
+    sample = profile_sample(health, plan['profile'])
+    if not sample:
+        return None
+    if backend_identity(sample) is not None:
+        return health
+    return None
+
+
+class PhaseSampler:
+    """Observe owned status during a turn, without invoking MCP or the model."""
+    def __init__(self, plan, phase):
+        self.plan, self.phase = plan, phase
+        self.done = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self):
+        while not self.done.is_set():
+            try:
+                health = observe_backend_now(self.plan)
+                if health:
+                    self.phase['sampled_active_observation'] = {'monotonic': time.monotonic(), 'health': health}
+            except (OSError, ValueError) as error:
+                errors = self.phase.setdefault('sampling_errors', [])
+                if type(error).__name__ not in errors:
+                    errors.append(type(error).__name__)
+            self.done.wait(.25)
+
+    def __enter__(self):
+        self.thread.start()
+        return self
+
+    def __exit__(self, *args):
+        self.done.set()
+        self.thread.join(timeout=3)
+
+
+def observe_mcp_result(event, plan, thread_id, phase):
+    params = event.get('params', {})
+    item = params.get('item', {})
+    if event.get('method') != 'item/completed' or params.get('threadId') != thread_id \
+            or item.get('type') != 'mcpToolCall' or item.get('status') != 'completed' \
+            or item.get('error') or (item.get('result') or {}).get('isError'):
+        return
+    try:
+        health = observe_backend_now(plan)
+        if health:
+            phase.setdefault('active_observations', []).append({'tool': item.get('tool'),
+                'item_id': item.get('id'), 'monotonic': time.monotonic(), 'health': health})
+    except (OSError, ValueError) as error:
+        phase.setdefault('observation_errors', []).append(type(error).__name__)
+
+
+def phase_backend_health(plan, phase):
+    health = observe_backend_now(plan)
+    if health is None and phase.get('active_observations'):
+        health = phase['active_observations'][-1]['health']
+    if health is None and phase.get('sampled_active_observation'):
+        health = phase['sampled_active_observation']['health']
+    if health is None:
+        raise RuntimeError('no backend identity was captured during successful MCP calls')
+    return health
+
+
+def transport_probe(rpc, plan, thread_id, name='probe.json'):
     """Direct app-server MCP calls; no model turn or workload-result mutation."""
     workspace = Path(plan['workspace'])
-    target = workspace_file(workspace, 'results/probe.json')
+    relative = 'results/' + name
+    target = workspace_file(workspace, relative)
     orders = workspace_file(workspace, 'data/orders.json')
     if target.exists():
         raise RuntimeError('probe requires a fresh results/probe.json destination')
@@ -208,13 +291,48 @@ def transport_probe(rpc, plan, thread_id):
         if response.get('isError'):
             raise RuntimeError('direct filesystem transport probe returned an MCP error')
         calls.append({'tool': tool, 'response': response})
-    checks = verify_files(workspace, [{'path': 'results/probe.json', 'json_equals': marker}])
+    checks = verify_files(workspace, [{'path': relative, 'json_equals': marker}])
     original = json.loads(orders.read_text(encoding='utf-8-sig'))
     input_observed = original.get('batch_id') in json.dumps(calls[0]['response'])
     output_observed = 'native-codex-filesystem' in json.dumps(calls[2]['response'])
     if not input_observed or not output_observed or not all(check['passed'] for check in checks):
         raise RuntimeError('direct filesystem probe did not prove input/output contents')
     return {'passed': True, 'model_turns': 0, 'calls': calls, 'file_checks': checks}
+
+
+def transport_idle_probe(rpc, plan, thread_id, output, baseline_inventory):
+    """Two real direct-API filesystem cycles and one idle/wake, zero inference."""
+    phases = []
+    first = {}
+    with PhaseSampler(plan, first):
+        first['probe'] = transport_probe(rpc, plan, thread_id)
+        first['published_status'] = wait_profile(plan['warden_state'], plan['profile'], backend_active=True, timeout=10)
+    first['active_status'] = phase_backend_health(plan, first)
+    first_sample = profile_sample(first['active_status'], plan['profile'])
+    identity = proxy_identity(first_sample)
+    previous = backend_identity(first_sample)
+    phases.append(first)
+    ended = time.monotonic()
+    gap = wait_gap(rpc, plan, output, ended + plan['minimum_idle_seconds'], ended, identity)
+    previous_exit = process_metrics(*previous)
+    if previous_exit.get('alive') is not False:
+        raise RuntimeError('direct probe previous published backend did not verifiably exit')
+    second = {}
+    with PhaseSampler(plan, second):
+        second['probe'] = transport_probe(rpc, plan, thread_id, name='probe-wake.json')
+        second['published_status'] = wait_profile(plan['warden_state'], plan['profile'], backend_active=True,
+                                                 timeout=10, identity=identity)
+    second['active_status'] = phase_backend_health(plan, second)
+    second_sample = profile_sample(second['active_status'], plan['profile'])
+    second['inventory'] = inventory(rpc, thread_id, plan['server_name'])
+    checks = {'two_file_cycles': first['probe']['passed'] and second['probe']['passed'],
+        'same_proxy': proxy_identity(second_sample) == identity,
+        'previous_backend_exited': previous_exit.get('alive') is False,
+        'different_backend_identity': backend_identity(second_sample) != previous,
+        'unchanged_metadata': second['inventory']['metadata_sha256'] == baseline_inventory['metadata_sha256']}
+    phases.append(second)
+    return {'passed': all(checks.values()), 'model_turns': 0, 'checks': checks,
+            'phases': phases, 'gap': gap, 'previous_backend_after_idle': previous_exit}
 
 
 def wait_gap(rpc, plan, output, target, last_completed, identity):
@@ -301,7 +419,10 @@ def run(args, plan):
         if args.preflight:
             if args.probe_tools:
                 result['direct_transport_probe'] = transport_probe(rpc, plan, thread_id)
-            result['transport_preflight_passed'] = not rpc.unexpected_requests
+            if args.probe_idle_wake:
+                result['direct_idle_probe'] = transport_idle_probe(rpc, plan, thread_id, output, baseline_inventory)
+            result['transport_preflight_passed'] = not rpc.unexpected_requests \
+                and result.get('direct_idle_probe', {'passed': True})['passed']
         else:
             began = time.monotonic()
             identity = None
@@ -319,17 +440,20 @@ def run(args, plan):
                 if any(sha256_file(path) != value for path, value in frozen.items()):
                     raise RuntimeError('frozen source, backend or plan changed before inference')
                 event_index = len(rpc.events)
+                rpc.event_observer = lambda event: observe_mcp_result(event, plan, thread_id, phase)
                 now = time.monotonic()
                 if index == 0:
                     began = now  # Schedule all later stages from the actual first turn start.
                 phase['started_offset_seconds'] = now - began
                 write_json(output / 'progress.json', {'phase': 'turn', 'turn_id': turn['id'], 'index': index})
-                response = rpc.call('turn/start', {'threadId': thread_id, 'model': args.model, 'effort': 'low',
-                    'input': [{'type': 'text', 'text': turn['prompt']}]}, timeout=30)
-                turn_id = response['turn']['id']
-                phase['turn_id'] = turn_id
-                final = rpc.wait_turn(thread_id, turn_id, plan['turn_timeout_seconds'], event_index,
-                    max_mcp_calls=plan.get('max_mcp_calls_per_turn', 12))
+                with PhaseSampler(plan, phase):
+                    response = rpc.call('turn/start', {'threadId': thread_id, 'model': args.model, 'effort': 'low',
+                        'input': [{'type': 'text', 'text': turn['prompt']}]}, timeout=30)
+                    turn_id = response['turn']['id']
+                    phase['turn_id'] = turn_id
+                    final = rpc.wait_turn(thread_id, turn_id, plan['turn_timeout_seconds'], event_index,
+                        max_mcp_calls=plan.get('max_mcp_calls_per_turn', 12))
+                rpc.event_observer = None
                 completed = time.monotonic()
                 phase['completed_offset_seconds'] = completed - began
                 phase['turn_status'] = final.get('status')
@@ -337,21 +461,24 @@ def run(args, plan):
                 calls = [item for item in items if item.get('type') == 'mcpToolCall']
                 phase['mcp_calls'] = calls
                 phase['file_checks'] = verify_files(plan['workspace'], turn['verify'])
-                health = wait_profile(plan['warden_state'], plan['profile'], backend_active=True, timeout=10,
-                                      identity=identity)
+                checks = check_tools(calls, plan['server_name'], plan['allowed_tools'], turn['required_tools'],
+                                     turn['required_tool_groups'])
+                checks.update({'turn_completed': final.get('status') == 'completed',
+                    'file_effects_verified': all(c['passed'] for c in phase['file_checks']),
+                    'no_unrelated_actions': not any(i.get('type') in FORBIDDEN_ITEMS for i in items),
+                    'no_interactive_requests': not rpc.unexpected_requests})
+                phase['checks'] = checks
+                if not all(checks.values()):
+                    phase['passed'] = False
+                    raise RuntimeError('tool/file acceptance failed: ' + ', '.join(k for k, v in checks.items() if not v))
+                health = phase_backend_health(plan, phase)
                 sample = profile_sample(health, plan['profile'])
                 phase['active_status'] = health
                 if identity is None:
                     identity = proxy_identity(sample)
                 current_inventory = inventory(rpc, thread_id, plan['server_name'])
                 phase['inventory'] = current_inventory
-                checks = check_tools(calls, plan['server_name'], plan['allowed_tools'], turn['required_tools'],
-                                     turn['required_tool_groups'])
-                checks.update({'turn_completed': final.get('status') == 'completed',
-                    'file_effects_verified': all(c['passed'] for c in phase['file_checks']),
-                    'no_unrelated_actions': not any(i.get('type') in FORBIDDEN_ITEMS for i in items),
-                    'no_interactive_requests': not rpc.unexpected_requests,
-                    'same_proxy': proxy_identity(sample) == identity,
+                checks.update({'same_proxy': proxy_identity(sample) == identity,
                     'backend_woke_after_expiry': index == 0 or (backend_identity(sample) != previous_backend
                         and phase['gap']['idle_elapsed_seconds'] >= plan['minimum_idle_seconds']),
                     'tool_metadata_unchanged': current_inventory['metadata_sha256'] == baseline_inventory['metadata_sha256'],
@@ -403,12 +530,16 @@ def main():
     parser.add_argument('--model', default='gpt-6.1-sol')
     parser.add_argument('--probe-tools', action='store_true',
                         help='with --preflight, directly read/write/read a fresh results/probe.json without a model')
+    parser.add_argument('--probe-idle-wake', action='store_true',
+                        help='with --preflight, directly verify two file cycles and idle/wake without a model')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--execute', action='store_true')
     mode.add_argument('--preflight', action='store_true', help='start isolated transport, without any model turn')
     args = parser.parse_args()
-    if args.probe_tools and not args.preflight:
-        parser.error('--probe-tools requires --preflight')
+    if (args.probe_tools or args.probe_idle_wake) and not args.preflight:
+        parser.error('direct probes require --preflight')
+    if args.probe_tools and args.probe_idle_wake:
+        parser.error('select only one direct transport probe')
     try:
         plan = load_plan(args.plan)
         connector_config(plan)

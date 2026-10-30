@@ -89,6 +89,51 @@ class WorkloadChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             codex.isolated_config(original, {}, 'private', [])
 
+    def test_only_authorized_fixture_write_tools_are_preapproved(self):
+        tools = ['read_text_file', 'write_file', 'edit_file']
+        config = codex.isolated_config({}, {'command': 'owned'}, 'warden-work', tools)
+        selected = config['mcp_servers']['warden-work']
+        self.assertEqual(selected['default_tools_approval_mode'], 'auto')
+        self.assertEqual(selected['tools'], {'write_file': {'approval_mode': 'approve'},
+                                            'edit_file': {'approval_mode': 'approve'}})
+        other = codex.isolated_config({}, {'command': 'owned'}, 'other', tools)
+        self.assertNotIn('tools', other['mcp_servers']['other'])
+
+    def test_mcp_observer_captures_backend_before_final_reply_idle_expiry(self):
+        live = {'samples': [{'profile': 'filesystem', 'ownerPid': 1, 'ownerCreated': '10',
+                            'backendPid': 2, 'backendCreated': '20'}]}
+        event = {'method': 'item/completed', 'params': {'threadId': 'thread', 'item': {
+            'id': 'mcp1', 'type': 'mcpToolCall', 'tool': 'write_file', 'status': 'completed', 'result': {}}}}
+        phase = {}
+        with patch.object(codex, 'observe_backend_now', return_value=live):
+            codex.observe_mcp_result(event, {}, 'thread', phase)
+        with patch.object(codex, 'observe_backend_now', return_value=None):
+            self.assertEqual(codex.phase_backend_health({}, phase), live)
+        event['params']['item']['status'] = 'failed'
+        failed = {}
+        with patch.object(codex, 'observe_backend_now') as observer:
+            codex.observe_mcp_result(event, {}, 'thread', failed)
+        observer.assert_not_called()
+        self.assertEqual(failed, {})
+
+    def test_unknown_child_is_never_substituted_for_published_backend(self):
+        health = {'samples': [{'profile': 'filesystem', 'ownerPid': 1, 'ownerCreated': '10', 'backendPid': None}]}
+        with patch.object(codex, 'status_snapshot', return_value=health):
+            observed = codex.observe_backend_now({'warden_state': 'synthetic', 'profile': 'filesystem'})
+        self.assertIsNone(observed)
+
+    def test_phase_sampler_preserves_published_identity_when_backend_expires(self):
+        live = {'samples': [{'profile': 'filesystem', 'ownerPid': 1, 'ownerCreated': '10',
+                            'backendPid': 2, 'backendCreated': '20'}]}
+        phase = {}
+        with patch.object(codex, 'observe_backend_now', return_value=live):
+            with codex.PhaseSampler({}, phase):
+                deadline = time.monotonic() + 1
+                while 'sampled_active_observation' not in phase and time.monotonic() < deadline:
+                    time.sleep(.001)
+        with patch.object(codex, 'observe_backend_now', return_value=None):
+            self.assertEqual(codex.phase_backend_health({}, phase), live)
+
     def test_gap_measures_idle_after_previous_turn_completion(self):
         class FakeProcess:
             pid = 99

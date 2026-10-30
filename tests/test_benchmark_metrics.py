@@ -66,6 +66,8 @@ class BenchmarkAttributionTests(unittest.TestCase):
         value = reader.query(os.getpid())
         self.assertGreater(value['privateBytes'], 0)
         self.assertGreater(value['workingSetBytes'], 0)
+        self.assertIsInstance(value['pageFaultCount'], int)
+        self.assertGreaterEqual(value['pageFaultCount'], 0)
         result = module.collect(reader, [os.getpid()], {os.getpid(): value['created']})
         self.assertTrue(any(r['pid'] == os.getpid() and r['created'] == value['created'] for r in result['processes']))
 
