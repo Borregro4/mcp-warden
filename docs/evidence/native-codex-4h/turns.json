@@ -1,0 +1,312 @@
+{
+  "turns": [
+    {
+      "stage": "paid-orders",
+      "ordinal": 1,
+      "status": "passed",
+      "started_utc": "2026-10-30T15:12:08.033Z",
+      "completed_utc": "2026-10-30T15:12:26.064Z",
+      "start_offset_seconds": 0.0,
+      "turn_elapsed_seconds": 18.03100000001723,
+      "actual_mcp_calls": 3,
+      "calls": [
+        {
+          "call": 1,
+          "tool": "read_multiple_files",
+          "status": "completed",
+          "paths": [
+            "data/orders.json",
+            "data/shipping-policy.json"
+          ]
+        },
+        {
+          "call": 2,
+          "tool": "write_file",
+          "status": "completed",
+          "paths": [
+            "results/baseline.json"
+          ]
+        },
+        {
+          "call": 3,
+          "tool": "read_text_file",
+          "status": "completed",
+          "paths": [
+            "results/baseline.json"
+          ]
+        }
+      ],
+      "file_check_count": 3,
+      "recorded_checks_all_true": true,
+      "catalog_sha256": "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783"
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "ordinal": 2,
+      "status": "passed",
+      "started_utc": "2026-10-30T16:32:08.220Z",
+      "completed_utc": "2026-10-30T16:32:24.814Z",
+      "start_offset_seconds": 4800.187000000005,
+      "turn_elapsed_seconds": 16.594000000011874,
+      "actual_mcp_calls": 4,
+      "calls": [
+        {
+          "call": 1,
+          "tool": "read_text_file",
+          "status": "completed",
+          "paths": [
+            "data/shipping-policy.json"
+          ]
+        },
+        {
+          "call": 2,
+          "tool": "edit_file",
+          "status": "completed",
+          "paths": [
+            "data/shipping-policy.json"
+          ]
+        },
+        {
+          "call": 3,
+          "tool": "write_file",
+          "status": "completed",
+          "paths": [
+            "results/boundary-check.json"
+          ]
+        },
+        {
+          "call": 4,
+          "tool": "read_text_file",
+          "status": "completed",
+          "paths": [
+            "data/shipping-policy.json"
+          ]
+        }
+      ],
+      "file_check_count": 4,
+      "recorded_checks_all_true": true,
+      "catalog_sha256": "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783"
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "ordinal": 3,
+      "status": "passed",
+      "started_utc": "2026-10-30T17:52:08.236Z",
+      "completed_utc": "2026-10-30T17:52:25.002Z",
+      "start_offset_seconds": 9600.203000000009,
+      "turn_elapsed_seconds": 16.76600000000326,
+      "actual_mcp_calls": 4,
+      "calls": [
+        {
+          "call": 1,
+          "tool": "search_files",
+          "status": "completed",
+          "paths": [
+            "data"
+          ]
+        },
+        {
+          "call": 2,
+          "tool": "read_multiple_files",
+          "status": "completed",
+          "paths": [
+            "data/late-adjustments.json",
+            "results/baseline.json",
+            "data/orders.json",
+            "data/shipping-policy.json"
+          ]
+        },
+        {
+          "call": 3,
+          "tool": "write_file",
+          "status": "completed",
+          "paths": [
+            "results/adjusted.json"
+          ]
+        },
+        {
+          "call": 4,
+          "tool": "read_text_file",
+          "status": "completed",
+          "paths": [
+            "results/adjusted.json"
+          ]
+        }
+      ],
+      "file_check_count": 4,
+      "recorded_checks_all_true": true,
+      "catalog_sha256": "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783"
+    },
+    {
+      "stage": "final-audit",
+      "ordinal": 4,
+      "status": "passed",
+      "started_utc": "2026-10-30T19:12:08.236Z",
+      "completed_utc": "2026-10-30T19:12:16.923Z",
+      "start_offset_seconds": 14400.203000000009,
+      "turn_elapsed_seconds": 8.687000000005355,
+      "actual_mcp_calls": 3,
+      "calls": [
+        {
+          "call": 1,
+          "tool": "read_multiple_files",
+          "status": "completed",
+          "paths": [
+            "data/orders.json",
+            "data/shipping-policy.json",
+            "results/baseline.json",
+            "results/boundary-check.json",
+            "results/adjusted.json"
+          ]
+        },
+        {
+          "call": 2,
+          "tool": "write_file",
+          "status": "completed",
+          "paths": [
+            "results/final-summary.json"
+          ]
+        },
+        {
+          "call": 3,
+          "tool": "read_text_file",
+          "status": "completed",
+          "paths": [
+            "results/final-summary.json"
+          ]
+        }
+      ],
+      "file_check_count": 7,
+      "recorded_checks_all_true": true,
+      "catalog_sha256": "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783"
+    }
+  ],
+  "file_checks": [
+    {
+      "stage": "paid-orders",
+      "path": "results/baseline.json",
+      "verification": "json_equals",
+      "sha256": "e0d584061dbfd1c4d915a8aa3cd7824650b90586026fb4d68c5729ee7829b7d9",
+      "re_read_passed": true
+    },
+    {
+      "stage": "paid-orders",
+      "path": "data/orders.json",
+      "verification": "sha256",
+      "sha256": "765b1440c5fd34bb22eed5e808a6e75bff9d7e7bfcccaf1cd6cefbe8e703f2c8",
+      "re_read_passed": true
+    },
+    {
+      "stage": "paid-orders",
+      "path": "data/late-adjustments.json",
+      "verification": "sha256",
+      "sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "re_read_passed": true
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "path": "data/shipping-policy.json",
+      "verification": "json_equals",
+      "sha256": "128ab95286b9f88ae4b1db314ca8c1c5b4a2ec06026c6c4a01979703ad4ebef7",
+      "re_read_passed": true
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "path": "results/boundary-check.json",
+      "verification": "json_equals",
+      "sha256": "6abae86adc4ac6df66ccecc7075e761874eb8a98bb8474ece8ee6be1c38aa3d4",
+      "re_read_passed": true
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "path": "data/orders.json",
+      "verification": "sha256",
+      "sha256": "765b1440c5fd34bb22eed5e808a6e75bff9d7e7bfcccaf1cd6cefbe8e703f2c8",
+      "re_read_passed": true
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "path": "data/late-adjustments.json",
+      "verification": "sha256",
+      "sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "re_read_passed": true
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "path": "results/adjusted.json",
+      "verification": "json_equals",
+      "sha256": "c489435c2aadf0d4b73a461757626fde5c836bcccdc4c5e32ba8a66e8444e0b7",
+      "re_read_passed": true
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "path": "results/baseline.json",
+      "verification": "json_equals",
+      "sha256": "e0d584061dbfd1c4d915a8aa3cd7824650b90586026fb4d68c5729ee7829b7d9",
+      "re_read_passed": true
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "path": "data/orders.json",
+      "verification": "sha256",
+      "sha256": "765b1440c5fd34bb22eed5e808a6e75bff9d7e7bfcccaf1cd6cefbe8e703f2c8",
+      "re_read_passed": true
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "path": "data/late-adjustments.json",
+      "verification": "sha256",
+      "sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "results/final-summary.json",
+      "verification": "json_equals",
+      "sha256": "1d570b10a16a5f9b22893c0eee0714fcbd481a1983c73359df8ce3d80cc0961f",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "results/adjusted.json",
+      "verification": "json_equals",
+      "sha256": "c489435c2aadf0d4b73a461757626fde5c836bcccdc4c5e32ba8a66e8444e0b7",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "results/boundary-check.json",
+      "verification": "json_equals",
+      "sha256": "6abae86adc4ac6df66ccecc7075e761874eb8a98bb8474ece8ee6be1c38aa3d4",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "results/baseline.json",
+      "verification": "json_equals",
+      "sha256": "e0d584061dbfd1c4d915a8aa3cd7824650b90586026fb4d68c5729ee7829b7d9",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "data/shipping-policy.json",
+      "verification": "json_equals",
+      "sha256": "128ab95286b9f88ae4b1db314ca8c1c5b4a2ec06026c6c4a01979703ad4ebef7",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "data/orders.json",
+      "verification": "sha256",
+      "sha256": "765b1440c5fd34bb22eed5e808a6e75bff9d7e7bfcccaf1cd6cefbe8e703f2c8",
+      "re_read_passed": true
+    },
+    {
+      "stage": "final-audit",
+      "path": "data/late-adjustments.json",
+      "verification": "sha256",
+      "sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "re_read_passed": true
+    }
+  ]
+}

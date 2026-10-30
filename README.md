@@ -11,7 +11,7 @@ stateless profile can start a fresh backend for the next call. This is a
 
 **[Try the first-run guide →](docs/first-run.md)** ·
 [Guía en español](docs/first-run.es.md) ·
-[Download v0.2.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.2.0-alpha.1)
+[Download v0.3.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1)
 
 ## Start with one test server
 
@@ -36,16 +36,21 @@ not a claim about savings for your own servers.
 
 ## What has been checked
 
-- **Codex CLI 0.166.0-alpha.5.1:** three real MCP calls, exact returned values, common backend PID, and cleanup. Native Codex idle/wake was not tested.
-- **Claude Code 2.1.309 through official Agent SDK 0.2.175:** two real turns, clean idle stop, and a fresh backend over the same stdio connection.
-- **Synthetic SDK endurance:** one completed hour with a 900-second idle policy, callbacks, wake, owner replacement, and final cleanup.
+- **Codex CLI 0.166.0-alpha.5.1:** four turns across four hours, 14 real filesystem MCP calls, verified file effects, three idle/wake cycles, and final cleanup.
+- **Claude Code 2.1.309 through official Agent SDK 0.2.175:** four turns across four hours, 21 real filesystem MCP calls, verified file effects, three idle/wake cycles, and final cleanup.
+- Both kept one native session and proxy while a 900-second idle policy stopped and replaced the backend. These long runs explicitly enabled optional idle page release.
 
-See [VALIDATION.md](VALIDATION.md) for versions, methods, failed attempts,
-and the difference between native checks, SDK workloads, and GUI testing.
-The [four-way comparison](docs/benchmark-lightweight-2026-10-30.md) records
-memory and latency tradeoffs. The [original gateway's adverse result](docs/benchmark-results-2026-10-30.md)
-is also preserved; mcp-snooze retained lower latency and a smaller working set
-in the lightweight comparison.
+See [VALIDATION.md](VALIDATION.md) for the results, source hashes, failed
+smoke diagnostics and test limits. The data was synthetic; the clients, MCP
+operations and file changes were real. The demo above remains a recorded v0.2
+SDK example.
+
+The [six-way comparison](docs/v3-latency-working-set-results-2026-10-31.md)
+measured lower startup, wake latency and idle memory against v0.2. mcp-snooze
+still had lower latency. Optional [idle page release](docs/idle-page-release.md)
+reduced working set further with extra page faults; it stays off by default.
+[Earlier adverse gateway results](docs/benchmark-results-2026-10-30.md) and
+[the v0.2 validation](docs/validation-v0.2.0-alpha.1.md) remain available.
 
 ## Know the limits
 

@@ -29,8 +29,9 @@ example. Keep idle expiry disabled if that state must survive.
 Repo and demo: [Borregro4/mcp-warden](https://github.com/Borregro4/mcp-warden)
 · [First-run guide](https://github.com/Borregro4/mcp-warden/blob/main/docs/first-run.md)
 
-This is v0.2.0-alpha.1, with bounded native-client checks and a separate
-one-hour synthetic endurance test. It does not establish multi-day reliability
+This is v0.3.0-alpha.1. Codex and Claude each completed a four-hour native
+filesystem session with four turns and verified files, both with optional
+idle page release. The older synthetic hour belongs to v0.2. This does not establish multi-day reliability
 or token/quota savings. [First-run feedback](https://github.com/Borregro4/mcp-warden/issues/new?template=first-run.yml)
 has three required fields: client, outcome and the last completed or blocked
 step. No email or full configuration. Where does the guide lose you?
@@ -50,8 +51,10 @@ sintético para probar antes de conectar uno propio.
 
 Repositorio y guía: [Borregro4/mcp-warden](https://github.com/Borregro4/mcp-warden)
 
-Es v0.2.0-alpha.1: tiene pruebas nativas acotadas y una prueba sintética
-separada de una hora. Eso todavía no demuestra estabilidad de varios días
+Es v0.3.0-alpha.1: Codex y Claude completaron una sesión nativa de cuatro
+horas cada uno, con cuatro turnos y archivos verificados; ambos activaron
+la liberación opcional de páginas. La hora sintética anterior corresponde
+a v0.2. Eso todavía no demuestra estabilidad de varios días
 ni ahorro de tokens o cuota. El feedback puede ser un issue público breve,
 sin correo, configuración completa ni conversaciones. Las actualizaciones
 al día siguiente y al día 7 son opcionales.

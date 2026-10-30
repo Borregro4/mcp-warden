@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "public_fields_policy": "Explicit fixed call and fixture fields only; raw prompts, arguments, result content, account data, absolute paths and original session/tool IDs omitted. Fixture batch/order IDs are SHA-256 labels.",
+  "call_timing_scope": "SDK stream observation interval, including client scheduling and timestamp quantization; not isolated backend execution latency.",
+  "calls": [
+    {
+      "call_label": "call-01-1d3862d5d7f8",
+      "turn": "paid-orders",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 4.453000000008615,
+      "reply_observed_seconds": 4.48399999999674,
+      "observed_interval_seconds": 0.030999999988125637,
+      "successful_reply": true,
+      "input_canonical_sha256": "e0fedf845d8e2f87f3676e53510e21eba257e824e98063b2b0a1b44417cd2313",
+      "reply_content_canonical_sha256": "8deceee81f5eaab018a52353cf9aaa267d43ecd6c46a6ac948103279fa2027b5"
+    },
+    {
+      "call_label": "call-02-236eb57473fc",
+      "turn": "paid-orders",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 5.26500000001397,
+      "reply_observed_seconds": 5.26500000001397,
+      "observed_interval_seconds": 0.0,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4ac8d3722cc406d3d60aaf2c3028848034e888fca2b41d821f9f306e185d1e3",
+      "reply_content_canonical_sha256": "0ed151d7f9f861b4ef6281a889b3ec3e14a4302a3f06f8eed0a40739105d1f00"
+    },
+    {
+      "call_label": "call-03-269d2bed24c2",
+      "turn": "paid-orders",
+      "tool": "mcp__warden-work__write_file",
+      "call_observed_seconds": 7.842999999993481,
+      "reply_observed_seconds": 7.85899999999674,
+      "observed_interval_seconds": 0.01600000000325963,
+      "successful_reply": true,
+      "input_canonical_sha256": "bdfb4969c7d134f4a1d01bb8121d5347bedf1296d5c73e826ecbdf3d78fa5bd8",
+      "reply_content_canonical_sha256": "cdca425614990a6c737f4f533efe0bdcd4b4a96e4df4496e0eb602fe16ecea97"
+    },
+    {
+      "call_label": "call-04-2abd756300b4",
+      "turn": "paid-orders",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 11.078000000008615,
+      "reply_observed_seconds": 11.09299999999348,
+      "observed_interval_seconds": 0.014999999984866008,
+      "successful_reply": true,
+      "input_canonical_sha256": "2b6c765f3054fd25b11e8b341e081fa7bb5ed2b26fe64c97b2e942d4ccb429e6",
+      "reply_content_canonical_sha256": "167933dbd9fb4aa5f9c4fceef4d395d8f68ee488f757fee37bb898939ab2ae14"
+    },
+    {
+      "call_label": "call-05-e92347947532",
+      "turn": "boundary-policy-fix",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 4803.453000000009,
+      "reply_observed_seconds": 4803.703000000009,
+      "observed_interval_seconds": 0.25,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4ac8d3722cc406d3d60aaf2c3028848034e888fca2b41d821f9f306e185d1e3",
+      "reply_content_canonical_sha256": "0ed151d7f9f861b4ef6281a889b3ec3e14a4302a3f06f8eed0a40739105d1f00"
+    },
+    {
+      "call_label": "call-06-ee17d4e93d42",
+      "turn": "boundary-policy-fix",
+      "tool": "mcp__warden-work__edit_file",
+      "call_observed_seconds": 4808.780999999988,
+      "reply_observed_seconds": 4808.796000000002,
+      "observed_interval_seconds": 0.015000000013969839,
+      "successful_reply": true,
+      "input_canonical_sha256": "1cb9939f287c46b67c759e610a9b6881e9d8c97e29ec3401427020602a27f078",
+      "reply_content_canonical_sha256": "54935c87f13bc5ab066ba381a0cd4063e06c066843da5b29af200e283bc0a0d3"
+    },
+    {
+      "call_label": "call-07-9e2207eeb8b1",
+      "turn": "boundary-policy-fix",
+      "tool": "mcp__warden-work__write_file",
+      "call_observed_seconds": 4809.421000000002,
+      "reply_observed_seconds": 4809.437000000005,
+      "observed_interval_seconds": 0.01600000000325963,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4d9e3901f86c60e02cde73555c716e45369277bda67e99f3718ee34ef7ba5d8",
+      "reply_content_canonical_sha256": "921a036497038c1c2986ae996ea97f880fae07e799b29198c3e3adaf7ecbf2e3"
+    },
+    {
+      "call_label": "call-08-effbc859a938",
+      "turn": "boundary-policy-fix",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 4810.796000000002,
+      "reply_observed_seconds": 4810.796000000002,
+      "observed_interval_seconds": 0.0,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4ac8d3722cc406d3d60aaf2c3028848034e888fca2b41d821f9f306e185d1e3",
+      "reply_content_canonical_sha256": "0617433c557a1da4d6c44b5547d15e6bc818fcf9a560397277ebc811e37056fb"
+    },
+    {
+      "call_label": "call-09-71887c49c3e4",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__search_files",
+      "call_observed_seconds": 9612.203000000009,
+      "reply_observed_seconds": 9612.5,
+      "observed_interval_seconds": 0.29699999999138527,
+      "successful_reply": true,
+      "input_canonical_sha256": "7bbc43f268640c1fa60e4abff3edfeedd2f9ed6f701ffc400fda8ea082fe36d9",
+      "reply_content_canonical_sha256": "db23b4f3b1b94a9850c934b538b0b9e382f325064bee12d4b1ef752d61b1b8ed"
+    },
+    {
+      "call_label": "call-10-4810878d2b39",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 9612.546000000002,
+      "reply_observed_seconds": 9612.578000000009,
+      "observed_interval_seconds": 0.03200000000651926,
+      "successful_reply": true,
+      "input_canonical_sha256": "2b6c765f3054fd25b11e8b341e081fa7bb5ed2b26fe64c97b2e942d4ccb429e6",
+      "reply_content_canonical_sha256": "167933dbd9fb4aa5f9c4fceef4d395d8f68ee488f757fee37bb898939ab2ae14"
+    },
+    {
+      "call_label": "call-11-f83850df892e",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 9612.953000000009,
+      "reply_observed_seconds": 9612.967999999993,
+      "observed_interval_seconds": 0.014999999984866008,
+      "successful_reply": true,
+      "input_canonical_sha256": "e0fedf845d8e2f87f3676e53510e21eba257e824e98063b2b0a1b44417cd2313",
+      "reply_content_canonical_sha256": "8deceee81f5eaab018a52353cf9aaa267d43ecd6c46a6ac948103279fa2027b5"
+    },
+    {
+      "call_label": "call-12-4920ffa1aa77",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 9613.530999999988,
+      "reply_observed_seconds": 9613.546000000002,
+      "observed_interval_seconds": 0.015000000013969839,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4ac8d3722cc406d3d60aaf2c3028848034e888fca2b41d821f9f306e185d1e3",
+      "reply_content_canonical_sha256": "0617433c557a1da4d6c44b5547d15e6bc818fcf9a560397277ebc811e37056fb"
+    },
+    {
+      "call_label": "call-13-cd962319d6dc",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 9617.233999999997,
+      "reply_observed_seconds": 9617.25,
+      "observed_interval_seconds": 0.01600000000325963,
+      "successful_reply": true,
+      "input_canonical_sha256": "4414cd487fbed97e182ae85a66409befb9c8793f7aee4ee9dba13aae5288edaa",
+      "reply_content_canonical_sha256": "7438ff6e55c576b35809d7df4ca4e02a0f5408d9f379933e9daac4c6bad2d16b"
+    },
+    {
+      "call_label": "call-14-db9825816b09",
+      "turn": "reconcile-adjustments",
+      "tool": "mcp__warden-work__write_file",
+      "call_observed_seconds": 9622.296000000002,
+      "reply_observed_seconds": 9622.312000000005,
+      "observed_interval_seconds": 0.01600000000325963,
+      "successful_reply": true,
+      "input_canonical_sha256": "c573794a7a74facfb793d32b326826ff9fd0f66bf723fe5ee3424275fa88abc0",
+      "reply_content_canonical_sha256": "90ee4af5b20e21d0771e619bce7b7e286c9cc1bf9da8185723eeffefb3039445"
+    },
+    {
+      "call_label": "call-15-8ce352e10e3a",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14405.015000000014,
+      "reply_observed_seconds": 14405.280999999988,
+      "observed_interval_seconds": 0.2659999999741558,
+      "successful_reply": true,
+      "input_canonical_sha256": "e0fedf845d8e2f87f3676e53510e21eba257e824e98063b2b0a1b44417cd2313",
+      "reply_content_canonical_sha256": "8deceee81f5eaab018a52353cf9aaa267d43ecd6c46a6ac948103279fa2027b5"
+    },
+    {
+      "call_label": "call-16-95eecf42d425",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14405.687000000005,
+      "reply_observed_seconds": 14405.687000000005,
+      "observed_interval_seconds": 0.0,
+      "successful_reply": true,
+      "input_canonical_sha256": "e4ac8d3722cc406d3d60aaf2c3028848034e888fca2b41d821f9f306e185d1e3",
+      "reply_content_canonical_sha256": "0617433c557a1da4d6c44b5547d15e6bc818fcf9a560397277ebc811e37056fb"
+    },
+    {
+      "call_label": "call-17-46675767a8d6",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14406.030999999988,
+      "reply_observed_seconds": 14406.046000000002,
+      "observed_interval_seconds": 0.015000000013969839,
+      "successful_reply": true,
+      "input_canonical_sha256": "2b6c765f3054fd25b11e8b341e081fa7bb5ed2b26fe64c97b2e942d4ccb429e6",
+      "reply_content_canonical_sha256": "167933dbd9fb4aa5f9c4fceef4d395d8f68ee488f757fee37bb898939ab2ae14"
+    },
+    {
+      "call_label": "call-18-0120d783b3a2",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14406.390000000014,
+      "reply_observed_seconds": 14406.390000000014,
+      "observed_interval_seconds": 0.0,
+      "successful_reply": true,
+      "input_canonical_sha256": "fa1721682d3ccfe27c5a1051718310587827a95f198c884f0dbfd58795239881",
+      "reply_content_canonical_sha256": "a607a5c03dfc35f47876c709850d185323d577b85c16d3f00ddd7820f2c0f23f"
+    },
+    {
+      "call_label": "call-19-0ac9604d21cd",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14406.967999999993,
+      "reply_observed_seconds": 14406.967999999993,
+      "observed_interval_seconds": 0.0,
+      "successful_reply": true,
+      "input_canonical_sha256": "bd379f9281e700c9524b5265ff1b82726b71b01996f3d22cb323af299776ec46",
+      "reply_content_canonical_sha256": "b239e8dc48485114cb8f7d0a35970f8d904c18cd12c6822c33218dc34239820c"
+    },
+    {
+      "call_label": "call-20-baaf6999e811",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__write_file",
+      "call_observed_seconds": 14413.108999999997,
+      "reply_observed_seconds": 14413.125,
+      "observed_interval_seconds": 0.01600000000325963,
+      "successful_reply": true,
+      "input_canonical_sha256": "31448c22e31811bc5cdc00faa3f1bb52101a9bc14893ebf51e0088e3e24a6d8c",
+      "reply_content_canonical_sha256": "85e69357eb682d57e15730ae3e67d3607ccb48cac6549350c14674cedb8e9390"
+    },
+    {
+      "call_label": "call-21-d85205d0aa0f",
+      "turn": "final-audit",
+      "tool": "mcp__warden-work__read_text_file",
+      "call_observed_seconds": 14414.625,
+      "reply_observed_seconds": 14414.640000000014,
+      "observed_interval_seconds": 0.015000000013969839,
+      "successful_reply": true,
+      "input_canonical_sha256": "6d910ad8ccf68643154926a2102cf3b6687cb49bdcd55f9b28608be0d23ef86f",
+      "reply_content_canonical_sha256": "e808e36379f31c4eee75c8bec3f5262c8a1190a295f8a270cb07e29a8036e311"
+    }
+  ],
+  "file_checks": [
+    {
+      "turn": "paid-orders",
+      "file": "results/baseline.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "ae7db2e1850977179f94f48b4ee7b0e10489be88b60e4be27a9e3b6ffe00dbd7",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "actual_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "expected_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      },
+      "actual_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      }
+    },
+    {
+      "turn": "paid-orders",
+      "file": "data/orders.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e"
+    },
+    {
+      "turn": "paid-orders",
+      "file": "data/late-adjustments.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02"
+    },
+    {
+      "turn": "boundary-policy-fix",
+      "file": "data/shipping-policy.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "128ab95286b9f88ae4b1db314ca8c1c5b4a2ec06026c6c4a01979703ad4ebef7",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "66236638a842a65394b1708e1fad480db45d7a6ad0995250e6c8a045e626b3f2",
+      "actual_canonical_sha256": "66236638a842a65394b1708e1fad480db45d7a6ad0995250e6c8a045e626b3f2",
+      "expected_public": {
+        "free_shipping_threshold_cents": 4000,
+        "threshold_comparison": "ge",
+        "shipping_fee_cents": 500
+      },
+      "actual_public": {
+        "free_shipping_threshold_cents": 4000,
+        "threshold_comparison": "ge",
+        "shipping_fee_cents": 500
+      }
+    },
+    {
+      "turn": "boundary-policy-fix",
+      "file": "results/boundary-check.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "e8a68b5a6167be2d25cb7d3aa82b3d62a33fe1b4233f9dc59ca5e0f7a775088d",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "a1b075373d2f9ebf16448af86dd9ccab6047b791b88033bb3f4d4ca1b61ce83f",
+      "actual_canonical_sha256": "a1b075373d2f9ebf16448af86dd9ccab6047b791b88033bb3f4d4ca1b61ce83f",
+      "expected_public": {
+        "below_threshold_shipping_cents": 500,
+        "at_threshold_shipping_cents": 0,
+        "above_threshold_shipping_cents": 0
+      },
+      "actual_public": {
+        "below_threshold_shipping_cents": 500,
+        "at_threshold_shipping_cents": 0,
+        "above_threshold_shipping_cents": 0
+      }
+    },
+    {
+      "turn": "boundary-policy-fix",
+      "file": "data/orders.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e"
+    },
+    {
+      "turn": "boundary-policy-fix",
+      "file": "data/late-adjustments.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02"
+    },
+    {
+      "turn": "reconcile-adjustments",
+      "file": "results/adjusted.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "6bc3cc92b3508ae405713f0a8a20048c9a00a7347001400daf14d57856ee2ea0",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "601b9655aa2ceb3e7c936b508c86da11bb2f4377e74888e63f7f8d63e9743556",
+      "actual_canonical_sha256": "601b9655aa2ceb3e7c936b508c86da11bb2f4377e74888e63f7f8d63e9743556",
+      "expected_public": {
+        "adjustment_cents": -150,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6",
+        "paid_order_ids_sha256": [
+          "16a36e86f6fed5d465ff332511a0ce1a863b55d364b25a7cdaa25db19abf9648",
+          "1398b376fdcce25c5a5399367e76891e85121c010ec919cc243b1a519d95bbc6",
+          "4e808094851fc2eac7a386fc7d64677b34bda5e41d366ec4943233f9e6f2cd63"
+        ]
+      },
+      "actual_public": {
+        "adjustment_cents": -150,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6",
+        "paid_order_ids_sha256": [
+          "16a36e86f6fed5d465ff332511a0ce1a863b55d364b25a7cdaa25db19abf9648",
+          "1398b376fdcce25c5a5399367e76891e85121c010ec919cc243b1a519d95bbc6",
+          "4e808094851fc2eac7a386fc7d64677b34bda5e41d366ec4943233f9e6f2cd63"
+        ]
+      }
+    },
+    {
+      "turn": "reconcile-adjustments",
+      "file": "results/baseline.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "ae7db2e1850977179f94f48b4ee7b0e10489be88b60e4be27a9e3b6ffe00dbd7",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "actual_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "expected_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      },
+      "actual_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      }
+    },
+    {
+      "turn": "reconcile-adjustments",
+      "file": "data/orders.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e"
+    },
+    {
+      "turn": "reconcile-adjustments",
+      "file": "data/late-adjustments.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02"
+    },
+    {
+      "turn": "final-audit",
+      "file": "results/final-summary.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "da991b10dc03b71d9b608d2a2ba76d14183c42d665f1e71c53902d8990e24416",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "cd9ad055f1782eb893f168d1ba4ac5f935e6ef7c1ef0e787a00bee137f72d530",
+      "actual_canonical_sha256": "cd9ad055f1782eb893f168d1ba4ac5f935e6ef7c1ef0e787a00bee137f72d530",
+      "expected_public": {
+        "paid_order_count": 3,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "free_shipping_boundary": "inclusive",
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      },
+      "actual_public": {
+        "paid_order_count": 3,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "free_shipping_boundary": "inclusive",
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      }
+    },
+    {
+      "turn": "final-audit",
+      "file": "results/adjusted.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "6bc3cc92b3508ae405713f0a8a20048c9a00a7347001400daf14d57856ee2ea0",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "601b9655aa2ceb3e7c936b508c86da11bb2f4377e74888e63f7f8d63e9743556",
+      "actual_canonical_sha256": "601b9655aa2ceb3e7c936b508c86da11bb2f4377e74888e63f7f8d63e9743556",
+      "expected_public": {
+        "adjustment_cents": -150,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6",
+        "paid_order_ids_sha256": [
+          "16a36e86f6fed5d465ff332511a0ce1a863b55d364b25a7cdaa25db19abf9648",
+          "1398b376fdcce25c5a5399367e76891e85121c010ec919cc243b1a519d95bbc6",
+          "4e808094851fc2eac7a386fc7d64677b34bda5e41d366ec4943233f9e6f2cd63"
+        ]
+      },
+      "actual_public": {
+        "adjustment_cents": -150,
+        "adjusted_subtotal_cents": 3800,
+        "shipping_cents": 500,
+        "total_cents": 4300,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6",
+        "paid_order_ids_sha256": [
+          "16a36e86f6fed5d465ff332511a0ce1a863b55d364b25a7cdaa25db19abf9648",
+          "1398b376fdcce25c5a5399367e76891e85121c010ec919cc243b1a519d95bbc6",
+          "4e808094851fc2eac7a386fc7d64677b34bda5e41d366ec4943233f9e6f2cd63"
+        ]
+      }
+    },
+    {
+      "turn": "final-audit",
+      "file": "results/boundary-check.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "e8a68b5a6167be2d25cb7d3aa82b3d62a33fe1b4233f9dc59ca5e0f7a775088d",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "a1b075373d2f9ebf16448af86dd9ccab6047b791b88033bb3f4d4ca1b61ce83f",
+      "actual_canonical_sha256": "a1b075373d2f9ebf16448af86dd9ccab6047b791b88033bb3f4d4ca1b61ce83f",
+      "expected_public": {
+        "below_threshold_shipping_cents": 500,
+        "at_threshold_shipping_cents": 0,
+        "above_threshold_shipping_cents": 0
+      },
+      "actual_public": {
+        "below_threshold_shipping_cents": 500,
+        "at_threshold_shipping_cents": 0,
+        "above_threshold_shipping_cents": 0
+      }
+    },
+    {
+      "turn": "final-audit",
+      "file": "results/baseline.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "ae7db2e1850977179f94f48b4ee7b0e10489be88b60e4be27a9e3b6ffe00dbd7",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "actual_canonical_sha256": "8ef84c980d67f172ed2d93671d157e5b662cc9c3ea410f29379515be6bb8a09c",
+      "expected_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      },
+      "actual_public": {
+        "paid_order_count": 3,
+        "paid_units": 6,
+        "subtotal_cents": 3950,
+        "shipping_cents": 500,
+        "total_cents": 4450,
+        "batch_id_sha256": "e3b519ec02a6d02e1efaf4e4df32c318b74307de8bbd6e41723f3bf3adf204f6"
+      }
+    },
+    {
+      "turn": "final-audit",
+      "file": "data/shipping-policy.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "128ab95286b9f88ae4b1db314ca8c1c5b4a2ec06026c6c4a01979703ad4ebef7",
+      "check_kind": "json_equals",
+      "expected_canonical_sha256": "66236638a842a65394b1708e1fad480db45d7a6ad0995250e6c8a045e626b3f2",
+      "actual_canonical_sha256": "66236638a842a65394b1708e1fad480db45d7a6ad0995250e6c8a045e626b3f2",
+      "expected_public": {
+        "free_shipping_threshold_cents": 4000,
+        "threshold_comparison": "ge",
+        "shipping_fee_cents": 500
+      },
+      "actual_public": {
+        "free_shipping_threshold_cents": 4000,
+        "threshold_comparison": "ge",
+        "shipping_fee_cents": 500
+      }
+    },
+    {
+      "turn": "final-audit",
+      "file": "data/orders.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e"
+    },
+    {
+      "turn": "final-audit",
+      "file": "data/late-adjustments.json",
+      "passed_now": true,
+      "passed_in_run": true,
+      "actual_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "check_kind": "sha256",
+      "expected_bytes_sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02"
+    }
+  ],
+  "independently_recomputed_business_values": {
+    "paid_order_count": 3,
+    "paid_units": 6,
+    "baseline_subtotal_cents": 3950,
+    "baseline_total_cents": 4450,
+    "adjustment_cents": -150,
+    "adjusted_subtotal_cents": 3800,
+    "adjusted_total_cents": 4300,
+    "inclusive_shipping_policy": true,
+    "at_threshold_shipping_cents": 0
+  },
+  "unique_files_reverified": [
+    "data/late-adjustments.json",
+    "data/orders.json",
+    "data/shipping-policy.json",
+    "results/adjusted.json",
+    "results/baseline.json",
+    "results/boundary-check.json",
+    "results/final-summary.json"
+  ],
+  "protected_seed_files": [
+    {
+      "file": "data/orders.json",
+      "sha256": "fcfc7bfe4d215e00b5495952b63ebc895ca35d6c13a0b86ab4034aa89aa52e4e",
+      "unchanged": true
+    },
+    {
+      "file": "data/late-adjustments.json",
+      "sha256": "7bb3e4df3a757dbd85523bc1596de8c905235c434deafb5cba09e5aa0d732b02",
+      "unchanged": true
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "changed_condition_diagnostics": [
+    {
+      "label": "diagnostic_1",
+      "passed": false,
+      "model_backed_turns_requested": 1,
+      "mcp_attempts": 2,
+      "successful_mcp_calls": 1,
+      "cleanup_passed": true,
+      "classification": "harness_failure",
+      "explanation": "write_file required approval under auto; no output file was produced; the final live-backend assertion masked that approval error",
+      "private_result_sha256": "77b22532b278fb06d710ef6c52b61a66183bfa2d194396f065dd34ab64aa6699"
+    },
+    {
+      "label": "diagnostic_2",
+      "passed": false,
+      "model_backed_turns_requested": 1,
+      "mcp_attempts": 3,
+      "successful_mcp_calls": 3,
+      "cleanup_passed": true,
+      "classification": "harness_failure",
+      "explanation": "the first file task passed; the harness substituted an unidentified direct child for the backend and failed the idle liveness check",
+      "private_result_sha256": "008e1dc584eeb23a492c7a79c1f599652432d9b7b221e16bd0af26fc610e78ae"
+    },
+    {
+      "label": "final_smoke",
+      "passed": true,
+      "model_backed_turns_requested": 2,
+      "mcp_attempts": 7,
+      "successful_mcp_calls": 7,
+      "cleanup_passed": true,
+      "classification": "passed",
+      "explanation": "scoped write/edit approval and published-backend sampling; two turns and real idle/wake passed",
+      "private_result_sha256": "4c2d6b3095475ef41590c228dd10fb82fa6527875db6143902de2c0a74860223"
+    }
+  ],
+  "failed_diagnostic_runs": 2,
+  "failed_diagnostic_model_turns": 2,
+  "final_smoke_model_turns": 2,
+  "note": "diagnostics are preserved and excluded from passes; this is not a measured identical-trial failure rate"
+}

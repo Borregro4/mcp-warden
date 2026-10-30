@@ -12,7 +12,7 @@ acotadas en Codex CLI y Claude Code; revisa los
 
 **[Sigue la guía de primera ejecución →](docs/first-run.es.md)** ·
 [English guide](docs/first-run.md) ·
-[Descarga v0.2.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.2.0-alpha.1)
+[Descarga v0.3.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1)
 
 ## Empieza con un servidor de prueba
 
@@ -37,17 +37,21 @@ ahorros con tus propios servidores.
 
 ## Qué se comprobó
 
-- **Codex CLI 0.166.0-alpha.5.1:** tres llamadas MCP reales, valores exactos, un mismo PID del servidor y limpieza. No se probó el cierre y reinicio por inactividad en Codex nativo.
-- **Claude Code 2.1.309 mediante Agent SDK oficial 0.2.175:** dos turnos reales, cierre limpio por inactividad y un servidor nuevo en la misma conexión stdio.
-- **Prueba sintética de resistencia con SDK:** una hora completada con un plazo de inactividad de 900 segundos, callbacks, reactivación, reemplazo del propietario y limpieza final.
+- **Codex CLI 0.166.0-alpha.5.1:** cuatro turnos durante cuatro horas, 14 llamadas MCP reales al sistema de archivos, efectos verificados, tres ciclos de inactividad y reactivación, y limpieza final.
+- **Claude Code 2.1.309 mediante Agent SDK oficial 0.2.175:** cuatro turnos durante cuatro horas, 21 llamadas MCP reales al sistema de archivos, efectos verificados, tres ciclos de inactividad y reactivación, y limpieza final.
+- Ambos conservaron una sesión nativa y un proxy mientras el plazo de 900 segundos detenía y reemplazaba el servidor. Estas pruebas largas activaron la liberación opcional de páginas inactivas.
 
-[VALIDATION.md](VALIDATION.md) registra versiones, métodos, intentos fallidos
-y la diferencia entre pruebas nativas, cargas con SDK y pruebas de interfaz.
-La [comparación de cuatro variantes](docs/benchmark-lightweight-2026-10-30.md)
-incluye las diferencias de memoria y latencia. También se conserva el
-[resultado desfavorable del gateway original](docs/benchmark-results-2026-10-30.md);
-mcp-snooze mantuvo menor latencia y menor memoria de trabajo en la comparación
-del modo ligero.
+[VALIDATION.md](VALIDATION.md) registra resultados, huellas de las fuentes,
+diagnósticos de pruebas iniciales fallidas y límites. Los datos eran sintéticos;
+los clientes, operaciones MCP y cambios de archivos fueron reales. La demo de
+arriba conserva su ejecución histórica con SDK y v0.2.
+
+La [comparación de seis variantes](docs/v3-latency-working-set-results-2026-10-31.md)
+midió menor latencia de inicio y reactivación, y menor memoria inactiva frente
+a v0.2. mcp-snooze conservó menor latencia. La [liberación opcional de páginas](docs/idle-page-release.md)
+redujo más el conjunto de trabajo a cambio de más fallos de página; sigue
+desactivada por defecto. Se conservan el [resultado desfavorable del gateway](docs/benchmark-results-2026-10-30.md)
+y la [validación de v0.2](docs/validation-v0.2.0-alpha.1.md).
 
 ## Límites que debes conocer
 

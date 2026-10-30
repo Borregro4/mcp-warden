@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "method": "explicit field allowlist; raw payloads are never copied",
+  "included": [
+    "public stage/tool names",
+    "workspace-relative artifact paths",
+    "SHA-256 hashes",
+    "UTC timing and durations",
+    "PID and FILETIME identities",
+    "numeric CPU and working-set observations",
+    "boolean audit checks"
+  ],
+  "excluded": [
+    "raw account/config/log payloads",
+    "absolute local paths and usernames",
+    "raw thread/turn/item IDs",
+    "synthetic batch identifier",
+    "credentials, tokens and tool-result content"
+  ],
+  "checks": {
+    "exact_private_identifiers_absent": true,
+    "absolute_paths_absent": true,
+    "local_username_absent": true,
+    "credential_pattern_scan_passed": true,
+    "raw_payloads_not_copied": true,
+    "markdown_report_scanned": true,
+    "raw_item_identifiers_absent": true
+  },
+  "published_json_sha256": {
+    "summary.json": "7dff399ba9794de9c181c675774b9a3f197aa1adba4782dfc927d5073c7fa318",
+    "turns.json": "d648c5ea9464a7426b32b6e3ee932ca3da778ed9537c5e4eeb6b0e7190087591",
+    "lifecycle.json": "bb5fa24d3df406c1915a0e725a4e475b4339ec326a9fcdf9375e0e93028aa1ec",
+    "metrics.json": "5e57cc0141448641c05a924ff729b854a2fdcd326372f397170981d15652f9ff",
+    "diagnostics.json": "31a1632dddb8e7aa7a2458fc8fcec89123906cbb3e7922399046ab7ed33e8f08"
+  },
+  "published_markdown_sha256": {
+    "native-codex-4h-results-2026-10-31.md": "1e21a6f3fff8be078e51644e05038c82013b7ae6e490800b83f4a7dc19e3c58e"
+  }
+}

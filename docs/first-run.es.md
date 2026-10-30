@@ -2,10 +2,10 @@
 
 [English](first-run.md) · [Volver al README](../README.es.md)
 
-## 1. Descarga o clona v0.2.0-alpha.1
+## 1. Descarga o clona v0.3.0-alpha.1
 
 Elige una opción. Esta guía usa la
-[alfa publicada para Windows](https://github.com/Borregro4/mcp-warden/releases/tag/v0.2.0-alpha.1).
+[alfa publicada para Windows](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1).
 
 **Sin Git:** descarga **Source code (zip)** de esa versión, extrae todo el
 archivo en una carpeta tuya y abre PowerShell en la carpeta extraída que
@@ -19,7 +19,7 @@ Set-Location 'C:\ruta\a\la\carpeta\mcp-warden'
 **Con Git:** desde una carpeta donde todavía no exista `mcp-warden`:
 
 ```powershell
-git clone --branch v0.2.0-alpha.1 --depth 1 https://github.com/Borregro4/mcp-warden.git mcp-warden
+git clone --branch v0.3.0-alpha.1 --depth 1 https://github.com/Borregro4/mcp-warden.git mcp-warden
 Set-Location .\mcp-warden
 ```
 
@@ -43,7 +43,7 @@ python -c "import sys; print(sys.executable)"
 python warden.py --version
 ```
 
-Comprueba que Python indique 3.12+ y Warden `0.2.0-alpha.1`. Conserva la ruta
+Comprueba que Python indique 3.12+ y Warden `0.3.0-alpha.1`. Conserva la ruta
 del ejecutable si tienes varias instalaciones de Python. Para tu cliente,
 comprueba `codex --version` o `claude --version`; confirma primero que puedes
 abrirlo normalmente con la sesión que ya tienes.

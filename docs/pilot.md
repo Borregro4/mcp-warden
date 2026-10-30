@@ -7,7 +7,7 @@ lifecycle behavior. Participation and all follow-up are voluntary.
 
 Start with the [first-run guide](first-run.md), using the included synthetic
 backend before trying a trusted backend of your own. Use the public
-**v0.2.0-alpha.1** release for a comparable first attempt. Do not change a
+**v0.3.0-alpha.1** release for a comparable first attempt. Do not change a
 production workflow just to take part. There is no separate pilot signup,
 email requirement, automatic telemetry or scheduled reminder.
 
@@ -89,14 +89,16 @@ this document.
 
 ## What has and has not been qualified
 
-The [v0.2 validation record](../VALIDATION.md) contains three actual Codex MCP
-calls, two Claude user turns through its SDK-launched CLI, and a separate
-one-hour synthetic SDK endurance run. These bounded checks do not establish
-seven-day reliability or compatibility with every client/backend. Later
-candidates are outside this pilot's evidence until their results are published.
+The [current validation record](../VALIDATION.md) contains a four-hour native
+filesystem session for each client: four turns each, 14 actual Codex MCP calls
+and 21 Claude MCP calls, with verified file effects, idle/wake and cleanup.
+Both explicitly enabled optional idle page release. The older synthetic
+one-hour result belongs to v0.2. These bounded checks do not establish
+seven-day reliability or compatibility with every client/backend.
 
-Stateless restart discards backend memory, cursors and selections. Manual
-reconnect remains appropriate when that loss is unacceptable. This alpha is
+Stateless restart discards backend memory, cursors and selections. Disable
+idle expiry when that state must survive; manual reconnect makes the reset
+boundary explicit but does not preserve backend memory. This alpha is
 not a security sandbox and does not claim token, quota or bill savings.
 Read [SECURITY.md](../SECURITY.md) before attaching a real backend.
 
@@ -113,7 +115,7 @@ including a request-only issue if a private report action is unavailable.
 
 Buscamos primero **cinco voluntarios** que ya usen Windows, Codex CLI o Claude
 Code y MCP. Sigue la [guía de primer uso](first-run.md) con el ejemplo sintético
-de **v0.2.0-alpha.1**. Si puedes, anota versiones y tiempo de instalación;
+de **v0.3.0-alpha.1**. Si puedes, anota versiones y tiempo de instalación;
 son útiles pero opcionales al enviar. El formulario sólo exige cliente,
 resultado y último paso completado o fallido. Puedes responder en español
 y dejar lo demás vacío o indicar “desconocido” / “no medido”; no necesitas

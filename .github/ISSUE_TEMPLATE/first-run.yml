@@ -14,7 +14,7 @@ body:
     attributes:
       label: Warden version or commit
       description: Optional; leave blank or say unknown if unavailable.
-      placeholder: "For example: v0.2.0-alpha.1, or unknown"
+      placeholder: "For example: v0.3.0-alpha.1, or unknown"
     validations:
       required: false
   - type: input

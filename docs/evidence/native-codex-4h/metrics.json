@@ -1,0 +1,174 @@
+{
+  "units": {
+    "workingSetBytes": "bytes",
+    "cpuSeconds": "cumulative CPU seconds of that process identity"
+  },
+  "metric_scope": "named driver, app-server, proxy and currently active direct backend; selected phase snapshots, not peaks or private bytes",
+  "initial_driver": {
+    "pid": 76852,
+    "created": "134378467262789773",
+    "alive": true,
+    "workingSetBytes": 21327872,
+    "cpuSeconds": 0.34375
+  },
+  "initial_app_server": {
+    "pid": 28768,
+    "created": "134378467267302281",
+    "alive": true,
+    "workingSetBytes": 101019648,
+    "cpuSeconds": 0.0
+  },
+  "phases": [
+    {
+      "stage": "paid-orders",
+      "start_offset_seconds": 0.0,
+      "driver": {
+        "pid": 76852,
+        "created": "134378467262789773",
+        "alive": true,
+        "workingSetBytes": 22175744,
+        "cpuSeconds": 0.9375
+      },
+      "app_server": {
+        "pid": 28768,
+        "created": "134378467267302281",
+        "alive": true,
+        "workingSetBytes": 147808256,
+        "cpuSeconds": 0.734375
+      },
+      "proxy": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 19992576,
+        "cpuSeconds": 0.171875
+      },
+      "backend": {
+        "pid": 54040,
+        "created": "134378467272642839",
+        "alive": true,
+        "workingSetBytes": 57188352,
+        "cpuSeconds": 0.234375
+      }
+    },
+    {
+      "stage": "boundary-policy-fix",
+      "start_offset_seconds": 4800.187000000005,
+      "driver": {
+        "pid": 76852,
+        "created": "134378467262789773",
+        "alive": true,
+        "workingSetBytes": 17899520,
+        "cpuSeconds": 2.546875
+      },
+      "app_server": {
+        "pid": 28768,
+        "created": "134378467267302281",
+        "alive": true,
+        "workingSetBytes": 139022336,
+        "cpuSeconds": 2.140625
+      },
+      "proxy": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 7798784,
+        "cpuSeconds": 8.609375
+      },
+      "backend": {
+        "pid": 36432,
+        "created": "134378515347098014",
+        "alive": true,
+        "workingSetBytes": 59273216,
+        "cpuSeconds": 0.21875
+      }
+    },
+    {
+      "stage": "reconcile-adjustments",
+      "start_offset_seconds": 9600.203000000009,
+      "driver": {
+        "pid": 76852,
+        "created": "134378467262789773",
+        "alive": true,
+        "workingSetBytes": 18579456,
+        "cpuSeconds": 3.921875
+      },
+      "app_server": {
+        "pid": 28768,
+        "created": "134378467267302281",
+        "alive": true,
+        "workingSetBytes": 141025280,
+        "cpuSeconds": 3.328125
+      },
+      "proxy": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 7417856,
+        "cpuSeconds": 17.0
+      },
+      "backend": {
+        "pid": 4944,
+        "created": "134378563344087346",
+        "alive": true,
+        "workingSetBytes": 60116992,
+        "cpuSeconds": 0.28125
+      }
+    },
+    {
+      "stage": "final-audit",
+      "start_offset_seconds": 14400.203000000009,
+      "driver": {
+        "pid": 76852,
+        "created": "134378467262789773",
+        "alive": true,
+        "workingSetBytes": 21098496,
+        "cpuSeconds": 5.28125
+      },
+      "app_server": {
+        "pid": 28768,
+        "created": "134378467267302281",
+        "alive": true,
+        "workingSetBytes": 142753792,
+        "cpuSeconds": 4.546875
+      },
+      "proxy": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 7401472,
+        "cpuSeconds": 25.34375
+      },
+      "backend": {
+        "pid": 28544,
+        "created": "134378611313208223",
+        "alive": true,
+        "workingSetBytes": 71368704,
+        "cpuSeconds": 0.1875
+      }
+    }
+  ],
+  "idle_proxy_snapshots": [
+    {
+      "pid": 34612,
+      "created": "134378467271170085",
+      "alive": true,
+      "workingSetBytes": 4612096,
+      "cpuSeconds": 8.578125
+    },
+    {
+      "pid": 34612,
+      "created": "134378467271170085",
+      "alive": true,
+      "workingSetBytes": 4468736,
+      "cpuSeconds": 16.96875
+    },
+    {
+      "pid": 34612,
+      "created": "134378467271170085",
+      "alive": true,
+      "workingSetBytes": 4493312,
+      "cpuSeconds": 25.265625
+    }
+  ]
+}

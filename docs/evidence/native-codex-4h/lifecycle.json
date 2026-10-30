@@ -1,0 +1,200 @@
+{
+  "proxy_pid": 34612,
+  "proxy_created_filetime": "134378467271170085",
+  "transitions": [
+    {
+      "transition": 1,
+      "proxy_pid": 34612,
+      "proxy_created_filetime": "134378467271170085",
+      "previous_backend_pid": 54040,
+      "previous_backend_created_filetime": "134378467272642839",
+      "previous_backend_alive_after_idle": false,
+      "expired_backend_pid": null,
+      "idle_elapsed_recorded_seconds": 4781.968999999983,
+      "gap_between_raw_turn_events_seconds": 4782.155999999988,
+      "idle_status_recorded_utc": "2026-10-30T16:31:58.910680Z",
+      "idle_proxy_metrics": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 4612096,
+        "cpuSeconds": 8.578125
+      },
+      "new_backend_pid": 36432,
+      "new_backend_created_filetime": "134378515347098014"
+    },
+    {
+      "transition": 2,
+      "proxy_pid": 34612,
+      "proxy_created_filetime": "134378467271170085",
+      "previous_backend_pid": 36432,
+      "previous_backend_created_filetime": "134378515347098014",
+      "previous_backend_alive_after_idle": false,
+      "expired_backend_pid": null,
+      "idle_elapsed_recorded_seconds": 4783.218999999983,
+      "gap_between_raw_turn_events_seconds": 4783.421999999991,
+      "idle_status_recorded_utc": "2026-10-30T17:51:55.925865Z",
+      "idle_proxy_metrics": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 4468736,
+        "cpuSeconds": 16.96875
+      },
+      "new_backend_pid": 4944,
+      "new_backend_created_filetime": "134378563344087346"
+    },
+    {
+      "transition": 3,
+      "proxy_pid": 34612,
+      "proxy_created_filetime": "134378467271170085",
+      "previous_backend_pid": 4944,
+      "previous_backend_created_filetime": "134378563344087346",
+      "previous_backend_alive_after_idle": false,
+      "expired_backend_pid": null,
+      "idle_elapsed_recorded_seconds": 4783.030999999988,
+      "gap_between_raw_turn_events_seconds": 4783.233999999997,
+      "idle_status_recorded_utc": "2026-10-30T19:11:55.613221Z",
+      "idle_proxy_metrics": {
+        "pid": 34612,
+        "created": "134378467271170085",
+        "alive": true,
+        "workingSetBytes": 4493312,
+        "cpuSeconds": 25.265625
+      },
+      "new_backend_pid": 28544,
+      "new_backend_created_filetime": "134378611313208223"
+    }
+  ],
+  "catalog_sha256": "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783",
+  "frozen_sources": [
+    {
+      "label": "warden.py",
+      "sha256": "bcd288de151afdfeacc76e91c2faf1d2f42599f411ee0939916dbf3b2f3153fb",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "runtime/idle_stdio.py",
+      "sha256": "ccc87826d029bdca2b3b85fd2eed5c90c5ee53d34c19aad5a34b59f1e8aebf52",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "runtime/lazy_stdio.py",
+      "sha256": "5b957d97ba64be441ef5ce6b4477ebf73d29b95db975f8f4dd75c82bbd61a1d8",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "runtime/owned_bridge.py",
+      "sha256": "5ccc3a4069bb49bcf3474f8a0a39402b6b77d6943a7aad9855015a65c1e300ab",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "scripts/native_workload.py",
+      "sha256": "47e994d259c62e5891cecb5abd743d114a48325a6b5b6d032732314dd8fdd7d1",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "scripts/soak_metrics.py",
+      "sha256": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "private_test_configuration",
+      "sha256": "137c9a93806b62d456012efb6ccece383e6701e50aa7ee8670f3b67c11ce1578",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "filesystem_backend_entry",
+      "sha256": "fd44be644b81d088eded98d73a5521a179850e716102aa1d7a9edccf6d79fba9",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "filesystem_backend_package_metadata",
+      "sha256": "42ddd58e3f5580d07af425bc7394d78496db410c3a522c73c174ea108a051771",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "isolated_backend_lockfile",
+      "sha256": "bc2237deef11a5e6dffce0e94ac80512197d053555b8faf98da8c141206af2ba",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "private_workload_plan",
+      "sha256": "9d6f57407dcdfa8296cd4cf5e5b290b419a76dd0c03f91dfdd8d04d2ebdf4bc8",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "scripts/native_codex_persistent.py",
+      "sha256": "6c09b21b13d1fcaa65cc6682d9f491a203f6b7a10d1b2db4f6568eb8f539dea3",
+      "current_re_read_matches": true
+    },
+    {
+      "label": "installed_codex_executable",
+      "sha256": "3097c909fb6d5cd63510d44aceb1d42df9f6e85722a3e447e477def1ecf60e16",
+      "current_re_read_matches": true
+    }
+  ],
+  "post_exit_native_checks": [
+    {
+      "role": "driver",
+      "pid": 76852,
+      "created_filetime": "134378467262789773",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "app_server",
+      "pid": 28768,
+      "created_filetime": "134378467267302281",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "proxy",
+      "pid": 34612,
+      "created_filetime": "134378467271170085",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "backend_generation_1",
+      "pid": 54040,
+      "created_filetime": "134378467272642839",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "backend_generation_2",
+      "pid": 36432,
+      "created_filetime": "134378515347098014",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "backend_generation_3",
+      "pid": 4944,
+      "created_filetime": "134378563344087346",
+      "original_identity_alive": false,
+      "pid_reused": false
+    },
+    {
+      "role": "backend_generation_4",
+      "pid": 28544,
+      "created_filetime": "134378611313208223",
+      "original_identity_alive": false,
+      "pid_reused": false
+    }
+  ],
+  "normal_exit": {
+    "returncode": 0,
+    "forced_termination": false
+  },
+  "remaining_sessions": 0,
+  "independently_recomputed_inventory_hashes": [
+    "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783",
+    "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783",
+    "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783",
+    "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783",
+    "b2434d82513f93e6b585cb9b7c02ea6ba047d5b9ee3887bce2c61a8377c9b783"
+  ]
+}

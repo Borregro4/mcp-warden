@@ -1,0 +1,496 @@
+{
+  "schema_version": 1,
+  "sample_count": 510,
+  "all_phase_event_count": 521,
+  "proxy_identity": {
+    "pid": 27740,
+    "created_filetime": "134378461321182487"
+  },
+  "backend_generations": [
+    {
+      "generation": 1,
+      "pid": 25588,
+      "created_filetime": "134378461322364949"
+    },
+    {
+      "generation": 2,
+      "pid": 65056,
+      "created_filetime": "134378509345936438"
+    },
+    {
+      "generation": 3,
+      "pid": 72396,
+      "created_filetime": "134378557433214566"
+    },
+    {
+      "generation": 4,
+      "pid": 62564,
+      "created_filetime": "134378605360307636"
+    }
+  ],
+  "initial_cold_samples": [
+    {
+      "phase": "cold",
+      "elapsed_seconds": 1.4210000000020955,
+      "reported_backend_pid": null,
+      "observed_backend_pid": 25588,
+      "observed_backend_created_filetime": "134378461322364949",
+      "authoritative_at_that_sample": false
+    },
+    {
+      "phase": "cold_before_work",
+      "elapsed_seconds": 1.437000000005355,
+      "reported_backend_pid": null,
+      "observed_backend_pid": 25588,
+      "observed_backend_created_filetime": "134378461322364949",
+      "authoritative_at_that_sample": false
+    }
+  ],
+  "tool_result_authority": {
+    "total": 21,
+    "immediately_authoritative": 16,
+    "awaiting_status_refresh_then_corroborated": 5,
+    "observations": [
+      {
+        "turn": "paid-orders",
+        "elapsed_seconds": 4.5,
+        "backend_pid": 25588,
+        "backend_created_filetime": "134378461322364949",
+        "reported_backend_pid": 25588,
+        "reported_backend_created_filetime": "134378461322364949",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "paid-orders",
+        "elapsed_seconds": 5.280999999988126,
+        "backend_pid": 25588,
+        "backend_created_filetime": "134378461322364949",
+        "reported_backend_pid": 25588,
+        "reported_backend_created_filetime": "134378461322364949",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "paid-orders",
+        "elapsed_seconds": 7.875,
+        "backend_pid": 25588,
+        "backend_created_filetime": "134378461322364949",
+        "reported_backend_pid": 25588,
+        "reported_backend_created_filetime": "134378461322364949",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "paid-orders",
+        "elapsed_seconds": 11.10899999999674,
+        "backend_pid": 25588,
+        "backend_created_filetime": "134378461322364949",
+        "reported_backend_pid": 25588,
+        "reported_backend_created_filetime": "134378461322364949",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "boundary-policy-fix",
+        "elapsed_seconds": 4803.733999999997,
+        "backend_pid": 65056,
+        "backend_created_filetime": "134378509345936438",
+        "reported_backend_pid": null,
+        "reported_backend_created_filetime": null,
+        "immediate_authoritative_status": false,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "boundary-policy-fix",
+        "elapsed_seconds": 4808.812000000005,
+        "backend_pid": 65056,
+        "backend_created_filetime": "134378509345936438",
+        "reported_backend_pid": 65056,
+        "reported_backend_created_filetime": "134378509345936438",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "boundary-policy-fix",
+        "elapsed_seconds": 4809.453000000009,
+        "backend_pid": 65056,
+        "backend_created_filetime": "134378509345936438",
+        "reported_backend_pid": 65056,
+        "reported_backend_created_filetime": "134378509345936438",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "boundary-policy-fix",
+        "elapsed_seconds": 4810.828000000009,
+        "backend_pid": 65056,
+        "backend_created_filetime": "134378509345936438",
+        "reported_backend_pid": 65056,
+        "reported_backend_created_filetime": "134378509345936438",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9612.530999999988,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9612.592999999993,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9612.983999999997,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9613.578000000009,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9617.265000000014,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "reconcile-adjustments",
+        "elapsed_seconds": 9622.342999999993,
+        "backend_pid": 72396,
+        "backend_created_filetime": "134378557433214566",
+        "reported_backend_pid": 72396,
+        "reported_backend_created_filetime": "134378557433214566",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14405.312000000005,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": null,
+        "reported_backend_created_filetime": null,
+        "immediate_authoritative_status": false,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14405.717999999993,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": null,
+        "reported_backend_created_filetime": null,
+        "immediate_authoritative_status": false,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14406.062000000005,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": null,
+        "reported_backend_created_filetime": null,
+        "immediate_authoritative_status": false,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14406.421000000002,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": null,
+        "reported_backend_created_filetime": null,
+        "immediate_authoritative_status": false,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14407.0,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": 62564,
+        "reported_backend_created_filetime": "134378605360307636",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14413.140000000014,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": 62564,
+        "reported_backend_created_filetime": "134378605360307636",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      },
+      {
+        "turn": "final-audit",
+        "elapsed_seconds": 14414.655999999988,
+        "backend_pid": 62564,
+        "backend_created_filetime": "134378605360307636",
+        "reported_backend_pid": 62564,
+        "reported_backend_created_filetime": "134378605360307636",
+        "immediate_authoritative_status": true,
+        "later_authoritative_corroboration": true
+      }
+    ]
+  },
+  "first_backend_independent_handle_capture": {
+    "utc": "2026-10-30T15:09:32.264543+00:00",
+    "pid": 25588,
+    "created_filetime": "134378461322364949",
+    "measured_image_name": "node.exe",
+    "alive_at_capture": true
+  },
+  "idle_gaps": [
+    {
+      "after_turn": "paid-orders",
+      "old_backend_pid": 25588,
+      "old_backend_created_filetime": "134378461322364949",
+      "new_backend_pid": 65056,
+      "new_backend_created_filetime": "134378509345936438",
+      "result_to_next_start_seconds": 4785.358999999997,
+      "last_confirmed_alive_elapsed_seconds": 887.3120000000054,
+      "first_confirmed_exited_elapsed_seconds": 917.375,
+      "first_confirmed_exited_utc": "2026-10-30T15:17:28.601020+00:00",
+      "confirmed_backend_absent_samples": 131,
+      "backend_absent_observed_span_seconds": 3884.0929999999935,
+      "proxy_cpu_counter_increase_in_absent_span_seconds": 6.484375,
+      "proxy_average_one_core_percent_in_absent_span": 0.16694695518361716,
+      "proxy_identity_unchanged": true,
+      "backend_identity_changed": true
+    },
+    {
+      "after_turn": "boundary-policy-fix",
+      "old_backend_pid": 65056,
+      "old_backend_created_filetime": "134378509345936438",
+      "new_backend_pid": 72396,
+      "new_backend_created_filetime": "134378557433214566",
+      "result_to_next_start_seconds": 4783.0,
+      "last_confirmed_alive_elapsed_seconds": 5689.390000000014,
+      "first_confirmed_exited_elapsed_seconds": 5719.421000000002,
+      "first_confirmed_exited_utc": "2026-10-30T16:37:30.535009+00:00",
+      "confirmed_backend_absent_samples": 131,
+      "backend_absent_observed_span_seconds": 3882.0320000000065,
+      "proxy_cpu_counter_increase_in_absent_span_seconds": 6.3125,
+      "proxy_average_one_core_percent_in_absent_span": 0.16260813924254075,
+      "proxy_identity_unchanged": true,
+      "backend_identity_changed": true
+    },
+    {
+      "after_turn": "reconcile-adjustments",
+      "old_backend_pid": 72396,
+      "old_backend_created_filetime": "134378557433214566",
+      "new_backend_pid": 62564,
+      "new_backend_created_filetime": "134378605360307636",
+      "result_to_next_start_seconds": 4774.3279999999795,
+      "last_confirmed_alive_elapsed_seconds": 10498.108999999997,
+      "first_confirmed_exited_elapsed_seconds": 10528.125,
+      "first_confirmed_exited_utc": "2026-10-30T17:57:39.136989+00:00",
+      "confirmed_backend_absent_samples": 130,
+      "backend_absent_observed_span_seconds": 3873.3429999999935,
+      "proxy_cpu_counter_increase_in_absent_span_seconds": 5.984375,
+      "proxy_average_one_core_percent_in_absent_span": 0.15450155072762753,
+      "proxy_identity_unchanged": true,
+      "backend_identity_changed": true
+    }
+  ],
+  "metrics": {
+    "backend_absent_confirmed": {
+      "samples": 392,
+      "proxy_working_set_bytes": {
+        "count": 392,
+        "minimum": 4366336,
+        "median": 4489216.0,
+        "maximum": 4976640
+      },
+      "whole_test_tree_working_set_bytes": {
+        "count": 392,
+        "minimum": 230174720,
+        "median": 264601600.0,
+        "maximum": 320602112
+      },
+      "whole_test_tree_private_bytes": {
+        "count": 392,
+        "minimum": 455376896,
+        "median": 472125440.0,
+        "maximum": 517779456
+      }
+    },
+    "backend_present_including_preexpiry_wait": {
+      "samples": 110,
+      "proxy_working_set_bytes": {
+        "count": 110,
+        "minimum": 7409664,
+        "median": 8347648.0,
+        "maximum": 20262912
+      },
+      "whole_test_tree_working_set_bytes": {
+        "count": 110,
+        "minimum": 328577024,
+        "median": 352696320.0,
+        "maximum": 456200192
+      },
+      "whole_test_tree_private_bytes": {
+        "count": 110,
+        "minimum": 523968512,
+        "median": 545646592.0,
+        "maximum": 637120512
+      }
+    }
+  },
+  "cpu_scope": "GetProcessTimes counter increases of the single pinned proxy process, excluding backend, CLI, driver and console hosts; backend-absent windows sampled about every 30 seconds.",
+  "working_set_scope": "Current resident working set from Windows process counters, not committed/private memory. Whole-tree values include the test driver, native CLI and verified descendants; no sum over unrelated applications.",
+  "after_disconnect": {
+    "utc": "2026-10-30T19:02:29.491507+00:00",
+    "live_warden_sessions": 0,
+    "tree_process_count": 1,
+    "remaining_tree_process_role": "harness only",
+    "known_backend_identities": [
+      {
+        "pid": 25588,
+        "created_filetime": "134378461322364949",
+        "alive": false
+      },
+      {
+        "pid": 62564,
+        "created_filetime": "134378605360307636",
+        "alive": false
+      },
+      {
+        "pid": 65056,
+        "created_filetime": "134378509345936438",
+        "alive": false
+      },
+      {
+        "pid": 72396,
+        "created_filetime": "134378557433214566",
+        "alive": false
+      }
+    ],
+    "known_proxy_identities": [
+      {
+        "pid": 27740,
+        "created_filetime": "134378461321182487",
+        "alive": false
+      }
+    ]
+  },
+  "current_independent_identity_readback": {
+    "utc": "2026-10-30T19:25:40.136054+00:00",
+    "processes": [
+      {
+        "pid": 19324,
+        "created_filetime": "134378461322420765",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 25588,
+        "created_filetime": "134378461322364949",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 27740,
+        "created_filetime": "134378461321182487",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 33716,
+        "created_filetime": "134378461320934973",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 34764,
+        "created_filetime": "134378461313978666",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 34772,
+        "created_filetime": "134378461320995010",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 42844,
+        "created_filetime": "134378605360435105",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 44460,
+        "created_filetime": "134378461314032622",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 55536,
+        "created_filetime": "134378509346046558",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 62564,
+        "created_filetime": "134378605360307636",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 64892,
+        "created_filetime": "134378461301415771",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 65056,
+        "created_filetime": "134378509345936438",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 68652,
+        "created_filetime": "134378557433301492",
+        "alive": false,
+        "numeric_pid_reused": false
+      },
+      {
+        "pid": 72396,
+        "created_filetime": "134378557433214566",
+        "alive": false,
+        "numeric_pid_reused": false
+      }
+    ]
+  }
+}

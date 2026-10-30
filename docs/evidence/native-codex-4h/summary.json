@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "audit_status": "passed",
+  "scope": "one installed native Codex app-server, one official filesystem MCP backend, synthetic business files",
+  "client_version": "codex-cli 0.166.0-alpha.5.1",
+  "model_observed": "gpt-6.1-sol",
+  "reasoning_effort_observed": "low",
+  "thread_identity_sha256": "5485c108340f70833ae23f2bf44a862b9a48c0bedc1607170642eafc6c3f63be",
+  "model_backed_turns": 4,
+  "successful_mcp_calls": 14,
+  "logical_turn_start_requests": 4,
+  "first_turn_started_utc": "2026-10-30T15:12:08.033Z",
+  "last_turn_started_utc": "2026-10-30T19:12:08.236Z",
+  "last_turn_completed_utc": "2026-10-30T19:12:16.923Z",
+  "actual_first_to_last_start_seconds": 14400.203000000009,
+  "recorded_workload_elapsed_seconds": 14409.484000000026,
+  "recorded_total_elapsed_seconds": 14410.828000000009,
+  "checks": {
+    "four_fixed_turns_in_one_app_server_and_thread": true,
+    "four_hours_between_actual_turn_starts": true,
+    "fourteen_successful_allowed_mcp_events": true,
+    "final_files_re_read_against_plan_and_independent_arithmetic": true,
+    "unchanged_seed_hashes": true,
+    "same_proxy_pid_and_filetime": true,
+    "three_idle_exits_and_new_backend_identities": true,
+    "three_gaps_at_least_900_seconds": true,
+    "catalog_unchanged": true,
+    "thirteen_frozen_sources_currently_match": true,
+    "normal_exit_zero_sessions_and_native_process_exit": true,
+    "no_model_or_backend_started_by_audit": true,
+    "raw_inventory_catalog_hash_recomputed_five_times": true,
+    "driver_and_app_server_pid_filetime_stable_all_phases": true,
+    "isolated_scoped_tool_permissions_verified": true
+  },
+  "private_artifact_sha256": {
+    "plan": "9d6f57407dcdfa8296cd4cf5e5b290b419a76dd0c03f91dfdd8d04d2ebdf4bc8",
+    "criteria": "7fa57e1fa9e5736b842c60ab66a9c9e1fbb13709979be56ad00f620435ebad46",
+    "result": "210f22f0303522b84d519f7143ce0c0f0a62d5dc4cef41020d6ac6766b7f868f",
+    "events": "c63f4a95ed34ba9de6365fd282d0b7152b6e860c81bef695f8b0c4a0c984937d",
+    "launch_receipt": "276ef32b9803628f824a7d5a7dde88da49405fe7698367255cea4d8c09273ffe"
+  },
+  "reported_thread_token_usage": {
+    "inputTokens": 335031,
+    "cachedInputTokens": 290688,
+    "outputTokens": 1772,
+    "reasoningOutputTokens": 0,
+    "totalTokens": 336803
+  },
+  "token_usage_note": "model-reported cumulative thread usage; no subscription credit or price conversion",
+  "gold_arithmetic": {
+    "paid_order_count": 3,
+    "paid_units": 6,
+    "subtotal_cents": 3950,
+    "adjustment_cents": -150,
+    "adjusted_subtotal_cents": 3800,
+    "shipping_cents": 500,
+    "total_cents": 4300,
+    "at_threshold_shipping_cents": 0
+  },
+  "limitations": [
+    "one backend and one account/client configuration; synthetic inputs",
+    "no GUI validation or universal backend compatibility claim",
+    "working set is not private bytes or total committed memory",
+    "CPU snapshots cover named processes only and are not machine-wide totals",
+    "no controlled baseline or monetary/subscription savings claim",
+    "900-second idle timeout is configured and expired states are proven before each wake; exact expiry latency is not measured"
+  ],
+  "runtime_profile": {
+    "transport": "stdio",
+    "restart_policy": "stateless",
+    "idle_timeout_seconds": 900,
+    "release_idle_pages": true
+  },
+  "isolated_client_configuration": {
+    "allowed_tool_count": 7,
+    "preapproved_mutating_tools": [
+      "write_file",
+      "edit_file"
+    ],
+    "default_fixture_tool_approval_mode": "auto",
+    "unrelated_configured_servers_disabled": 10,
+    "global_configuration_changed": false,
+    "effective_configuration_payload_excluded_from_raw_log": true
+  },
+  "measurement_limits": {
+    "exact_900_second_expiry_latency_measured": false
+  }
+}

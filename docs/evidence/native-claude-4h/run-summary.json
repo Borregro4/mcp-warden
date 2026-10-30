@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-10-30T19:25:40.136054+00:00",
+  "result": "PASS",
+  "scope": "One existing native Claude Code session, one isolated stateless filesystem workload; same completed run, no new inference during audit",
+  "client_version": "2.1.309",
+  "sdk_version": "0.2.175",
+  "models_observed": [
+    "claude-sonnet-5-5"
+  ],
+  "backend_package": {
+    "name": "@modelcontextprotocol/server-filesystem",
+    "version": "2.1.0"
+  },
+  "tested_profile": {
+    "transport": "stdio",
+    "restart_policy": "stateless",
+    "idle_timeout_seconds": 900,
+    "release_idle_pages": true
+  },
+  "first_connection_event_utc": "2026-10-30T15:02:11.280321+00:00",
+  "first_connection_event_jst": "2026-10-31T00:02:11.280321+09:00",
+  "final_observation_utc": "2026-10-30T19:02:29.491507+00:00",
+  "final_observation_jst": "2026-10-31T04:02:29.491507+09:00",
+  "recorder_monotonic_elapsed_seconds": 14418.562000000005,
+  "first_to_last_turn_start_seconds": 14400.030999999988,
+  "fixed_turn_offsets_seconds": [
+    0,
+    4800,
+    9600,
+    14400
+  ],
+  "minimum_idle_seconds": 900,
+  "mcp_calls": 21,
+  "mcp_successful_replies": 21,
+  "completed_native_results": 4,
+  "session_label_sha256": "7f2fb1fe93cb2b7ef359d940797ebd93e2efa50b39287ccccaf517f6afaff64a",
+  "proxy_identity": {
+    "pid": 27740,
+    "created_filetime": "134378461321182487"
+  },
+  "driver_global_checks": {
+    "all_planned_turns_completed": true,
+    "all_turn_checks_passed": true,
+    "same_native_session": true,
+    "minimum_idle_observed": true,
+    "planned_duration_observed": true,
+    "no_driver_error": true,
+    "sources_unchanged_during_run": true,
+    "same_live_proxy_identity": true,
+    "idle_backend_stop_between_turns": true,
+    "backend_generation_observed_per_turn": true,
+    "fresh_backend_after_each_idle": true,
+    "no_live_warden_session_after_disconnect": true,
+    "owned_backend_cleanup_verified": true,
+    "owned_proxy_cleanup_verified": true
+  },
+  "independent_audit_checks": {
+    "four_actual_completed_native_user_turns": true,
+    "first_to_last_turn_start_at_least_14400_seconds": true,
+    "twenty_one_unique_mcp_calls_with_one_successful_reply_each": true,
+    "all_observed_tools_in_fixed_allowlist": true,
+    "per_turn_tool_limit_16_respected": true,
+    "eighteen_file_checks_reverified_after_completion": true,
+    "both_source_seed_hashes_unchanged": true,
+    "business_arithmetic_independently_recomputed": true,
+    "same_native_session_hash_across_all_four_results": true,
+    "one_connection_and_one_disconnect_event": true,
+    "same_proxy_pid_and_creation_filetime": true,
+    "four_distinct_authoritatively_corroborated_backend_identities": true,
+    "three_idle_gaps_above_900_seconds_with_confirmed_old_backend_exit": true,
+    "client_catalog_signature_unchanged": true,
+    "eleven_run_source_hashes_and_driver_currently_match": true,
+    "raw_stdout_and_phase_file_hashes_match_final_summary": true,
+    "after_disconnect_zero_sessions_and_only_harness_in_tree": true,
+    "all_fourteen_recorded_test_tree_identities_absent_on_independent_readback": true,
+    "all_fourteen_driver_global_checks_passed": true,
+    "native_stderr_empty": true
+  },
+  "turns": [
+    {
+      "turn": "paid-orders",
+      "start_utc": "2026-10-30T15:02:12.709818+00:00",
+      "end_utc": "2026-10-30T15:02:27.381687+00:00",
+      "start_jst": "2026-10-31T00:02:12.709818+09:00",
+      "began_seconds": 1.437000000005355,
+      "ended_seconds": 16.10899999999674,
+      "elapsed_seconds": 14.671999999991385,
+      "idle_gap_seconds": null,
+      "mcp_calls": 4,
+      "file_checks": 3,
+      "all_turn_checks_passed": true,
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ],
+      "client_catalog_sha256": "979056f4f2967b7dc8b7d923ea09cacaad39c6b3902d482a8c5906572d520a43"
+    },
+    {
+      "turn": "boundary-policy-fix",
+      "start_utc": "2026-10-30T16:22:12.594820+00:00",
+      "end_utc": "2026-10-30T16:22:29.606546+00:00",
+      "start_jst": "2026-10-31T01:22:12.594820+09:00",
+      "began_seconds": 4801.4679999999935,
+      "ended_seconds": 4818.4679999999935,
+      "elapsed_seconds": 17.0,
+      "idle_gap_seconds": 4785.358999999997,
+      "mcp_calls": 4,
+      "file_checks": 4,
+      "all_turn_checks_passed": true,
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ],
+      "client_catalog_sha256": "979056f4f2967b7dc8b7d923ea09cacaad39c6b3902d482a8c5906572d520a43"
+    },
+    {
+      "turn": "reconcile-adjustments",
+      "start_utc": "2026-10-30T17:42:12.488132+00:00",
+      "end_utc": "2026-10-30T17:42:38.163499+00:00",
+      "start_jst": "2026-10-31T02:42:12.488132+09:00",
+      "began_seconds": 9601.467999999993,
+      "ended_seconds": 9627.140000000014,
+      "elapsed_seconds": 25.67200000002049,
+      "idle_gap_seconds": 4783.0,
+      "mcp_calls": 6,
+      "file_checks": 4,
+      "all_turn_checks_passed": true,
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ],
+      "client_catalog_sha256": "979056f4f2967b7dc8b7d923ea09cacaad39c6b3902d482a8c5906572d520a43"
+    },
+    {
+      "turn": "final-audit",
+      "start_utc": "2026-10-30T19:02:12.398046+00:00",
+      "end_utc": "2026-10-30T19:02:28.607664+00:00",
+      "start_jst": "2026-10-31T04:02:12.398046+09:00",
+      "began_seconds": 14401.467999999993,
+      "ended_seconds": 14417.671000000002,
+      "elapsed_seconds": 16.203000000008615,
+      "idle_gap_seconds": 4774.3279999999795,
+      "mcp_calls": 7,
+      "file_checks": 7,
+      "all_turn_checks_passed": true,
+      "models_observed": [
+        "claude-sonnet-5-5"
+      ],
+      "client_catalog_sha256": "979056f4f2967b7dc8b7d923ea09cacaad39c6b3902d482a8c5906572d520a43"
+    }
+  ],
+  "source_snapshots": [
+    {
+      "source_role": "warden.py",
+      "sha256": "bcd288de151afdfeacc76e91c2faf1d2f42599f411ee0939916dbf3b2f3153fb",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "runtime/idle_stdio.py",
+      "sha256": "ccc87826d029bdca2b3b85fd2eed5c90c5ee53d34c19aad5a34b59f1e8aebf52",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "runtime/lazy_stdio.py",
+      "sha256": "5b957d97ba64be441ef5ce6b4477ebf73d29b95db975f8f4dd75c82bbd61a1d8",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "runtime/owned_bridge.py",
+      "sha256": "5ccc3a4069bb49bcf3474f8a0a39402b6b77d6943a7aad9855015a65c1e300ab",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "scripts/native_workload.py",
+      "sha256": "47e994d259c62e5891cecb5abd743d114a48325a6b5b6d032732314dd8fdd7d1",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "scripts/soak_metrics.py",
+      "sha256": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "private-workload-config",
+      "sha256": "ec71f0a0963fdc1e0077f0d2004840dfd9d703983b958938fa794ba98f964ae5",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "official-filesystem-backend-entry",
+      "sha256": "fd44be644b81d088eded98d73a5521a179850e716102aa1d7a9edccf6d79fba9",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "official-filesystem-package-manifest",
+      "sha256": "42ddd58e3f5580d07af425bc7394d78496db410c3a522c73c174ea108a051771",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "isolated-backend-install-lock",
+      "sha256": "bc2237deef11a5e6dffce0e94ac80512197d053555b8faf98da8c141206af2ba",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "private-fixed-plan",
+      "sha256": "92775d91eac7576b2fa173bd44be49fc6be716517174666095d5629fb6299f11",
+      "current_readback_matches": true
+    },
+    {
+      "source_role": "scripts/native_claude_persistent.py",
+      "sha256": "fc7fafde2416e901e54526db485d0891eb9568862f98b04e7ee8ae281bf6b429",
+      "current_readback_matches": true
+    }
+  ],
+  "private_input_identities": [
+    {
+      "source_role": "native-stdout",
+      "sha256": "b1730fe6209d37f2df0c06636aca3bf6485eed2b3e09648f7b208141b4b46867",
+      "bytes": 76737
+    },
+    {
+      "source_role": "phase-observations",
+      "sha256": "ef83fd8abe9fa313ede92e412518cdbe68bd84364f43cd729a7f7ae1c787945c",
+      "bytes": 1289434
+    },
+    {
+      "source_role": "private-run-summary",
+      "sha256": "17ced7545991b18263e8836d4fe0cd883d63f2519f4c375f0838ad394e52c2ce",
+      "bytes": 22056
+    },
+    {
+      "source_role": "private-fixed-plan",
+      "sha256": "92775d91eac7576b2fa173bd44be49fc6be716517174666095d5629fb6299f11",
+      "bytes": 9887
+    },
+    {
+      "source_role": "independent-first-backend-identity-capture",
+      "sha256": "eb22319e9caab7f05623067dbf08bc57a0d56bf3afa7e91625c9b20326a96155",
+      "bytes": 6722
+    }
+  ],
+  "stderr_bytes": 0,
+  "limitations": [
+    "CLI and SDK workflow; not a test of the Desktop graphical interface.",
+    "One four-hour run is not multi-day production validation.",
+    "Explicit stateless filesystem restart preserves files, not arbitrary in-memory MCP state.",
+    "No subscription quota, invoice or savings measurement.",
+    "Client catalog hashes are cached signatures; restart validation is supported by the pinned guard source and successful calls, not a separate per-wake protocol trace."
+  ]
+}
