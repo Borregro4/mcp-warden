@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Supervisor local del ciclo de vida de servidores MCP en Windows. Coloca un gateway HTTP con sesiones entre el cliente stdio y su servidor, protege el trabajo en curso y libera las sesiones inactivas junto con sus procesos propios.
+Supervisor local del ciclo de vida de servidores MCP en Windows. El modo ligero usa un proxy stdio de Python y su servidor. El modo gateway opcional agrega sesiones HTTP y límites centrales de admisión. Ambos protegen el trabajo en curso y limpian sus procesos propios.
 
 **Versión alfa.** Esta entrega se enfoca en las sesiones y la propiedad de procesos en Windows. No selecciona modelos de IA, limita cuotas de suscripción ni acredita ahorro de tokens o dinero. Consulta las [pruebas y los límites vigentes](VALIDATION.md) antes de adoptarlo.
 
@@ -12,7 +12,45 @@ Varias sesiones de programación pueden dejar varias copias del mismo servidor M
 
 MCP Warden agrega esa gestión alrededor de [Supergateway](https://github.com/supercorp-ai/supergateway), que se encarga del transporte HTTP/SSE. Vincula cada sesión a un PID de Windows **y su hora de creación**, protege las operaciones pendientes y permite vencer una sesión inactiva aunque conserve un stream GET abierto.
 
-## Inicio rápido
+## Inicio rápido del modo ligero
+
+Requisitos: Windows y Python 3.12 en `PATH`. Este modo no necesita un proceso
+Node, instalación npm, puerto HTTP ni supervisor en primer plano.
+
+El servidor incluido es sintético y no conserva estado necesario entre llamadas.
+Para probarlo:
+
+```powershell
+python warden.py init --state .warden-state --transport stdio --restart-policy stateless
+python warden.py doctor --state .warden-state --transport stdio
+python warden.py configuration --state .warden-state --profile example --client codex
+# O imprime la configuración para Claude:
+python warden.py configuration --state .warden-state --profile example --client claude
+```
+
+Agrega la entrada generada al cliente. El cliente inicia `connect` cuando hace
+falta. Consulta las identidades de los proxies activos con:
+
+```powershell
+python warden.py status --state .warden-state --transport stdio --json
+```
+
+Usa `restart_policy: "stateless"` únicamente cuando sea aceptable perder la
+memoria del servidor, sus cursores y selecciones. La política predeterminada es
+`manual`: una conexión vencida pide reconectar. Puedes conservar un servidor
+con estado desactivando el vencimiento con `idle_session_timeout_seconds: 0`.
+
+El reinicio stateless mantiene la conexión stdio, inicializa otro servidor,
+comprueba sus instrucciones y el catálogo de herramientas observado previamente,
+y envía la solicitud nueva una vez. Cambios de esquemas o permisos declarados,
+catálogos paginados, falta de un catálogo de referencia, cancelaciones y resultados
+inciertos requieren una conexión nueva. Las llamadas anteriores no se repiten.
+
+Este modo limita los mensajes a 1 MiB y las colas a 16 entradas. Los límites
+globales de sesiones pertenecen al modo gateway. Las muestras de estado cubren
+el proxy y su servidor directo; no incluyen a todos sus descendientes.
+
+## Gateway HTTP opcional
 
 Requisitos: Windows, Python 3.12 y Node.js 22 o posterior en `PATH`. Usa una terminal normal, sin permisos de administrador.
 
@@ -68,6 +106,8 @@ Es un fragmento de perfil, no la configuración completa. Conserva las rutas y l
 
 | Opción | Efecto |
 | --- | --- |
+| `transport: "stdio"` | Proxy ligero sin supervisor en primer plano. `gateway` conserva la compatibilidad con configuraciones anteriores. |
+| `restart_policy: "stateless"` | Autoriza el reinicio tras inactividad limpia en el modo ligero. El valor predeterminado `manual` pide reconectar. |
 | `idle_session_timeout_seconds` | Plazo de inactividad por perfil. `0` desactiva el vencimiento. El valor predeterminado es 900 segundos. |
 | `cleanup_scope: "tree"` | El árbol privado del servidor queda dentro de un Job Object de Windows y se limpia con su sesión. |
 | `cleanup_scope: "process"` | Sólo se limpia el proceso del servidor; sus hijos pueden ser compartidos y seguir ejecutándose. |
@@ -97,7 +137,12 @@ Usa `process` cuando el servidor inicie servicios compartidos intencionalmente. 
 - La actividad del servidor que renueva el plazo de inactividad.
 - La identidad del propietario mediante PID y hora de creación, para rechazar PID reutilizados.
 
-Un stream pasivo no mantiene viva indefinidamente una sesión sin trabajo. Cancelar libera la protección de esa solicitud; no demuestra que el servidor haya terminado. Cuando una sesión vencida devuelve HTTP 404, `connect` informa un error MCP fijo que pide reconectar y cierra la conexión. No repite llamadas de herramientas ni recupera silenciosamente el estado del servidor. La compatibilidad probada con aplicaciones se registra en [VALIDATION.md](VALIDATION.md).
+Un stream pasivo no mantiene viva indefinidamente una sesión gateway sin trabajo. Cancelar no demuestra que el servidor haya terminado. Cuando una sesión gateway vencida devuelve HTTP 404, `connect` pide reconectar y cierra la conexión. El reinicio stateless ligero sigue las condiciones anteriores. La compatibilidad probada se registra en [VALIDATION.md](VALIDATION.md).
+
+Los clientes stdio modernos pueden enviar `server/discover` antes de inicializar.
+Warden responde con un error JSON-RPC asociado al ID correcto y conserva la
+conexión para la negociación anterior con `initialize`. Es compatibilidad con
+esa consulta previa; no implementa toda la revisión de protocolo 2026-07-28.
 
 ## Datos locales y alcance
 
@@ -118,7 +163,11 @@ npm test
 
 Las pruebas usan servidores sintéticos locales y carpetas temporales. El [workflow de CI](.github/workflows/test.yml) ejecuta la suite en Windows. Tener el archivo del workflow no acredita una ejecución remota exitosa: revisa su resultado y [VALIDATION.md](VALIDATION.md).
 
-Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) y la [comparación con proyectos relacionados](docs/alternatives.md).
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), la
+[comparación con proyectos relacionados](docs/alternatives.md) y la
+[medición de la primera alfa](docs/benchmark-results-2026-10-30.md).
+Ese resultado mostró por qué hacía falta reducir el costo del modo stdio;
+no acredita superioridad general frente a otros supervisores.
 
 ## Licencia y atribución
 

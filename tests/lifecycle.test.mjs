@@ -349,3 +349,18 @@ test('Windows MCP session lifecycle', { skip: process.platform !== 'win32', time
     assert.equal((await c.post({ jsonrpc: '2.0', id: 'orphan', method: 'tools/list' })).status, 404);
   });
 });
+
+test('configured initialization deadline allows an owner bridge taking over ten seconds',
+  { skip: process.platform !== 'win32', timeout: 25000 }, async t => {
+    const h = await harness(t, IDLE_SECONDS, { handshake_timeout_seconds: 18 });
+    const wrapper = path.join(h.directory, 'slow-owner.py');
+    await writeFile(wrapper, 'import time,runpy\ntime.sleep(10.2)\nrunpy.run_path('
+      + JSON.stringify(path.join(ROOT, 'runtime', 'owned_bridge.py')) + ',run_name="__main__")\n');
+    h.gateway.config.owned_bridge = wrapper;
+    const response = await exchange(h.port, h.headers, { jsonrpc: '2.0', id: 'slow-owner', method: 'initialize',
+      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'slow-owner', version: '1' } } },
+      { timeoutMs: 20000 });
+    assert.equal(response.status, 200, response.text);
+    assert.ok(response.messages.some(message => message.id === 'slow-owner' && message.result));
+    assert.equal((await h.events()).filter(event => event.event === 'bridge_started').length, 1);
+  });

@@ -131,8 +131,12 @@ class CacheLock:
 
 
 class WindowsJob:
-    """Place a suspended child in an unnamed kill-on-close Job before any code runs."""
-    def __init__(self):
+    """Own a suspended child before it runs; optionally let descendants leave this Job.
+
+    Silent breakaway applies only to this Job. An outer client/CI Job can still
+    contain descendants according to its own policy.
+    """
+    def __init__(self, include_descendants=True):
         import ctypes as c
         from ctypes import wintypes as w
         self.c = c
@@ -159,6 +163,8 @@ class WindowsJob:
             raise c.WinError(c.get_last_error())
         info = EXT()
         info.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        if not include_descendants:
+            info.BasicLimitInformation.LimitFlags |= 0x1000  # JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK
         if not self.k.SetInformationJobObject(self.handle, 9, c.byref(info), c.sizeof(info)):
             self.close()
             raise c.WinError(c.get_last_error())
@@ -280,21 +286,22 @@ class Bridge:
         args = [self.spec["command"], *self.spec.get("args", [])]
         kwargs = dict(stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr.buffer,
                       cwd=self.cwd, env=self.environment, bufsize=0)
-        if os.name == "nt" and self.cleanup_scope == "tree":
+        if os.name == "nt":
             # Fail closed only for unsafe launch mechanics; never resume an unowned suspended child.
-            self.job = WindowsJob()
-            self.proc = subprocess.Popen(args, creationflags=0x08000000 | 0x00000004, **kwargs)
+            # Process scope retains crash cleanup for the root, while shared daemons
+            # automatically leave this Job when they are created.
+            self.job = WindowsJob(include_descendants=self.cleanup_scope == "tree")
             try:
+                self.proc = subprocess.Popen(args, creationflags=0x08000000 | 0x00000004, **kwargs)
                 self.job.attach_and_resume(self.proc)
             except BaseException:
-                self.proc.kill()
-                self.proc.wait(timeout=5)
-                self.job.close()
+                try:
+                    if self.proc is not None:
+                        self.proc.kill()
+                        self.proc.wait(timeout=5)
+                finally:
+                    self.job.close()
                 raise
-        elif os.name == "nt":
-            # Opt-in for servers that can launch shared external daemons (for example ADB).
-            # Their daemon must outlive this connection; ownership covers only the direct child.
-            self.proc = subprocess.Popen(args, creationflags=0x08000000, **kwargs)
         else:
             self.proc = subprocess.Popen(args, start_new_session=self.cleanup_scope == "tree", **kwargs)
         threading.Thread(target=self.read_stream, args=(self.proc.stdout, self.events, "backend"), daemon=True).start()
@@ -519,7 +526,7 @@ class Bridge:
             pass
         finally:
             if self.job:
-                self.job.close()  # Includes descendants even if the direct child already exited.
+                self.job.close()  # Descendant ownership follows the selected cleanup scope.
             elif os.name != "nt" and self.cleanup_scope == "tree":
                 import signal
                 try:

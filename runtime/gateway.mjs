@@ -293,7 +293,7 @@ export class Gateway {
       child.stdin.on('error', () => {});
       while (!existsSync(identityPath)) {
         if (record.closing || record.spawnFailed || child.exitCode !== null || child.signalCode !== null
-          || Date.now() >= Math.min(record.deadline, record.deadline - budget + 10000)) throw new Error('owner_unavailable');
+          || Date.now() >= record.deadline) throw new Error('owner_unavailable');
         await delay(10);
       }
       const identity = JSON.parse(readFileSync(identityPath, 'utf8'));

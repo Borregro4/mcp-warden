@@ -18,9 +18,12 @@ import secrets
 import shutil
 import subprocess
 import sys
+import threading
+import time
+import uuid
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.1.0-alpha.1"
+VERSION = "0.2.0-alpha.1"
 
 
 class WardenError(Exception):
@@ -31,7 +34,10 @@ def state_path(value: str | Path) -> Path:
     return Path(value).expanduser().resolve()
 
 
-def initialize(state: Path, port: int = 18741, idle_seconds: float = 900) -> dict:
+def initialize(state: Path, port: int = 18741, idle_seconds: float = 900,
+               transport: str = 'gateway', restart_policy: str = 'manual') -> dict:
+    if transport not in {'gateway', 'stdio'} or restart_policy not in {'manual', 'stateless'}:
+        raise WardenError('invalid transport or restart policy')
     if type(port) is not int or not 1024 <= port <= 65535:
         raise WardenError("port must be between 1024 and 65535")
     if not isinstance(idle_seconds, (float, int)) or not 0 <= idle_seconds <= 86400:
@@ -63,7 +69,8 @@ def initialize(state: Path, port: int = 18741, idle_seconds: float = 900) -> dic
         "bridge": str(ROOT / "runtime" / "lazy_stdio.py"),
         "handshake_timeout_seconds": 120,
         "idle_session_timeout_seconds": idle_seconds,
-        "profiles": {"example": {"manifest": manifest, "shutdown_grace_seconds": 0.5}},
+        "profiles": {"example": {"manifest": manifest, "shutdown_grace_seconds": 0.5,
+                                   "transport": transport, "restart_policy": restart_policy}},
     }
     with (state / "config.json").open("x", encoding="utf-8") as output:
         json.dump(config, output, indent=2)
@@ -187,6 +194,11 @@ def connect(state: Path, profile: str) -> int:
     config = load_config(state)
     if profile not in config["profiles"]:
         raise WardenError("unknown profile")
+    transport = config['profiles'][profile].get('transport', 'gateway')
+    if transport == 'stdio':
+        return connect_stdio(state_path(state), profile, config)
+    if transport != 'gateway':
+        raise WardenError('unknown profile transport')
     command = [node_executable(), str(ROOT / "runtime" / "connect.mjs"),
                "--state", str(state), "--profile", profile,
                "--owner-pid", str(os.getpid()), "--owner-created", str(own_creation_time())]
@@ -223,6 +235,100 @@ def connect(state: Path, profile: str) -> int:
         job.close()
 
 
+def runtime_module(name: str, filename: str):
+    spec = importlib.util.spec_from_file_location(name, ROOT / 'runtime' / filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def connect_stdio(state: Path, profile: str, config: dict) -> int:
+    """One Python proxy and its backend: no HTTP supervisor or Node connector."""
+    selected = config['profiles'][profile]
+    manifest = dict(selected['manifest'])
+    manifest.update(cwd=os.getcwd(),
+                    idle_session_timeout_seconds=selected.get('idle_session_timeout_seconds',
+                        config.get('idle_session_timeout_seconds', 900)),
+                    restart_policy=selected.get('restart_policy', 'manual'))
+    directory = state / 'run' / 'stdio' / uuid.uuid4().hex
+    directory.mkdir(parents=True, mode=0o700)
+    manifest['stderr_log_dir'] = str(directory / 'stderr')
+    module = runtime_module('warden_idle_stdio', 'idle_stdio.py')
+    metrics = runtime_module('warden_stdio_metrics', 'owned_bridge.py')
+    # Diagnostics stay outside the protocol stream; backend logs may be private.
+    module.redirect_diagnostics(manifest, state / 'config.json')
+    bridge = module.IdleBridge(manifest)
+    done = threading.Event()
+    owner = metrics.PinnedProcess(os.getpid())
+
+    def save(active):
+        samples = [owner.usage()]
+        backend_pid = None
+        process = bridge.proc  # Pin one generation reference across the sampler's check.
+        try:
+            if process is not None and process.poll() is None:
+                backend = metrics.PinnedProcess(process.pid)
+                try:
+                    samples.append(backend.usage())
+                    backend_pid = backend.pid
+                finally:
+                    backend.close()
+        except (OSError, ValueError):
+            pass
+        value = {'active': active, 'profile': profile, 'ownerPid': owner.pid,
+                 'ownerCreated': str(owner.created), 'backendPid': backend_pid,
+                 'sampledAt': time.time(), 'workingSetBytes': sum(x[0] for x in samples),
+                 'cpuSeconds': sum(x[1] for x in samples), 'sampledProcesses': len(samples),
+                 'usageScope': 'proxy_and_direct_backend_only'}
+        temporary = directory / 'status.tmp'
+        temporary.write_text(json.dumps(value), encoding='utf-8')
+        os.replace(temporary, directory / 'status.json')
+
+    def sample():
+        while not done.is_set():
+            try:
+                save(True)
+            except (OSError, ValueError):
+                pass
+            done.wait(2)
+
+    sampler = threading.Thread(target=sample, daemon=True)
+    sampler.start()
+    try:
+        return bridge.run()
+    finally:
+        done.set()
+        sampler.join(timeout=3)
+        try:
+            save(False)
+        except (OSError, ValueError):
+            pass
+        owner.close()
+
+
+def get_stdio_status(state: Path) -> dict:
+    require_windows()
+    load_config(state)
+    metrics = runtime_module('warden_status_metrics', 'owned_bridge.py')
+    samples = []
+    for file in (state / 'run' / 'stdio').glob('*/status.json'):
+        try:
+            if file.stat().st_size > 4096:
+                continue
+            value = json.loads(file.read_text(encoding='utf-8'))
+            if not value.get('active'):
+                continue
+            owner = metrics.PinnedProcess(value['ownerPid'], value['ownerCreated'])
+            try:
+                if owner.alive():
+                    samples.append(value)
+            finally:
+                owner.close()
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return {'status': 'ready', 'transport': 'stdio', 'sessionCount': len(samples), 'samples': samples}
+
+
 def configuration(state: Path, profile: str, client: str) -> str:
     config = load_config(state)
     if profile not in config["profiles"] or re.fullmatch(r"[A-Za-z0-9_-]+", profile) is None:
@@ -239,10 +345,10 @@ def configuration(state: Path, profile: str, client: str) -> str:
     ])
 
 
-def doctor(state: Path | None) -> dict:
+def doctor(state: Path | None, transport: str = 'gateway') -> dict:
     node = shutil.which("node")
     node_supported = False
-    if node:
+    if node and transport != 'stdio':
         try:
             result = subprocess.run(
                 [node, "--version"], capture_output=True, text=True, timeout=3,
@@ -262,6 +368,9 @@ def doctor(state: Path | None) -> dict:
         "dependencies_installed": (ROOT / "node_modules" / "supergateway" / "package.json").is_file(),
         "sdk_installed": (ROOT / "node_modules" / "@modelcontextprotocol" / "sdk" / "package.json").is_file(),
     }
+    if transport == 'stdio':
+        checks = {key: value for key, value in checks.items() if key in ('windows_runtime', 'python_311_or_newer')}
+        checks['stdio_runtime_source'] = (ROOT / 'runtime' / 'idle_stdio.py').is_file()
     if state is not None:
         try:
             load_config(state)
@@ -282,17 +391,21 @@ def main(argv: list[str] | None = None) -> int:
         if name == "init":
             sub.add_argument("--port", type=int, default=18741)
             sub.add_argument("--idle-seconds", type=float, default=900)
+            sub.add_argument('--transport', choices=('gateway', 'stdio'), default='gateway')
+            sub.add_argument('--restart-policy', choices=('manual', 'stateless'), default='manual')
         if name in {"connect", "configuration"}:
             sub.add_argument("--profile", required=True)
         if name == "configuration":
             sub.add_argument("--client", choices=("codex", "claude"), required=True)
         if name in {"status", "doctor"}:
             sub.add_argument("--json", action="store_true")
+            sub.add_argument('--transport', choices=('gateway', 'stdio'), default='gateway')
     args = parser.parse_args(argv)
     try:
         if args.command == "init":
-            initialize(args.state, args.port, args.idle_seconds)
-            print("State initialized. Review config.json, then run serve with this state directory.")
+            initialize(args.state, args.port, args.idle_seconds, args.transport, args.restart_policy)
+            print('State initialized. Review config.json and generate client configuration.'
+                  + (' Run serve first for gateway profiles.' if args.transport == 'gateway' else ''))
             return 0
         if args.command == "serve":
             return serve(args.state)
@@ -301,14 +414,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "configuration":
             print(configuration(args.state, args.profile, args.client))
             return 0
-        data = get_status(args.state) if args.command == "status" else doctor(args.state)
+        data = (get_stdio_status(args.state) if args.transport == 'stdio' else get_status(args.state)) \
+            if args.command == "status" else doctor(args.state, args.transport)
         if args.json:
             print(json.dumps(data, indent=2))
         elif args.command == "doctor":
             for key, passed in data["checks"].items():
                 print(("OK   " if passed else "FAIL ") + key)
         else:
-            print("Gateway ready; " + str(data.get("sessionCount", 0)) + " active sessions; "
+            print(("Stdio supervisor; " if args.transport == 'stdio' else "Gateway ready; ") + str(data.get("sessionCount", 0)) + " active sessions; "
                   + str(data.get("pendingRequestCount", 0)) + " pending requests.")
         return 0 if args.command != "doctor" or data["ready"] else 1
     except WardenError as error:

@@ -1,0 +1,68 @@
+name: Windows synthetic comparison
+on:
+  push:
+    branches: ['validation/benchmark', 'improve/native-lightweight']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - name: Download and verify upstream release
+        shell: pwsh
+        run: |
+          $thirdParty = Join-Path $env:RUNNER_TEMP 'snooze-official'
+          New-Item -ItemType Directory -Force -Path $thirdParty | Out-Null
+          $archive = Join-Path $thirdParty 'mcp-snooze-windows.zip'
+          Invoke-WebRequest -Uri 'https://github.com/askmegit/mcp-snooze/releases/download/v0.1.0/mcp-snooze_0.1.0_windows_amd64.zip' -OutFile $archive
+          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne '1694342e4d7f4cf64cfdd17e65edc10280a7727be438bd9328ff8824b0442880') { throw 'Upstream archive digest mismatch' }
+          Expand-Archive -LiteralPath $archive -DestinationPath $thirdParty
+      - name: Run predeclared four-way comparison
+        shell: pwsh
+        run: |
+          $binary = Join-Path $env:RUNNER_TEMP 'snooze-official/mcp-snooze.exe'
+          $results = Join-Path $env:RUNNER_TEMP 'benchmark-raw'
+          node scripts/benchmark.mjs --snooze $binary --out $results --runs 3
+      - name: Select synthetic report files only
+        if: always()
+        shell: pwsh
+        run: |
+          $raw = Join-Path $env:RUNNER_TEMP 'benchmark-raw'
+          $public = Join-Path $env:RUNNER_TEMP 'benchmark-public'
+          New-Item -ItemType Directory -Force -Path $public | Out-Null
+          $tokens = @()
+          if (Test-Path -LiteralPath $raw) {
+            $tokens = @(Get-ChildItem -LiteralPath $raw -Filter token -Recurse -File | ForEach-Object { (Get-Content -Raw -LiteralPath $_.FullName).Trim() })
+          }
+          foreach ($name in @('plan.json','results.json','summary.json','environment-abort.json')) {
+            $source = Join-Path $raw $name
+            if (Test-Path -LiteralPath $source) {
+              $text = Get-Content -Raw -LiteralPath $source
+              $null = $text | ConvertFrom-Json
+              foreach ($token in $tokens) {
+                if ($token.Length -ge 32 -and $text.Contains($token)) { throw 'Runtime token detected in report; refusing upload' }
+              }
+              Copy-Item -LiteralPath $source -Destination (Join-Path $public $name)
+            }
+          }
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: windows-synthetic-comparison
+          path: ${{ runner.temp }}/benchmark-public/*.json
+          if-no-files-found: warn
+          retention-days: 7

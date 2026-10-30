@@ -1,6 +1,6 @@
 {
   "name": "mcp-warden",
-  "version": "0.1.0-alpha.1",
+  "version": "0.2.0-alpha.1",
   "description": "Windows lifecycle supervisor for local MCP sessions",
   "private": true,
   "type": "module",

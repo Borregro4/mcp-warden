@@ -59,7 +59,9 @@ def handle(message):
     elif method == "ping":
         result(ident, {})
     elif method == "tools/list":
-        result(ident, {"tools": [
+        result(ident, {"tools": [{**tool, "annotations": {
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False}} for tool in [
             {"name": "echo", "description": "Return a value and this backend PID.",
              "inputSchema": {"type": "object", "properties": {"value": {"type": "string"}}}},
             {"name": "sleep", "description": "Return after a bounded delay (maximum 30 seconds).",
@@ -68,7 +70,7 @@ def handle(message):
              "inputSchema": {"type": "object", "properties": {}}},
             {"name": "notify_callback", "description": "Return, then ask roots/list over the event stream.",
              "inputSchema": {"type": "object", "properties": {}}},
-        ]})
+        ]]})
     elif method == "tools/call":
         params = message.get("params", {})
         arguments = params.get("arguments", {})

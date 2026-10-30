@@ -2,7 +2,7 @@
 
 [Español](README.es.md)
 
-A local lifecycle supervisor for MCP servers on Windows. It puts a stateful HTTP gateway between a stdio client and its backend, protects work in progress, and releases idle sessions and their owned processes.
+A local lifecycle supervisor for MCP servers on Windows. The lightweight mode runs a Python stdio proxy and its backend. The optional gateway mode provides stateful HTTP sessions and central admission limits. Both protect work in progress and clean up owned processes.
 
 **Alpha software.** This release focuses on session lifecycle and Windows process ownership. It does not select AI models, enforce subscription quotas, or claim token or cost savings. See [validation and current limits](VALIDATION.md) before adopting it.
 
@@ -12,7 +12,44 @@ Several coding sessions can leave several copies of the same MCP backend running
 
 MCP Warden adds that lifecycle policy around [Supergateway](https://github.com/supercorp-ai/supergateway), which supplies the HTTP/SSE transport. It binds a session to a Windows PID **and creation time**, protects in-flight requests and callbacks, and lets an idle HTTP session expire even when a passive GET stream remains open.
 
-## Quick start
+## Lightweight quick start
+
+Requirements: Windows and Python 3.12 on `PATH`. This runtime mode needs no
+Node process, npm installation, HTTP listener or foreground gateway.
+
+The included example is synthetic and stateless. For this example:
+
+```powershell
+python warden.py init --state .warden-state --transport stdio --restart-policy stateless
+python warden.py doctor --state .warden-state --transport stdio
+python warden.py configuration --state .warden-state --profile example --client codex
+# Or print the Claude configuration:
+python warden.py configuration --state .warden-state --profile example --client claude
+```
+
+Add the printed entry to your client. The client launches `connect` when needed.
+Observe validated running proxy identities with:
+
+```powershell
+python warden.py status --state .warden-state --transport stdio --json
+```
+
+Declare `restart_policy: "stateless"` only when losing backend memory, cursors
+and selections is acceptable. The default policy is `manual`: an expired
+connection reports that a client reconnect is required. For stateful backends,
+you can disable idle expiry with `idle_session_timeout_seconds: 0`.
+
+Stateless wake keeps the stdio connection open, reinitializes the backend,
+validates its initialization instructions and previously observed tool metadata,
+then sends the new request once. Changed schemas or approval annotations,
+paginated discovery, missing discovery baseline, cancellation or uncertain
+outcomes require a fresh client connection. Old tool calls are never replayed.
+
+This mode bounds input frames to 1 MiB and queues to 16 entries. It does not
+provide the gateway's global/per-profile session admission limits. Status
+samples cover the proxy and direct backend; they do not include every descendant.
+
+## Optional HTTP gateway
 
 Requirements: Windows, Python 3.12, and Node.js 22 or newer on `PATH`. Run in a normal user terminal.
 
@@ -68,6 +105,8 @@ This is a profile fragment, not a complete gateway configuration. Preserve the p
 
 | Setting | Meaning |
 | --- | --- |
+| `transport: "stdio"` | Lightweight proxy; no foreground supervisor needed. `gateway` remains the compatibility default for older configs. |
+| `restart_policy: "stateless"` | Explicit opt-in to clean idle restart in lightweight mode. Default `manual` preserves an explicit reconnect boundary. |
 | `idle_session_timeout_seconds` | Idle deadline per profile. `0` disables idle expiry. The default is 900 seconds. |
 | `cleanup_scope: "tree"` | Private backend process tree belongs to a Windows Job Object and is cleaned up with the session. |
 | `cleanup_scope: "process"` | Clean up only the backend process; descendants may be shared and may remain running. |
@@ -95,7 +134,12 @@ Choose `process` for a backend that deliberately launches shared services. Use `
 - Backend activity that refreshes the idle deadline.
 - Windows owner identity, checked using PID and creation time to reject PID reuse.
 
-A passive event stream does not keep an otherwise idle session alive indefinitely. Cancellation releases the corresponding pending-request lease; it does not prove that a backend has stopped working. When an expired session returns HTTP 404, `connect` reports a fixed MCP error requesting reconnection and closes the connection. It does not replay tool calls or silently restore backend state. Actual application compatibility is recorded in [VALIDATION.md](VALIDATION.md).
+A passive event stream does not keep an otherwise idle gateway session alive indefinitely. Cancellation does not prove that a backend has stopped working. When an expired gateway session returns HTTP 404, `connect` reports a fixed MCP error requesting reconnection and closes the connection. Lightweight stateless restart follows the stricter rules above. Actual application compatibility is recorded in [VALIDATION.md](VALIDATION.md).
+
+Modern stdio clients may probe `server/discover` before initialization. Warden
+returns a correlated JSON-RPC method error and keeps the connection open for
+the documented legacy `initialize` fallback. This is compatibility with that
+probe, not an implementation of the complete 2026-07-28 protocol era.
 
 ## Local data and boundaries
 
@@ -115,7 +159,11 @@ npm test
 
 Tests use synthetic local backends and temporary state. The [CI workflow](.github/workflows/test.yml) runs the suite on Windows. A workflow file alone is not a successful remote run; consult its run result and [VALIDATION.md](VALIDATION.md).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the [comparison with related projects](docs/alternatives.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), the
+[comparison with related projects](docs/alternatives.md), and
+[the measured first-alpha comparison](docs/benchmark-results-2026-10-30.md).
+That result showed why a lower-cost stdio mode was needed; it does not establish
+general superiority over other supervisors.
 
 ## License and attribution
 

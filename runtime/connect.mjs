@@ -68,6 +68,14 @@ export async function connect(options) {
   http.onmessage = message => { if (!closing) void stdio.send(message).catch(() => shutdown()); };
   stdio.onmessage = message => {
     if (closing) return;
+    // Modern clients probe stdio before the legacy initialize handshake.
+    // This adapter is legacy: a correlated JSON-RPC error permits the
+    // documented fallback without forwarding an invalid HTTP initialization.
+    if (!http.sessionId && message.method === 'server/discover' && Object.hasOwn(message, 'id')) {
+      void stdio.send({ jsonrpc: '2.0', id: message.id,
+        error: { code: -32601, message: 'Method not found; use the initialize handshake.' } }).catch(() => shutdown());
+      return;
+    }
     void http.send(message).catch(async error => {
       const expired = error?.code === 404;
       try {
