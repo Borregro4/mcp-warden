@@ -1,0 +1,55 @@
+name: Windows 60-minute endurance
+
+on:
+  push:
+    branches:
+      - validation/soak-native
+    paths:
+      - '.github/workflows/soak.yml'
+      - 'scripts/soak.mjs'
+      - 'scripts/soak_metrics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-warden-soak-validation
+  cancel-in-progress: false
+
+jobs:
+  soak:
+    runs-on: windows-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - name: Check harness syntax
+        run: |
+          node --check scripts/soak.mjs
+          python -m py_compile scripts/soak_metrics.py
+      - name: Run regular regression suite
+        run: npm test
+      - name: Run real-time 60-minute endurance
+        run: node scripts/soak.mjs --minutes 60 --idle 900 --sample 30 --targetMib 256 --abortMib 768 --minFreeGib 3 --out work/soak-ci
+      - name: Upload selected synthetic observations
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: windows-soak-sanitized
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            work/soak-ci/plan.json
+            work/soak-ci/preflight.json
+            work/soak-ci/observations.jsonl
+            work/soak-ci/result.json
