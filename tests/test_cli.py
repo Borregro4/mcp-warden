@@ -90,6 +90,24 @@ class StateContracts(unittest.TestCase):
         with self.assertRaises(warden.WardenError):
             warden.load_config(self.state)
 
+    def test_load_config_resolves_equivalent_state_path_before_token_check(self):
+        expected = warden.initialize(self.state)
+        # Resolves to the same directory while retaining a distinct lexical
+        # representation, as Windows short/long TEMP aliases do in CI.
+        alias = self.state / "run" / ".."
+        self.assertNotEqual(alias, alias.resolve())
+        self.assertEqual(warden.load_config(alias), expected)
+
+    def test_equivalent_state_alias_still_rejects_sibling_token(self):
+        config = warden.initialize(self.state)
+        sibling = self.state.parent / (self.state.name + "-sibling")
+        sibling.mkdir()
+        (sibling / "token").write_text("different-local-token", encoding="ascii")
+        config["token_file"] = str(sibling / "token")
+        (self.state / "config.json").write_text(json.dumps(config), encoding="utf-8")
+        with self.assertRaises(warden.WardenError):
+            warden.load_config(self.state / "run" / "..")
+
 
 class HealthContract(unittest.TestCase):
     def test_status_sends_token_only_as_authorization_header(self):

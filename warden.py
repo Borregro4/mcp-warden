@@ -73,6 +73,10 @@ def initialize(state: Path, port: int = 18741, idle_seconds: float = 900) -> dic
 
 def load_config(state: Path) -> dict:
     try:
+        # Both sides must use the same resolved directory identity. In
+        # particular, Windows TEMP may use an 8.3 alias while init saved the
+        # long path; lexical comparison would reject that valid state.
+        state = state_path(state)
         raw = (state / "config.json").read_bytes()
         if len(raw) > 1024 * 1024:
             raise ValueError()

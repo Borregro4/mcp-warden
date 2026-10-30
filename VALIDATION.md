@@ -12,7 +12,8 @@ npm test
 npm audit --omit=dev
 ```
 
-The full local run passed **13 Node test entries** and **15 Python tests**.
+The local protocol run passed **13 Node test entries**. After the path-alias
+regression fix, the Python suite passed **17 tests**.
 The pure gateway entry contains 34 assertions; it is included in the 13,
 not another 34 independent integration tests.
 
@@ -43,6 +44,12 @@ Covered behavior:
 
 The tests caught a real Windows pipe inheritance problem and connector shutdown
 issues during preparation. The final tests include those cases.
+
+The first remote Windows CI run passed the 13 Node entries but failed two Python
+cases because the state comparison used a resolved token path and an unresolved
+state alias. `load_config` now resolves its state argument first. A regression
+test failed before this change and passed afterward; another case confirms that
+a token in a sibling directory is still rejected.
 
 ## Dependency and publication checks
 
