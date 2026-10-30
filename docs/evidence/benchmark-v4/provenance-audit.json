@@ -1,0 +1,183 @@
+{
+  "provenance": {
+    "headSha": "a2bb764c9a9299bd392ad7502d553ad9676bc5af",
+    "runId": 41078627365,
+    "jobId": 124141473790,
+    "artifactId": 12989156048,
+    "artifactSha256": "4d474b3230a72aa389629664bcf21b58f076d81dc4153f1f53ff495d3298832a",
+    "artifactSizeBytes": 17703,
+    "benchmarkRunUrl": "https://github.com/Borregro4/mcp-warden/actions/runs/41078627365",
+    "artifactUrl": "https://github.com/Borregro4/mcp-warden/actions/runs/41078627365/artifacts/12989156048",
+    "ciRunId": 41078627321,
+    "ciJobId": 124141473882,
+    "ciRunUrl": "https://github.com/Borregro4/mcp-warden/actions/runs/41078627321",
+    "ci": {
+      "conclusion": "success",
+      "nodeTests": 49,
+      "nodeFailed": 0,
+      "pythonTests": 70,
+      "pythonPassed": true
+    },
+    "environment": {
+      "os": "Microsoft Windows Server 2025",
+      "node": "v22.23.4",
+      "python": "CPython 3.12.10"
+    }
+  },
+  "audit": {
+    "headSha": "a2bb764c9a9299bd392ad7502d553ad9676bc5af",
+    "baselineSha": "5c95856307e6610c9a1cf2b19a2f6d5cd208deea",
+    "artifactSha256": "4d474b3230a72aa389629664bcf21b58f076d81dc4153f1f53ff495d3298832a",
+    "passedRepetitions": 18,
+    "acceptedSampleRows": 228,
+    "samples": 54,
+    "samplerRejectedParentEdges": 0,
+    "acceptedAttributionIssues": 0,
+    "sourceChecks": [
+      {
+        "path": "scripts/benchmark.mjs",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "88d31a92b9eda17b71b1afb1f751edc1d9c0f90460a7b7af9922d069fd358f8b"
+      },
+      {
+        "path": "scripts/benchmark_backend.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8"
+      },
+      {
+        "path": "scripts/benchmark_processes.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "283802f56b256bbfd28f5be72d8334b9aab97a239c8bbd62a2440ac620f6f14f"
+      },
+      {
+        "path": "scripts/soak_metrics.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b"
+      },
+      {
+        "path": "scripts/benchmark_deltas.mjs",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "a2e3ccb789aa5292971a698e4a8e23622e4f6eaee464faec2e0811bde0500840"
+      },
+      {
+        "path": ".github/workflows/benchmark.yml",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "f81399d643c4ca146943111a1bb6d26302566ed38f2c874c3cfa9bc51ac60e23"
+      },
+      {
+        "path": "examples/echo_server.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d"
+      },
+      {
+        "path": "warden.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "bcd288de151afdfeacc76e91c2faf1d2f42599f411ee0939916dbf3b2f3153fb"
+      },
+      {
+        "path": "runtime/gateway.mjs",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "25e0b891683921bf07c615ea0551de405084de77d7e4b297753a92aca89ab104"
+      },
+      {
+        "path": "runtime/connect.mjs",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "f0fad1e1fdbd77a92b733d139318de91e1e55f47ccff9415dbcfae1cd4245aa9"
+      },
+      {
+        "path": "runtime/lazy_stdio.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "5b957d97ba64be441ef5ce6b4477ebf73d29b95db975f8f4dd75c82bbd61a1d8"
+      },
+      {
+        "path": "runtime/idle_stdio.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "ccc87826d029bdca2b3b85fd2eed5c90c5ee53d34c19aad5a34b59f1e8aebf52"
+      },
+      {
+        "path": "runtime/owned_bridge.py",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4"
+      },
+      {
+        "path": "package-lock.json",
+        "matched": [
+          "windows_crlf_checkout"
+        ],
+        "sha256": "4bf9e1fc9b0813aa6e77b96819af6a86fcfc4b79378a1a898234a5e9491621dd"
+      }
+    ],
+    "percentReductionVersusReference": {
+      "warden-stdio": {
+        "snooze": {
+          "medianColdMs": -47.85656251780876,
+          "medianWarmMs": -14.462627160850882,
+          "medianWakeMs": -13.140005454610726,
+          "medianIdlePrivateBytes": 70.71410798706145,
+          "medianIdleWorkingSetBytes": -74.49974345818369
+        },
+        "warden-v02": {
+          "medianColdMs": 17.583157543467422,
+          "medianWarmMs": 5.788132503714878,
+          "medianWakeMs": 19.161570107393246,
+          "medianIdlePrivateBytes": 13.836017569546119,
+          "medianIdleWorkingSetBytes": 14.256901550485315
+        }
+      },
+      "warden-stdio-release": {
+        "snooze": {
+          "medianColdMs": -46.15419564967766,
+          "medianWarmMs": -9.95134896025687,
+          "medianWakeMs": -13.479478323040489,
+          "medianIdlePrivateBytes": 70.75557767272123,
+          "medianIdleWorkingSetBytes": 28.168291431503334
+        },
+        "warden-v02": {
+          "medianColdMs": 18.53207519436359,
+          "medianWarmMs": 9.501274116968089,
+          "medianWakeMs": 18.9190170549629,
+          "medianIdlePrivateBytes": 13.958028306490972,
+          "medianIdleWorkingSetBytes": 64.70439934451028
+        },
+        "warden-stdio": {
+          "medianColdMs": 1.1513637535879122,
+          "medianWarmMs": 3.9412673922418784,
+          "medianWakeMs": -0.300046713861927,
+          "medianIdlePrivateBytes": 0.1416029453412631,
+          "medianIdleWorkingSetBytes": 58.83563657747721
+        }
+      }
+    },
+    "limits": [
+      "Retrospective artifact audit cannot repeat live process ownership or snapshot-cutoff checks.",
+      "Wake CPU and page-fault deltas cover stable explicit roots only; new/exited backends and descendants are excluded.",
+      "Three repetitions per variant on one shared runner do not establish general superiority."
+    ]
+  }
+}

@@ -36,6 +36,9 @@ those servers explicitly and disable unrelated extensions, built-ins, skills,
 hooks, apps and plugins for the test thread. It then enables only the test
 connector and its explicit tool allowlist. `config/read` response bodies are
 excluded from raw logs, and unrelated configuration values are not persisted.
+Only the fixture server's allowlisted `write_file` and `edit_file` receive
+per-tool `approval_mode = "approve"`, within the authorized synthetic workspace.
+Other fixture tools retain `auto`; unrelated actions remain unavailable.
 The connected inventory must contain only the test server before inference.
 The [MCP configuration reference](https://developers.openai.com/codex/mcp)
 documents `enabled_tools`, `required` and scoped tool approval configuration.
@@ -96,8 +99,12 @@ Scheduled times are minimum offsets from the first turn. Each later turn also
 waits at least `minimum_idle_seconds` after the previous result. No model
 requests occur during inactivity. Four-hour acceptance requires the fourth
 turn to start at or after 14,400 seconds and all three idle/wake transitions.
-The small smoke plan uses two turns, a two-second backend idle deadline and
-at least five seconds idle after the first result. Final cleanup requires a
+The final small smoke plan uses two turns, a ten-second backend idle deadline
+and at least fifteen seconds idle after the first result. A sampler reads only
+Warden's published status during a turn and validates its backend identity
+natively; this preserves evidence when the backend expires before the model's
+final reply. An arbitrary child process is never substituted for the backend.
+Final cleanup requires a
 normal app-server exit and zero remaining Warden sessions. Only this driver's
 own subprocess handle is eligible for forced termination, which fails cleanup.
 

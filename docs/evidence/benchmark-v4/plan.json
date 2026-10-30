@@ -1,0 +1,98 @@
+{
+  "version": 4,
+  "preparedUtc": "2026-10-30T15:13:34.863Z",
+  "platform": "win32",
+  "runsPerVariant": 3,
+  "variants": [
+    "direct",
+    "snooze",
+    "warden-v02",
+    "warden-gateway",
+    "warden-stdio",
+    "warden-stdio-release"
+  ],
+  "allocationMiB": 32,
+  "sessions": 1,
+  "idleSeconds": 2,
+  "warmCalls": 10,
+  "orders": [
+    [
+      "direct",
+      "snooze",
+      "warden-v02",
+      "warden-gateway",
+      "warden-stdio",
+      "warden-stdio-release"
+    ],
+    [
+      "snooze",
+      "warden-v02",
+      "warden-gateway",
+      "warden-stdio",
+      "warden-stdio-release",
+      "direct"
+    ],
+    [
+      "warden-v02",
+      "warden-gateway",
+      "warden-stdio",
+      "warden-stdio-release",
+      "direct",
+      "snooze"
+    ]
+  ],
+  "protocolClient": "@modelcontextprotocol/sdk 1.32.0",
+  "node": "v22.23.4",
+  "baseline": {
+    "commit": "5c95856307e6610c9a1cf2b19a2f6d5cd208deea",
+    "sourceHashes": {
+      "warden.py": "5bbb4e244ad463babcd0de6e1d4847a03fe34e1505848524848846c5f09f88e9",
+      "runtime/lazy_stdio.py": "604ac275816445cdd7b2208ef7590d55abad1495e8fbdc01b24f3676916a3ee6",
+      "runtime/idle_stdio.py": "3abeddced072a694f557b500b484263462f73e9b38f5d8b1be16fc583217664b",
+      "runtime/owned_bridge.py": "5ccc3a4069bb49bcf3474f8a0a39402b6b77d6943a7aad9855015a65c1e300ab"
+    },
+    "gitBlobs": {
+      "warden.py": "1bf79e6f82cb3e45b2c20ad85be8a13f527c8635",
+      "runtime/lazy_stdio.py": "403cb779a4ee8f7cca445c4315bf7b8f3b00a91a",
+      "runtime/idle_stdio.py": "1f06bb566a91c8362a3dfd5b0364e7cdf10a82bb",
+      "runtime/owned_bridge.py": "211529a8e9866002055b73c363c4552893840899"
+    },
+    "transport": "stdio",
+    "restartPolicy": "stateless",
+    "npmDependenciesUsed": false
+  },
+  "snooze": {
+    "version": "0.1.0",
+    "binarySha256": "43e02bbc1148718c3305e74974d0a57ae032e3e9c366b755d53519ee580971db"
+  },
+  "criteria": {
+    "sameWorkload": "Same 32 MiB resident Python fixture, SDK client, one session, ten echo calls and reverse callback.",
+    "cold": "Elapsed client connect, tools/list and first echo; includes starting variant processes.",
+    "warm": "Ten serial echo round trips, individual latency in milliseconds.",
+    "longCall": "Three-second call must complete under two-second idle deadline.",
+    "idle": "Resource sample after three seconds without client requests; retain proxy/supervisor cost.",
+    "wake": "Attempt echo. Gateway may explicitly expire: record failure and one reconnect in its time. Stateless stdio must resume on the same client connection after metadata validation.",
+    "resources": "Canonical Windows ownership selection validates every parent/child creation time against snapshot cutoff and previously observed root birth identities. Sum private bytes and working set; unavailable entries invalidate a complete resource claim.",
+    "wakeCounters": "Idle-to-awake CPU seconds and page-fault deltas include only explicit roots alive at both samples with identical PID+creation. New backends, exited roots and descendants are excluded, never attributed zero. The interval includes wake and sampler delay; these are not total stack CPU or hard page faults.",
+    "pageRelease": "Only warden-stdio-release opts into release_idle_pages:true. Other variants retain their default memory policy. Lower working set does not imply lower committed private memory.",
+    "cleanup": "After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.",
+    "guards": "Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB."
+  },
+  "decisionRule": "Report raw observations and medians; no general winner or subscription/token saving inferred.",
+  "sourceHashes": {
+    "scripts/benchmark.mjs": "88d31a92b9eda17b71b1afb1f751edc1d9c0f90460a7b7af9922d069fd358f8b",
+    "scripts/benchmark_backend.py": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8",
+    "scripts/benchmark_processes.py": "283802f56b256bbfd28f5be72d8334b9aab97a239c8bbd62a2440ac620f6f14f",
+    "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+    "scripts/benchmark_deltas.mjs": "a2e3ccb789aa5292971a698e4a8e23622e4f6eaee464faec2e0811bde0500840",
+    ".github/workflows/benchmark.yml": "f81399d643c4ca146943111a1bb6d26302566ed38f2c874c3cfa9bc51ac60e23",
+    "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+    "warden.py": "bcd288de151afdfeacc76e91c2faf1d2f42599f411ee0939916dbf3b2f3153fb",
+    "runtime/gateway.mjs": "25e0b891683921bf07c615ea0551de405084de77d7e4b297753a92aca89ab104",
+    "runtime/connect.mjs": "f0fad1e1fdbd77a92b733d139318de91e1e55f47ccff9415dbcfae1cd4245aa9",
+    "runtime/lazy_stdio.py": "5b957d97ba64be441ef5ce6b4477ebf73d29b95db975f8f4dd75c82bbd61a1d8",
+    "runtime/idle_stdio.py": "ccc87826d029bdca2b3b85fd2eed5c90c5ee53d34c19aad5a34b59f1e8aebf52",
+    "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+    "package-lock.json": "4bf9e1fc9b0813aa6e77b96819af6a86fcfc4b79378a1a898234a5e9491621dd"
+  }
+}

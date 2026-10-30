@@ -1,0 +1,183 @@
+{
+  "preparedUtc": "2026-10-30T15:13:34.863Z",
+  "finishedUtc": "2026-10-30T15:16:15.939Z",
+  "runsPerVariant": 3,
+  "sourceChangedDuringRun": [],
+  "baselineChangedDuringRun": [],
+  "summaries": [
+    {
+      "variant": "direct",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 67.04670000000624,
+      "medianWarmMs": 0.21980000000621658,
+      "medianWakeMs": 0.583199999999124,
+      "medianWakeStableRootCpuSeconds": 0,
+      "medianWakeStableRootPageFaults": 0,
+      "wakeCounterExcludedRoots": [
+        [],
+        [],
+        []
+      ],
+      "medianActivePrivateBytes": 44740608,
+      "medianIdlePrivateBytes": 44740608,
+      "medianIdleWorkingSetBytes": 55373824,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "snooze",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 112.2496000000101,
+      "medianWarmMs": 0.4521999999997206,
+      "medianWakeMs": 59.03269999999975,
+      "medianWakeStableRootCpuSeconds": 0,
+      "medianWakeStableRootPageFaults": 67,
+      "wakeCounterExcludedRoots": [
+        [],
+        [],
+        []
+      ],
+      "medianActivePrivateBytes": 92438528,
+      "medianIdlePrivateBytes": 49385472,
+      "medianIdleWorkingSetBytes": 15966208,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "warden-v02",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 201.37679999999818,
+      "medianWarmMs": 0.5493999999962398,
+      "medianWakeMs": 82.62110000000393,
+      "medianWakeStableRootCpuSeconds": 0.015625,
+      "medianWakeStableRootPageFaults": 2803,
+      "wakeCounterExcludedRoots": [
+        [],
+        [],
+        []
+      ],
+      "medianActivePrivateBytes": 61267968,
+      "medianIdlePrivateBytes": 16785408,
+      "medianIdleWorkingSetBytes": 32493568,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "warden-gateway",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 1126.7530000000115,
+      "medianWarmMs": 4.816200000001118,
+      "medianWakeMs": 680.2934999999998,
+      "medianWakeStableRootCpuSeconds": 0,
+      "medianWakeStableRootPageFaults": 0,
+      "wakeCounterExcludedRoots": [
+        [
+          {
+            "pid": 6292,
+            "reason": "not_alive_at_both_samples"
+          }
+        ],
+        [
+          {
+            "pid": 5560,
+            "reason": "not_alive_at_both_samples"
+          }
+        ],
+        [
+          {
+            "pid": 7984,
+            "reason": "not_alive_at_both_samples"
+          }
+        ]
+      ],
+      "medianActivePrivateBytes": 191389696,
+      "medianIdlePrivateBytes": 132812800,
+      "medianIdleWorkingSetBytes": 205848576,
+      "idleProcessCounts": [
+        8,
+        8,
+        8
+      ],
+      "explicitFirstWakeErrors": 3,
+      "errors": []
+    },
+    {
+      "variant": "warden-stdio",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 165.9684000000052,
+      "medianWarmMs": 0.5176000000210479,
+      "medianWakeMs": 66.7896000000037,
+      "medianWakeStableRootCpuSeconds": 0,
+      "medianWakeStableRootPageFaults": 13,
+      "wakeCounterExcludedRoots": [
+        [],
+        [],
+        []
+      ],
+      "medianActivePrivateBytes": 59162624,
+      "medianIdlePrivateBytes": 14462976,
+      "medianIdleWorkingSetBytes": 27860992,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    },
+    {
+      "variant": "warden-stdio-release",
+      "planned": 3,
+      "passed": 3,
+      "medianColdMs": 164.05749999999534,
+      "medianWarmMs": 0.4971999999979744,
+      "medianWakeMs": 66.99000000000524,
+      "medianWakeStableRootCpuSeconds": 0,
+      "medianWakeStableRootPageFaults": 669,
+      "wakeCounterExcludedRoots": [
+        [],
+        [],
+        []
+      ],
+      "medianActivePrivateBytes": 59289600,
+      "medianIdlePrivateBytes": 14442496,
+      "medianIdleWorkingSetBytes": 11468800,
+      "idleProcessCounts": [
+        2,
+        2,
+        2
+      ],
+      "explicitFirstWakeErrors": 0,
+      "errors": []
+    }
+  ],
+  "limits": [
+    "Single synthetic session with 32 MiB resident allocation, three runs; not representative of all MCP servers.",
+    "Snapshot memory includes all observed variant-owned descendants; working-set sums double-count shared pages.",
+    "Six variants include immutable Warden v0.2.0-alpha.1 stdio, current gateway, current stdio default and current stdio opt-in page release. No quota, model or token cost is measured.",
+    "Three rotated repetitions do not balance all six variant positions or justify broad statistical claims.",
+    "Wake CPU/page-fault deltas cover only stable explicit roots, not newly created backends, exited processes or all descendants; zero values may reflect coarse accounting.",
+    "The Warden gateway variant requires explicit client reconnection after expiry; its failure and reconnect are included in wake time.",
+    "The Warden stdio variant is explicitly declared stateless and validates initialization and tool metadata before resuming a new request."
+  ]
+}

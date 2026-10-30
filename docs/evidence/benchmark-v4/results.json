@@ -1,0 +1,4080 @@
+{
+  "plan": {
+    "version": 4,
+    "preparedUtc": "2026-10-30T15:13:34.863Z",
+    "platform": "win32",
+    "runsPerVariant": 3,
+    "variants": [
+      "direct",
+      "snooze",
+      "warden-v02",
+      "warden-gateway",
+      "warden-stdio",
+      "warden-stdio-release"
+    ],
+    "allocationMiB": 32,
+    "sessions": 1,
+    "idleSeconds": 2,
+    "warmCalls": 10,
+    "orders": [
+      [
+        "direct",
+        "snooze",
+        "warden-v02",
+        "warden-gateway",
+        "warden-stdio",
+        "warden-stdio-release"
+      ],
+      [
+        "snooze",
+        "warden-v02",
+        "warden-gateway",
+        "warden-stdio",
+        "warden-stdio-release",
+        "direct"
+      ],
+      [
+        "warden-v02",
+        "warden-gateway",
+        "warden-stdio",
+        "warden-stdio-release",
+        "direct",
+        "snooze"
+      ]
+    ],
+    "protocolClient": "@modelcontextprotocol/sdk 1.32.0",
+    "node": "v22.23.4",
+    "baseline": {
+      "commit": "5c95856307e6610c9a1cf2b19a2f6d5cd208deea",
+      "sourceHashes": {
+        "warden.py": "5bbb4e244ad463babcd0de6e1d4847a03fe34e1505848524848846c5f09f88e9",
+        "runtime/lazy_stdio.py": "604ac275816445cdd7b2208ef7590d55abad1495e8fbdc01b24f3676916a3ee6",
+        "runtime/idle_stdio.py": "3abeddced072a694f557b500b484263462f73e9b38f5d8b1be16fc583217664b",
+        "runtime/owned_bridge.py": "5ccc3a4069bb49bcf3474f8a0a39402b6b77d6943a7aad9855015a65c1e300ab"
+      },
+      "gitBlobs": {
+        "warden.py": "1bf79e6f82cb3e45b2c20ad85be8a13f527c8635",
+        "runtime/lazy_stdio.py": "403cb779a4ee8f7cca445c4315bf7b8f3b00a91a",
+        "runtime/idle_stdio.py": "1f06bb566a91c8362a3dfd5b0364e7cdf10a82bb",
+        "runtime/owned_bridge.py": "211529a8e9866002055b73c363c4552893840899"
+      },
+      "transport": "stdio",
+      "restartPolicy": "stateless",
+      "npmDependenciesUsed": false
+    },
+    "snooze": {
+      "version": "0.1.0",
+      "binarySha256": "43e02bbc1148718c3305e74974d0a57ae032e3e9c366b755d53519ee580971db"
+    },
+    "criteria": {
+      "sameWorkload": "Same 32 MiB resident Python fixture, SDK client, one session, ten echo calls and reverse callback.",
+      "cold": "Elapsed client connect, tools/list and first echo; includes starting variant processes.",
+      "warm": "Ten serial echo round trips, individual latency in milliseconds.",
+      "longCall": "Three-second call must complete under two-second idle deadline.",
+      "idle": "Resource sample after three seconds without client requests; retain proxy/supervisor cost.",
+      "wake": "Attempt echo. Gateway may explicitly expire: record failure and one reconnect in its time. Stateless stdio must resume on the same client connection after metadata validation.",
+      "resources": "Canonical Windows ownership selection validates every parent/child creation time against snapshot cutoff and previously observed root birth identities. Sum private bytes and working set; unavailable entries invalidate a complete resource claim.",
+      "wakeCounters": "Idle-to-awake CPU seconds and page-fault deltas include only explicit roots alive at both samples with identical PID+creation. New backends, exited roots and descendants are excluded, never attributed zero. The interval includes wake and sampler delay; these are not total stack CPU or hard page faults.",
+      "pageRelease": "Only warden-stdio-release opts into release_idle_pages:true. Other variants retain their default memory policy. Lower working set does not imply lower committed private memory.",
+      "cleanup": "After closing owned transports/supervisor, no matching observed PID+creation identity remains alive.",
+      "guards": "Abort variant if <3 GiB system RAM available or managed private bytes >768 MiB."
+    },
+    "decisionRule": "Report raw observations and medians; no general winner or subscription/token saving inferred.",
+    "sourceHashes": {
+      "scripts/benchmark.mjs": "88d31a92b9eda17b71b1afb1f751edc1d9c0f90460a7b7af9922d069fd358f8b",
+      "scripts/benchmark_backend.py": "d9e99384770460f2b2591acffb711fbeb5f15de1e79daadd573fd3aede10b7d8",
+      "scripts/benchmark_processes.py": "283802f56b256bbfd28f5be72d8334b9aab97a239c8bbd62a2440ac620f6f14f",
+      "scripts/soak_metrics.py": "20c76d14c54246ed07e8d53a4410af2c4f54c81c4abb91630fc3ce210d29a39b",
+      "scripts/benchmark_deltas.mjs": "a2e3ccb789aa5292971a698e4a8e23622e4f6eaee464faec2e0811bde0500840",
+      ".github/workflows/benchmark.yml": "f81399d643c4ca146943111a1bb6d26302566ed38f2c874c3cfa9bc51ac60e23",
+      "examples/echo_server.py": "7a1f7f574633c32a6bf2ab2bd18c3c06cd00584dda2d6ab6adfe654d3b07af7d",
+      "warden.py": "bcd288de151afdfeacc76e91c2faf1d2f42599f411ee0939916dbf3b2f3153fb",
+      "runtime/gateway.mjs": "25e0b891683921bf07c615ea0551de405084de77d7e4b297753a92aca89ab104",
+      "runtime/connect.mjs": "f0fad1e1fdbd77a92b733d139318de91e1e55f47ccff9415dbcfae1cd4245aa9",
+      "runtime/lazy_stdio.py": "5b957d97ba64be441ef5ce6b4477ebf73d29b95db975f8f4dd75c82bbd61a1d8",
+      "runtime/idle_stdio.py": "ccc87826d029bdca2b3b85fd2eed5c90c5ee53d34c19aad5a34b59f1e8aebf52",
+      "runtime/owned_bridge.py": "77c834f553c3377f772af0d7a9798621688c1b72954e83fc460f56911ffd68a4",
+      "package-lock.json": "4bf9e1fc9b0813aa6e77b96819af6a86fcfc4b79378a1a898234a5e9491621dd"
+    }
+  },
+  "results": [
+    {
+      "variant": "direct",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373218.5436265,
+          "roots": [
+            1852
+          ],
+          "rootIdentities": {
+            "1852": "134378468153542682"
+          },
+          "processes": [
+            {
+              "pid": 1852,
+              "created": "134378468153542682",
+              "workingSetBytes": 48197632,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43495424,
+              "pageFaultCount": 11907,
+              "parent": 744
+            },
+            {
+              "pid": 7896,
+              "created": "134378468153577316",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 1852
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55390208,
+          "privateBytes": 44740608,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14216642560,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373221.6296523,
+          "roots": [
+            1852
+          ],
+          "rootIdentities": {
+            "1852": "134378468153542682"
+          },
+          "processes": [
+            {
+              "pid": 1852,
+              "created": "134378468153542682",
+              "workingSetBytes": 48197632,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43495424,
+              "pageFaultCount": 11907,
+              "parent": 744
+            },
+            {
+              "pid": 7896,
+              "created": "134378468153577316",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 1852
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55390208,
+          "privateBytes": 44740608,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14224134144,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373221.7098048,
+          "roots": [
+            1852
+          ],
+          "rootIdentities": {
+            "1852": "134378468153542682"
+          },
+          "processes": [
+            {
+              "pid": 1852,
+              "created": "134378468153542682",
+              "workingSetBytes": 48197632,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43495424,
+              "pageFaultCount": 11907,
+              "parent": 744
+            },
+            {
+              "pid": 7896,
+              "created": "134378468153577316",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 1852
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55390208,
+          "privateBytes": 44740608,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14228557824,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 118.72000000000025,
+      "warmMs": [
+        0.6273000000001048,
+        0.5332000000003063,
+        0.824500000000171,
+        0.5381999999999607,
+        0.7575999999999112,
+        1.0933999999997468,
+        0.5054000000000087,
+        0.663300000000163,
+        0.41660000000001673,
+        0.3141000000000531
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.583199999999124,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.08015251159667969,
+        "roots": [
+          {
+            "pid": 1852,
+            "created": "134378468153542682",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6771.834000000001,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373225.3094392,
+          "roots": [
+            8824
+          ],
+          "rootIdentities": {
+            "8824": "134378468221186837"
+          },
+          "processes": [
+            {
+              "pid": 8824,
+              "created": "134378468221186837",
+              "workingSetBytes": 8757248,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 47984640,
+              "pageFaultCount": 2236,
+              "parent": 744
+            },
+            {
+              "pid": 6444,
+              "created": "134378468221216749",
+              "workingSetBytes": 7077888,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1808,
+              "parent": 8824
+            },
+            {
+              "pid": 8516,
+              "created": "134378468221691276",
+              "workingSetBytes": 48197632,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43524096,
+              "pageFaultCount": 11908,
+              "parent": 8824
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64032768,
+          "privateBytes": 92749824,
+          "cpuSeconds": 0.109375,
+          "availableSystemBytes": 14236299264,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373228.3884387,
+          "roots": [
+            8824
+          ],
+          "rootIdentities": {
+            "8824": "134378468221186837"
+          },
+          "processes": [
+            {
+              "pid": 8824,
+              "created": "134378468221186837",
+              "workingSetBytes": 8876032,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 48132096,
+              "pageFaultCount": 2265,
+              "parent": 744
+            },
+            {
+              "pid": 6444,
+              "created": "134378468221216749",
+              "workingSetBytes": 7090176,
+              "cpuSeconds": 0,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1811,
+              "parent": 8824
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 15966208,
+          "privateBytes": 49385472,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14267011072,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373228.5274136,
+          "roots": [
+            8824
+          ],
+          "rootIdentities": {
+            "8824": "134378468221186837"
+          },
+          "processes": [
+            {
+              "pid": 8824,
+              "created": "134378468221186837",
+              "workingSetBytes": 9216000,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 48615424,
+              "pageFaultCount": 2348,
+              "parent": 744
+            },
+            {
+              "pid": 6444,
+              "created": "134378468221216749",
+              "workingSetBytes": 7090176,
+              "cpuSeconds": 0,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1811,
+              "parent": 8824
+            },
+            {
+              "pid": 6956,
+              "created": "134378468283986042",
+              "workingSetBytes": 47972352,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43323392,
+              "pageFaultCount": 11847,
+              "parent": 8824
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64278528,
+          "privateBytes": 93192192,
+          "cpuSeconds": 0.140625,
+          "availableSystemBytes": 14236880896,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 112.86639999999898,
+      "warmMs": [
+        0.5342000000000553,
+        0.4521999999997206,
+        0.3932999999997264,
+        0.4566999999988184,
+        0.36349999999947613,
+        0.3845000000001164,
+        0.467000000000553,
+        0.46960000000035507,
+        0.35120000000097207,
+        0.3783000000003085
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 59.03269999999975,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.13897490501403809,
+        "roots": [
+          {
+            "pid": 8824,
+            "created": "134378468221186837",
+            "cpuSeconds": 0,
+            "pageFaultCount": 83
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 83
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6857.831199999999,
+      "passed": true
+    },
+    {
+      "variant": "warden-v02",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373233.1583157,
+          "roots": [
+            6628
+          ],
+          "rootIdentities": {
+            "6628": "134378468298445091"
+          },
+          "processes": [
+            {
+              "pid": 6628,
+              "created": "134378468298445091",
+              "workingSetBytes": 25325568,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 15622144,
+              "pageFaultCount": 9908,
+              "parent": 744
+            },
+            {
+              "pid": 5016,
+              "created": "134378468298475233",
+              "workingSetBytes": 7196672,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1261568,
+              "pageFaultCount": 1845,
+              "parent": 6628
+            },
+            {
+              "pid": 3404,
+              "created": "134378468299996608",
+              "workingSetBytes": 47865856,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43143168,
+              "pageFaultCount": 11826,
+              "parent": 6628
+            },
+            {
+              "pid": 4056,
+              "created": "134378468300148317",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1838,
+              "parent": 3404
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 87576576,
+          "privateBytes": 61267968,
+          "cpuSeconds": 0.21875,
+          "availableSystemBytes": 14214406144,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373236.2426088,
+          "roots": [
+            6628
+          ],
+          "rootIdentities": {
+            "6628": "134378468298445091"
+          },
+          "processes": [
+            {
+              "pid": 6628,
+              "created": "134378468298445091",
+              "workingSetBytes": 25296896,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 15523840,
+              "pageFaultCount": 9911,
+              "parent": 744
+            },
+            {
+              "pid": 5016,
+              "created": "134378468298475233",
+              "workingSetBytes": 7196672,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1261568,
+              "pageFaultCount": 1845,
+              "parent": 6628
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 32493568,
+          "privateBytes": 16785408,
+          "cpuSeconds": 0.15625,
+          "availableSystemBytes": 14249619456,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373236.409678,
+          "roots": [
+            6628
+          ],
+          "rootIdentities": {
+            "6628": "134378468298445091"
+          },
+          "processes": [
+            {
+              "pid": 6628,
+              "created": "134378468298445091",
+              "workingSetBytes": 25341952,
+              "cpuSeconds": 0.15625,
+              "privateBytes": 15622144,
+              "pageFaultCount": 12784,
+              "parent": 744
+            },
+            {
+              "pid": 5016,
+              "created": "134378468298475233",
+              "workingSetBytes": 7196672,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1261568,
+              "pageFaultCount": 1845,
+              "parent": 6628
+            },
+            {
+              "pid": 3388,
+              "created": "134378468362521594",
+              "workingSetBytes": 48082944,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43446272,
+              "pageFaultCount": 11873,
+              "parent": 6628
+            },
+            {
+              "pid": 4216,
+              "created": "134378468362671878",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1843,
+              "parent": 3388
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 87814144,
+          "privateBytes": 61579264,
+          "cpuSeconds": 0.234375,
+          "availableSystemBytes": 14223187968,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 236.6149000000005,
+      "warmMs": [
+        0.6022000000011758,
+        0.5871999999981199,
+        0.5488000000004831,
+        0.5369000000027881,
+        0.5784999999996217,
+        0.5551000000014028,
+        0.5576000000000931,
+        0.5524000000004889,
+        0.569999999999709,
+        0.6202999999986787
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 88.70179999999891,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.1670691967010498,
+        "roots": [
+          {
+            "pid": 6628,
+            "created": "134378468298445091",
+            "cpuSeconds": 0.015625,
+            "pageFaultCount": 2873
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0.015625,
+        "pageFaultCount": 2873
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 7853.157600000002,
+      "passed": true
+    },
+    {
+      "variant": "warden-gateway",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373241.2222617,
+          "roots": [
+            5404,
+            6292
+          ],
+          "rootIdentities": {
+            "5404": "134378468369339017",
+            "6292": "134378468373907037"
+          },
+          "processes": [
+            {
+              "pid": 5404,
+              "created": "134378468369339017",
+              "workingSetBytes": 18710528,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11595776,
+              "pageFaultCount": 4657,
+              "parent": 744
+            },
+            {
+              "pid": 1856,
+              "created": "134378468369369112",
+              "workingSetBytes": 7254016,
+              "cpuSeconds": 0,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1861,
+              "parent": 5404
+            },
+            {
+              "pid": 1676,
+              "created": "134378468370161840",
+              "workingSetBytes": 69545984,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51953664,
+              "pageFaultCount": 22658,
+              "parent": 5404
+            },
+            {
+              "pid": 7984,
+              "created": "134378468370193225",
+              "workingSetBytes": 7307264,
+              "cpuSeconds": 0,
+              "privateBytes": 1327104,
+              "pageFaultCount": 1869,
+              "parent": 1676
+            },
+            {
+              "pid": 7228,
+              "created": "134378468378688517",
+              "workingSetBytes": 20815872,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 12361728,
+              "pageFaultCount": 5481,
+              "parent": 1676
+            },
+            {
+              "pid": 9192,
+              "created": "134378468378719157",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 7228
+            },
+            {
+              "pid": 3576,
+              "created": "134378468379874484",
+              "workingSetBytes": 47943680,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43249664,
+              "pageFaultCount": 11846,
+              "parent": 7228
+            },
+            {
+              "pid": 2352,
+              "created": "134378468379911066",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1216512,
+              "pageFaultCount": 1833,
+              "parent": 3576
+            },
+            {
+              "pid": 6292,
+              "created": "134378468373907037",
+              "workingSetBytes": 19718144,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 13434880,
+              "pageFaultCount": 8214,
+              "parent": 744
+            },
+            {
+              "pid": 7184,
+              "created": "134378468373940919",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1840,
+              "parent": 6292
+            },
+            {
+              "pid": 1792,
+              "created": "134378468374771030",
+              "workingSetBytes": 68845568,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 51765248,
+              "pageFaultCount": 26373,
+              "parent": 6292
+            },
+            {
+              "pid": 3376,
+              "created": "134378468374925939",
+              "workingSetBytes": 7233536,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1847,
+              "parent": 1792
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 288927744,
+          "privateBytes": 191963136,
+          "cpuSeconds": 1.5,
+          "availableSystemBytes": 14108606464,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373244.3068135,
+          "roots": [
+            5404,
+            6292
+          ],
+          "rootIdentities": {
+            "5404": "134378468369339017",
+            "6292": "134378468373907037"
+          },
+          "processes": [
+            {
+              "pid": 5404,
+              "created": "134378468369339017",
+              "workingSetBytes": 18710528,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11595776,
+              "pageFaultCount": 4657,
+              "parent": 744
+            },
+            {
+              "pid": 1856,
+              "created": "134378468369369112",
+              "workingSetBytes": 7254016,
+              "cpuSeconds": 0,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1861,
+              "parent": 5404
+            },
+            {
+              "pid": 1676,
+              "created": "134378468370161840",
+              "workingSetBytes": 69562368,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51986432,
+              "pageFaultCount": 22663,
+              "parent": 5404
+            },
+            {
+              "pid": 7984,
+              "created": "134378468370193225",
+              "workingSetBytes": 7307264,
+              "cpuSeconds": 0,
+              "privateBytes": 1327104,
+              "pageFaultCount": 1869,
+              "parent": 1676
+            },
+            {
+              "pid": 6292,
+              "created": "134378468373907037",
+              "workingSetBytes": 19718144,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 13434880,
+              "pageFaultCount": 8214,
+              "parent": 744
+            },
+            {
+              "pid": 7184,
+              "created": "134378468373940919",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1840,
+              "parent": 6292
+            },
+            {
+              "pid": 1792,
+              "created": "134378468374771030",
+              "workingSetBytes": 68845568,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 51765248,
+              "pageFaultCount": 26373,
+              "parent": 6292
+            },
+            {
+              "pid": 3376,
+              "created": "134378468374925939",
+              "workingSetBytes": 7233536,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1847,
+              "parent": 1792
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 205819904,
+          "privateBytes": 133926912,
+          "cpuSeconds": 1.328125,
+          "availableSystemBytes": 14148812800,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373245.0799756,
+          "roots": [
+            5404,
+            6292,
+            4576
+          ],
+          "rootIdentities": {
+            "4576": "134378468443453369",
+            "5404": "134378468369339017"
+          },
+          "processes": [
+            {
+              "pid": 4576,
+              "created": "134378468443453369",
+              "workingSetBytes": 19652608,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 13332480,
+              "pageFaultCount": 8184,
+              "parent": 744
+            },
+            {
+              "pid": 5260,
+              "created": "134378468443479863",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 4576
+            },
+            {
+              "pid": 8036,
+              "created": "134378468444292593",
+              "workingSetBytes": 68227072,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 50978816,
+              "pageFaultCount": 26349,
+              "parent": 4576
+            },
+            {
+              "pid": 3004,
+              "created": "134378468444441530",
+              "workingSetBytes": 7233536,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1273856,
+              "pageFaultCount": 1854,
+              "parent": 8036
+            },
+            {
+              "pid": 5404,
+              "created": "134378468369339017",
+              "workingSetBytes": 18710528,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11595776,
+              "pageFaultCount": 4657,
+              "parent": 744
+            },
+            {
+              "pid": 1856,
+              "created": "134378468369369112",
+              "workingSetBytes": 7254016,
+              "cpuSeconds": 0,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1861,
+              "parent": 5404
+            },
+            {
+              "pid": 1676,
+              "created": "134378468370161840",
+              "workingSetBytes": 69820416,
+              "cpuSeconds": 0.546875,
+              "privateBytes": 51986432,
+              "pageFaultCount": 22726,
+              "parent": 5404
+            },
+            {
+              "pid": 7984,
+              "created": "134378468370193225",
+              "workingSetBytes": 7307264,
+              "cpuSeconds": 0,
+              "privateBytes": 1327104,
+              "pageFaultCount": 1869,
+              "parent": 1676
+            },
+            {
+              "pid": 1572,
+              "created": "134378468448034589",
+              "workingSetBytes": 20779008,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 12668928,
+              "pageFaultCount": 5499,
+              "parent": 1676
+            },
+            {
+              "pid": 5208,
+              "created": "134378468448064111",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1843,
+              "parent": 1572
+            },
+            {
+              "pid": 6060,
+              "created": "134378468449076032",
+              "workingSetBytes": 48029696,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43384832,
+              "pageFaultCount": 11860,
+              "parent": 1572
+            },
+            {
+              "pid": 2388,
+              "created": "134378468449107031",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 6060
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 288583680,
+          "privateBytes": 191602688,
+          "cpuSeconds": 1.40625,
+          "availableSystemBytes": 14096904192,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1159.2891000000018,
+      "warmMs": [
+        7.055799999998271,
+        5.132299999997485,
+        5.130199999999604,
+        5.972300000001269,
+        5.966899999999441,
+        3.979299999999057,
+        4.153800000000047,
+        3.0433000000011816,
+        2.9927999999999884,
+        3.0997999999999593
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 683.5152999999991,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.7731621265411377,
+        "roots": [
+          {
+            "pid": 5404,
+            "created": "134378468369339017",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [
+          {
+            "pid": 6292,
+            "reason": "not_alive_at_both_samples"
+          }
+        ],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 18682.1381,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373258.8608937,
+          "roots": [
+            1192
+          ],
+          "rootIdentities": {
+            "1192": "134378468556156531"
+          },
+          "processes": [
+            {
+              "pid": 1192,
+              "created": "134378468556156531",
+              "workingSetBytes": 20488192,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 13103104,
+              "pageFaultCount": 5979,
+              "parent": 744
+            },
+            {
+              "pid": 7584,
+              "created": "134378468556184610",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 1192
+            },
+            {
+              "pid": 6332,
+              "created": "134378468557123246",
+              "workingSetBytes": 48263168,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43565056,
+              "pageFaultCount": 11925,
+              "parent": 1192
+            },
+            {
+              "pid": 2364,
+              "created": "134378468557155140",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1843,
+              "parent": 6332
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83124224,
+          "privateBytes": 59162624,
+          "cpuSeconds": 0.171875,
+          "availableSystemBytes": 14219317248,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373261.9410515,
+          "roots": [
+            1192
+          ],
+          "rootIdentities": {
+            "1192": "134378468556156531"
+          },
+          "processes": [
+            {
+              "pid": 1192,
+              "created": "134378468556156531",
+              "workingSetBytes": 20459520,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13004800,
+              "pageFaultCount": 5982,
+              "parent": 744
+            },
+            {
+              "pid": 7584,
+              "created": "134378468556184610",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 1192
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 27643904,
+          "privateBytes": 14249984,
+          "cpuSeconds": 0.125,
+          "availableSystemBytes": 14260822016,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373262.0851223,
+          "roots": [
+            1192
+          ],
+          "rootIdentities": {
+            "1192": "134378468556156531"
+          },
+          "processes": [
+            {
+              "pid": 1192,
+              "created": "134378468556156531",
+              "workingSetBytes": 20566016,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13103104,
+              "pageFaultCount": 6010,
+              "parent": 744
+            },
+            {
+              "pid": 7584,
+              "created": "134378468556184610",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 1192
+            },
+            {
+              "pid": 1364,
+              "created": "134378468619514786",
+              "workingSetBytes": 47910912,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 43339776,
+              "pageFaultCount": 11889,
+              "parent": 1192
+            },
+            {
+              "pid": 8568,
+              "created": "134378468619543118",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1841,
+              "parent": 1364
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 82849792,
+          "privateBytes": 58929152,
+          "cpuSeconds": 0.21875,
+          "availableSystemBytes": 14218600448,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 165.9684000000052,
+      "warmMs": [
+        0.5421999999962281,
+        0.5613999999986845,
+        0.520700000000943,
+        0.512300000002142,
+        0.4793999999965308,
+        0.5346999999965192,
+        0.49310000000696164,
+        0.5058999999964726,
+        0.4772000000011758,
+        0.5000999999974738
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 65.85369999999966,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14407086372375488,
+        "roots": [
+          {
+            "pid": 1192,
+            "created": "134378468556156531",
+            "cpuSeconds": 0,
+            "pageFaultCount": 28
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 28
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6982.760699999999,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio-release",
+      "repetition": 1,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373265.8388922,
+          "roots": [
+            3816
+          ],
+          "rootIdentities": {
+            "3816": "134378468625962449"
+          },
+          "processes": [
+            {
+              "pid": 3816,
+              "created": "134378468625962449",
+              "workingSetBytes": 20975616,
+              "cpuSeconds": 0.125,
+              "privateBytes": 13529088,
+              "pageFaultCount": 6023,
+              "parent": 744
+            },
+            {
+              "pid": 8524,
+              "created": "134378468625990031",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1232896,
+              "pageFaultCount": 1840,
+              "parent": 3816
+            },
+            {
+              "pid": 6444,
+              "created": "134378468626928458",
+              "workingSetBytes": 47996928,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43282432,
+              "pageFaultCount": 11859,
+              "parent": 3816
+            },
+            {
+              "pid": 7692,
+              "created": "134378468626958791",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 6444
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83345408,
+          "privateBytes": 59289600,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14220804096,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373268.919895,
+          "roots": [
+            3816
+          ],
+          "rootIdentities": {
+            "3816": "134378468625962449"
+          },
+          "processes": [
+            {
+              "pid": 3816,
+              "created": "134378468625962449",
+              "workingSetBytes": 4292608,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 13430784,
+              "pageFaultCount": 7087,
+              "parent": 744
+            },
+            {
+              "pid": 8524,
+              "created": "134378468625990031",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1232896,
+              "pageFaultCount": 1840,
+              "parent": 3816
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 11476992,
+          "privateBytes": 14663680,
+          "cpuSeconds": 0.15625,
+          "availableSystemBytes": 14262542336,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373269.0656362,
+          "roots": [
+            3816
+          ],
+          "rootIdentities": {
+            "3816": "134378468625962449"
+          },
+          "processes": [
+            {
+              "pid": 3816,
+              "created": "134378468625962449",
+              "workingSetBytes": 7045120,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 13754368,
+              "pageFaultCount": 7762,
+              "parent": 744
+            },
+            {
+              "pid": 8524,
+              "created": "134378468625990031",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1232896,
+              "pageFaultCount": 1840,
+              "parent": 3816
+            },
+            {
+              "pid": 680,
+              "created": "134378468689304825",
+              "workingSetBytes": 48050176,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43433984,
+              "pageFaultCount": 11866,
+              "parent": 3816
+            },
+            {
+              "pid": 1920,
+              "created": "134378468689332501",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 680
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 69468160,
+          "privateBytes": 59662336,
+          "cpuSeconds": 0.21875,
+          "availableSystemBytes": 14220521472,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 164.70769999999902,
+      "warmMs": [
+        0.5518000000010943,
+        0.5165999999953783,
+        0.4798000000009779,
+        0.47699999999895226,
+        0.5253999999986263,
+        0.47770000000309665,
+        0.4971999999979744,
+        0.49279999999998836,
+        0.47439999999915017,
+        0.5394999999989523
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 66.65179999999964,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14574122428894043,
+        "roots": [
+          {
+            "pid": 3816,
+            "created": "134378468625962449",
+            "cpuSeconds": 0,
+            "pageFaultCount": 675
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 675
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6978.304499999998,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373272.6623144,
+          "roots": [
+            9188
+          ],
+          "rootIdentities": {
+            "9188": "134378468694799624"
+          },
+          "processes": [
+            {
+              "pid": 9188,
+              "created": "134378468694799624",
+              "workingSetBytes": 8732672,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 47980544,
+              "pageFaultCount": 2228,
+              "parent": 744
+            },
+            {
+              "pid": 832,
+              "created": "134378468694827395",
+              "workingSetBytes": 7090176,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1810,
+              "parent": 9188
+            },
+            {
+              "pid": 4168,
+              "created": "134378468695250618",
+              "workingSetBytes": 47915008,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43196416,
+              "pageFaultCount": 11840,
+              "parent": 9188
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 63737856,
+          "privateBytes": 92426240,
+          "cpuSeconds": 0.125,
+          "availableSystemBytes": 14227492864,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373275.745319,
+          "roots": [
+            9188
+          ],
+          "rootIdentities": {
+            "9188": "134378468694799624"
+          },
+          "processes": [
+            {
+              "pid": 9188,
+              "created": "134378468694799624",
+              "workingSetBytes": 8863744,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 48152576,
+              "pageFaultCount": 2260,
+              "parent": 744
+            },
+            {
+              "pid": 832,
+              "created": "134378468694827395",
+              "workingSetBytes": 7094272,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1811,
+              "parent": 9188
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 15958016,
+          "privateBytes": 49405952,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14266736640,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373275.8869317,
+          "roots": [
+            9188
+          ],
+          "rootIdentities": {
+            "9188": "134378468694799624"
+          },
+          "processes": [
+            {
+              "pid": 9188,
+              "created": "134378468694799624",
+              "workingSetBytes": 9138176,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 48541696,
+              "pageFaultCount": 2327,
+              "parent": 744
+            },
+            {
+              "pid": 832,
+              "created": "134378468694827395",
+              "workingSetBytes": 7094272,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1253376,
+              "pageFaultCount": 1811,
+              "parent": 9188
+            },
+            {
+              "pid": 3468,
+              "created": "134378468757559887",
+              "workingSetBytes": 48205824,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43593728,
+              "pageFaultCount": 11902,
+              "parent": 9188
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64438272,
+          "privateBytes": 93388800,
+          "cpuSeconds": 0.125,
+          "availableSystemBytes": 14224621568,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 105.44450000000506,
+      "warmMs": [
+        0.5588999999963562,
+        0.48240000000078,
+        0.5138000000006286,
+        0.47290000000066357,
+        0.5250000000014552,
+        0.5216999999975087,
+        0.6247999999977765,
+        0.4757000000026892,
+        0.44539999999688007,
+        0.5105000000039581
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 59.08400000000256,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14161276817321777,
+        "roots": [
+          {
+            "pid": 9188,
+            "created": "134378468694799624",
+            "cpuSeconds": 0,
+            "pageFaultCount": 67
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 67
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6858.030200000001,
+      "passed": true
+    },
+    {
+      "variant": "warden-v02",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373279.7411275,
+          "roots": [
+            2988
+          ],
+          "rootIdentities": {
+            "2988": "134378468764617406"
+          },
+          "processes": [
+            {
+              "pid": 2988,
+              "created": "134378468764617406",
+              "workingSetBytes": 25427968,
+              "cpuSeconds": 0.15625,
+              "privateBytes": 16027648,
+              "pageFaultCount": 9831,
+              "parent": 744
+            },
+            {
+              "pid": 7696,
+              "created": "134378468764644621",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1841,
+              "parent": 2988
+            },
+            {
+              "pid": 5636,
+              "created": "134378468765819816",
+              "workingSetBytes": 48140288,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43442176,
+              "pageFaultCount": 11892,
+              "parent": 2988
+            },
+            {
+              "pid": 2636,
+              "created": "134378468765966566",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 5636
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 87941120,
+          "privateBytes": 61964288,
+          "cpuSeconds": 0.25,
+          "availableSystemBytes": 14213238784,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373282.835637,
+          "roots": [
+            2988
+          ],
+          "rootIdentities": {
+            "2988": "134378468764617406"
+          },
+          "processes": [
+            {
+              "pid": 2988,
+              "created": "134378468764617406",
+              "workingSetBytes": 25399296,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 15925248,
+              "pageFaultCount": 9834,
+              "parent": 744
+            },
+            {
+              "pid": 7696,
+              "created": "134378468764644621",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1841,
+              "parent": 2988
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 32587776,
+          "privateBytes": 17174528,
+          "cpuSeconds": 0.1875,
+          "availableSystemBytes": 14255661056,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373282.9992862,
+          "roots": [
+            2988
+          ],
+          "rootIdentities": {
+            "2988": "134378468764617406"
+          },
+          "processes": [
+            {
+              "pid": 2988,
+              "created": "134378468764617406",
+              "workingSetBytes": 25444352,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 16027648,
+              "pageFaultCount": 12637,
+              "parent": 744
+            },
+            {
+              "pid": 7696,
+              "created": "134378468764644621",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1841,
+              "parent": 2988
+            },
+            {
+              "pid": 6972,
+              "created": "134378468828453283",
+              "workingSetBytes": 48181248,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43573248,
+              "pageFaultCount": 11897,
+              "parent": 2988
+            },
+            {
+              "pid": 4736,
+              "created": "134378468828599312",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1840,
+              "parent": 6972
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 88002560,
+          "privateBytes": 62095360,
+          "cpuSeconds": 0.265625,
+          "availableSystemBytes": 14213881856,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 201.37679999999818,
+      "warmMs": [
+        0.5493999999962398,
+        0.574800000002142,
+        0.5428000000028987,
+        0.5089000000007218,
+        0.6212000000014086,
+        0.53870000000461,
+        0.5501000000003842,
+        0.5734000000011292,
+        0.5260999999954947,
+        0.5376000000032946
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 82.62110000000393,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.1636490821838379,
+        "roots": [
+          {
+            "pid": 2988,
+            "created": "134378468764617406",
+            "cpuSeconds": 0.015625,
+            "pageFaultCount": 2803
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0.015625,
+        "pageFaultCount": 2803
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 7071.746200000009,
+      "passed": true
+    },
+    {
+      "variant": "warden-gateway",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373287.7271852,
+          "roots": [
+            8036,
+            5560
+          ],
+          "rootIdentities": {
+            "5560": "134378468839253147",
+            "8036": "134378468835077958"
+          },
+          "processes": [
+            {
+              "pid": 5560,
+              "created": "134378468839253147",
+              "workingSetBytes": 19427328,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 12517376,
+              "pageFaultCount": 8074,
+              "parent": 744
+            },
+            {
+              "pid": 1288,
+              "created": "134378468839281979",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1841,
+              "parent": 5560
+            },
+            {
+              "pid": 856,
+              "created": "134378468840120022",
+              "workingSetBytes": 69058560,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 51724288,
+              "pageFaultCount": 26695,
+              "parent": 5560
+            },
+            {
+              "pid": 8832,
+              "created": "134378468840272001",
+              "workingSetBytes": 7229440,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1257472,
+              "pageFaultCount": 1848,
+              "parent": 856
+            },
+            {
+              "pid": 8036,
+              "created": "134378468835077958",
+              "workingSetBytes": 18845696,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 11730944,
+              "pageFaultCount": 4691,
+              "parent": 744
+            },
+            {
+              "pid": 2300,
+              "created": "134378468835107843",
+              "workingSetBytes": 7258112,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1860,
+              "parent": 8036
+            },
+            {
+              "pid": 3860,
+              "created": "134378468835861928",
+              "workingSetBytes": 70037504,
+              "cpuSeconds": 0.515625,
+              "privateBytes": 51597312,
+              "pageFaultCount": 22608,
+              "parent": 8036
+            },
+            {
+              "pid": 8776,
+              "created": "134378468835893113",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1867,
+              "parent": 3860
+            },
+            {
+              "pid": 8580,
+              "created": "134378468843958615",
+              "workingSetBytes": 20598784,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11767808,
+              "pageFaultCount": 5451,
+              "parent": 3860
+            },
+            {
+              "pid": 3972,
+              "created": "134378468843989680",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1840,
+              "parent": 8580
+            },
+            {
+              "pid": 1340,
+              "created": "134378468845016775",
+              "workingSetBytes": 48209920,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43524096,
+              "pageFaultCount": 11912,
+              "parent": 8580
+            },
+            {
+              "pid": 5616,
+              "created": "134378468845048883",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 1340
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 289538048,
+          "privateBytes": 190484480,
+          "cpuSeconds": 1.4375,
+          "availableSystemBytes": 14134988800,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373290.8078947,
+          "roots": [
+            8036,
+            5560
+          ],
+          "rootIdentities": {
+            "5560": "134378468839253147",
+            "8036": "134378468835077958"
+          },
+          "processes": [
+            {
+              "pid": 5560,
+              "created": "134378468839253147",
+              "workingSetBytes": 19427328,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 12517376,
+              "pageFaultCount": 8074,
+              "parent": 744
+            },
+            {
+              "pid": 1288,
+              "created": "134378468839281979",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1841,
+              "parent": 5560
+            },
+            {
+              "pid": 856,
+              "created": "134378468840120022",
+              "workingSetBytes": 69062656,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 51724288,
+              "pageFaultCount": 26696,
+              "parent": 5560
+            },
+            {
+              "pid": 8832,
+              "created": "134378468840272001",
+              "workingSetBytes": 7229440,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1257472,
+              "pageFaultCount": 1848,
+              "parent": 856
+            },
+            {
+              "pid": 8036,
+              "created": "134378468835077958",
+              "workingSetBytes": 18845696,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 11730944,
+              "pageFaultCount": 4691,
+              "parent": 744
+            },
+            {
+              "pid": 2300,
+              "created": "134378468835107843",
+              "workingSetBytes": 7258112,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1860,
+              "parent": 8036
+            },
+            {
+              "pid": 3860,
+              "created": "134378468835861928",
+              "workingSetBytes": 70053888,
+              "cpuSeconds": 0.515625,
+              "privateBytes": 51630080,
+              "pageFaultCount": 22613,
+              "parent": 8036
+            },
+            {
+              "pid": 8776,
+              "created": "134378468835893113",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1867,
+              "parent": 3860
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 206368768,
+          "privateBytes": 132734976,
+          "cpuSeconds": 1.28125,
+          "availableSystemBytes": 14185156608,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373291.5625417,
+          "roots": [
+            8036,
+            5560,
+            612
+          ],
+          "rootIdentities": {
+            "612": "134378468908440815",
+            "8036": "134378468835077958"
+          },
+          "processes": [
+            {
+              "pid": 612,
+              "created": "134378468908440815",
+              "workingSetBytes": 19542016,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 12660736,
+              "pageFaultCount": 8102,
+              "parent": 744
+            },
+            {
+              "pid": 6844,
+              "created": "134378468908467665",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 612
+            },
+            {
+              "pid": 1264,
+              "created": "134378468909278428",
+              "workingSetBytes": 68935680,
+              "cpuSeconds": 0.65625,
+              "privateBytes": 50806784,
+              "pageFaultCount": 26385,
+              "parent": 612
+            },
+            {
+              "pid": 8320,
+              "created": "134378468909424981",
+              "workingSetBytes": 7229440,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1257472,
+              "pageFaultCount": 1847,
+              "parent": 1264
+            },
+            {
+              "pid": 8036,
+              "created": "134378468835077958",
+              "workingSetBytes": 18845696,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 11730944,
+              "pageFaultCount": 4691,
+              "parent": 744
+            },
+            {
+              "pid": 2300,
+              "created": "134378468835107843",
+              "workingSetBytes": 7258112,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1314816,
+              "pageFaultCount": 1860,
+              "parent": 8036
+            },
+            {
+              "pid": 3860,
+              "created": "134378468835861928",
+              "workingSetBytes": 70115328,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51630080,
+              "pageFaultCount": 22628,
+              "parent": 8036
+            },
+            {
+              "pid": 8776,
+              "created": "134378468835893113",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1867,
+              "parent": 3860
+            },
+            {
+              "pid": 7000,
+              "created": "134378468913081545",
+              "workingSetBytes": 20783104,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 12595200,
+              "pageFaultCount": 5477,
+              "parent": 3860
+            },
+            {
+              "pid": 6416,
+              "created": "134378468913110308",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1232896,
+              "pageFaultCount": 1835,
+              "parent": 7000
+            },
+            {
+              "pid": 5172,
+              "created": "134378468913968261",
+              "workingSetBytes": 47988736,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43339776,
+              "pageFaultCount": 11851,
+              "parent": 7000
+            },
+            {
+              "pid": 6944,
+              "created": "134378468913999022",
+              "workingSetBytes": 7192576,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1839,
+              "parent": 5172
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 289566720,
+          "privateBytes": 190377984,
+          "cpuSeconds": 1.546875,
+          "availableSystemBytes": 14134218752,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1095.0938000000024,
+      "warmMs": [
+        5.531700000006822,
+        4.841399999990244,
+        4.19539999999688,
+        5.7453999999997905,
+        5.960099999996601,
+        4.3211000000010245,
+        3.7780000000057044,
+        3.0111000000033528,
+        3.1629999999859137,
+        3.292600000000675
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 671.3910000000033,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.7546470165252686,
+        "roots": [
+          {
+            "pid": 8036,
+            "created": "134378468835077958",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [
+          {
+            "pid": 5560,
+            "reason": "not_alive_at_both_samples"
+          }
+        ],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 18589.824800000002,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373305.3479161,
+          "roots": [
+            692
+          ],
+          "rootIdentities": {
+            "692": "134378469020999034"
+          },
+          "processes": [
+            {
+              "pid": 692,
+              "created": "134378469020999034",
+              "workingSetBytes": 20705280,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 13320192,
+              "pageFaultCount": 6068,
+              "parent": 744
+            },
+            {
+              "pid": 8092,
+              "created": "134378469021026471",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 692
+            },
+            {
+              "pid": 4080,
+              "created": "134378469021980044",
+              "workingSetBytes": 48054272,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43339776,
+              "pageFaultCount": 11876,
+              "parent": 692
+            },
+            {
+              "pid": 2868,
+              "created": "134378469022014841",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0,
+              "privateBytes": 1228800,
+              "pageFaultCount": 1837,
+              "parent": 4080
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83124224,
+          "privateBytes": 59129856,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14235459584,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373308.4303217,
+          "roots": [
+            692
+          ],
+          "rootIdentities": {
+            "692": "134378469020999034"
+          },
+          "processes": [
+            {
+              "pid": 692,
+              "created": "134378469020999034",
+              "workingSetBytes": 20676608,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13221888,
+              "pageFaultCount": 6071,
+              "parent": 744
+            },
+            {
+              "pid": 8092,
+              "created": "134378469021026471",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 692
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 27860992,
+          "privateBytes": 14462976,
+          "cpuSeconds": 0.140625,
+          "availableSystemBytes": 14281494528,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373308.5770774,
+          "roots": [
+            692
+          ],
+          "rootIdentities": {
+            "692": "134378469020999034"
+          },
+          "processes": [
+            {
+              "pid": 692,
+              "created": "134378469020999034",
+              "workingSetBytes": 20721664,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13320192,
+              "pageFaultCount": 6084,
+              "parent": 744
+            },
+            {
+              "pid": 8092,
+              "created": "134378469021026471",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1840,
+              "parent": 692
+            },
+            {
+              "pid": 1296,
+              "created": "134378469084404037",
+              "workingSetBytes": 47980544,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43335680,
+              "pageFaultCount": 11849,
+              "parent": 692
+            },
+            {
+              "pid": 2136,
+              "created": "134378469084432075",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1840,
+              "parent": 1296
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83070976,
+          "privateBytes": 59142144,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14239399936,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 170.14349999999104,
+      "warmMs": [
+        0.5423000000009779,
+        0.5673999999999069,
+        0.5362000000022817,
+        0.5279000000009546,
+        0.48540000000502914,
+        0.5015999999886844,
+        0.48440000000118744,
+        0.4626999999891268,
+        0.47469999999157153,
+        0.5095999999903142
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 66.7896000000037,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14675569534301758,
+        "roots": [
+          {
+            "pid": 692,
+            "created": "134378469020999034",
+            "cpuSeconds": 0,
+            "pageFaultCount": 13
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 13
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6984.672600000005,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio-release",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373312.3279855,
+          "roots": [
+            4168
+          ],
+          "rootIdentities": {
+            "4168": "134378469090875440"
+          },
+          "processes": [
+            {
+              "pid": 4168,
+              "created": "134378469090875440",
+              "workingSetBytes": 20684800,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13320192,
+              "pageFaultCount": 6092,
+              "parent": 744
+            },
+            {
+              "pid": 6048,
+              "created": "134378469090901488",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1220608,
+              "pageFaultCount": 1834,
+              "parent": 4168
+            },
+            {
+              "pid": 1336,
+              "created": "134378469091826798",
+              "workingSetBytes": 47972352,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43261952,
+              "pageFaultCount": 11853,
+              "parent": 4168
+            },
+            {
+              "pid": 7404,
+              "created": "134378469091858422",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1839,
+              "parent": 1336
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83021824,
+          "privateBytes": 59043840,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14243262464,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373315.4055448,
+          "roots": [
+            4168
+          ],
+          "rootIdentities": {
+            "4168": "134378469090875440"
+          },
+          "processes": [
+            {
+              "pid": 4168,
+              "created": "134378469090875440",
+              "workingSetBytes": 4276224,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 13221888,
+              "pageFaultCount": 7152,
+              "parent": 744
+            },
+            {
+              "pid": 6048,
+              "created": "134378469090901488",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1220608,
+              "pageFaultCount": 1834,
+              "parent": 4168
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 11452416,
+          "privateBytes": 14442496,
+          "cpuSeconds": 0.15625,
+          "availableSystemBytes": 14282424320,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373315.553184,
+          "roots": [
+            4168
+          ],
+          "rootIdentities": {
+            "4168": "134378469090875440"
+          },
+          "processes": [
+            {
+              "pid": 4168,
+              "created": "134378469090875440",
+              "workingSetBytes": 7004160,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 13316096,
+              "pageFaultCount": 7821,
+              "parent": 744
+            },
+            {
+              "pid": 6048,
+              "created": "134378469090901488",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1220608,
+              "pageFaultCount": 1834,
+              "parent": 4168
+            },
+            {
+              "pid": 9016,
+              "created": "134378469154175062",
+              "workingSetBytes": 48029696,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43388928,
+              "pageFaultCount": 11862,
+              "parent": 4168
+            },
+            {
+              "pid": 5564,
+              "created": "134378469154203491",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1839,
+              "parent": 9016
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 69394432,
+          "privateBytes": 59166720,
+          "cpuSeconds": 0.25,
+          "availableSystemBytes": 14240419840,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 164.05749999999534,
+      "warmMs": [
+        0.6431000000011409,
+        0.502200000002631,
+        0.5377000000007683,
+        0.5662000000011176,
+        0.49839999999676365,
+        0.49319999999715947,
+        0.5467999999964377,
+        0.5415999999968335,
+        0.46480000000155997,
+        0.48090000000956934
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 66.99000000000524,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14763927459716797,
+        "roots": [
+          {
+            "pid": 4168,
+            "created": "134378469090875440",
+            "cpuSeconds": 0.03125,
+            "pageFaultCount": 669
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0.03125,
+        "pageFaultCount": 669
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6976.2802999999985,
+      "passed": true
+    },
+    {
+      "variant": "direct",
+      "repetition": 2,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373319.108585,
+          "roots": [
+            9124
+          ],
+          "rootIdentities": {
+            "9124": "134378469159682245"
+          },
+          "processes": [
+            {
+              "pid": 9124,
+              "created": "134378469159682245",
+              "workingSetBytes": 47943680,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43225088,
+              "pageFaultCount": 11845,
+              "parent": 744
+            },
+            {
+              "pid": 3260,
+              "created": "134378469159713164",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1837,
+              "parent": 9124
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55128064,
+          "privateBytes": 44470272,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14233972736,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373322.200059,
+          "roots": [
+            9124
+          ],
+          "rootIdentities": {
+            "9124": "134378469159682245"
+          },
+          "processes": [
+            {
+              "pid": 9124,
+              "created": "134378469159682245",
+              "workingSetBytes": 47943680,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43225088,
+              "pageFaultCount": 11845,
+              "parent": 744
+            },
+            {
+              "pid": 3260,
+              "created": "134378469159713164",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1837,
+              "parent": 9124
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55128064,
+          "privateBytes": 44470272,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14276796416,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373322.2775986,
+          "roots": [
+            9124
+          ],
+          "rootIdentities": {
+            "9124": "134378469159682245"
+          },
+          "processes": [
+            {
+              "pid": 9124,
+              "created": "134378469159682245",
+              "workingSetBytes": 47943680,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43225088,
+              "pageFaultCount": 11845,
+              "parent": 744
+            },
+            {
+              "pid": 3260,
+              "created": "134378469159713164",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1837,
+              "parent": 9124
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55128064,
+          "privateBytes": 44470272,
+          "cpuSeconds": 0.0625,
+          "availableSystemBytes": 14270713856,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 66.78189999998722,
+      "warmMs": [
+        0.22969999999622814,
+        0.216100000005099,
+        0.24970000000030268,
+        0.21980000000621658,
+        0.2091999999975087,
+        0.2076999999990221,
+        0.17939999999362044,
+        0.20749999998952262,
+        0.20930000000225846,
+        0.2059000000008382
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.7446000000054482,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.07753968238830566,
+        "roots": [
+          {
+            "pid": 9124,
+            "created": "134378469159682245",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6716.282299999992,
+      "passed": true
+    },
+    {
+      "variant": "warden-v02",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373326.0765848,
+          "roots": [
+            4400
+          ],
+          "rootIdentities": {
+            "4400": "134378469228036112"
+          },
+          "processes": [
+            {
+              "pid": 4400,
+              "created": "134378469228036112",
+              "workingSetBytes": 25255936,
+              "cpuSeconds": 0.125,
+              "privateBytes": 15290368,
+              "pageFaultCount": 9716,
+              "parent": 744
+            },
+            {
+              "pid": 8348,
+              "created": "134378469228062923",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1839,
+              "parent": 4400
+            },
+            {
+              "pid": 8940,
+              "created": "134378469229227201",
+              "workingSetBytes": 48066560,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43352064,
+              "pageFaultCount": 11874,
+              "parent": 4400
+            },
+            {
+              "pid": 9184,
+              "created": "134378469229369052",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0,
+              "privateBytes": 1236992,
+              "pageFaultCount": 1837,
+              "parent": 8940
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 87683072,
+          "privateBytes": 61120512,
+          "cpuSeconds": 0.21875,
+          "availableSystemBytes": 14260940800,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373329.1578224,
+          "roots": [
+            4400
+          ],
+          "rootIdentities": {
+            "4400": "134378469228036112"
+          },
+          "processes": [
+            {
+              "pid": 4400,
+              "created": "134378469228036112",
+              "workingSetBytes": 25227264,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 15192064,
+              "pageFaultCount": 9719,
+              "parent": 744
+            },
+            {
+              "pid": 8348,
+              "created": "134378469228062923",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1839,
+              "parent": 4400
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 32407552,
+          "privateBytes": 16433152,
+          "cpuSeconds": 0.171875,
+          "availableSystemBytes": 14302535680,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373329.3161724,
+          "roots": [
+            4400
+          ],
+          "rootIdentities": {
+            "4400": "134378469228036112"
+          },
+          "processes": [
+            {
+              "pid": 4400,
+              "created": "134378469228036112",
+              "workingSetBytes": 25305088,
+              "cpuSeconds": 0.15625,
+              "privateBytes": 15552512,
+              "pageFaultCount": 12412,
+              "parent": 744
+            },
+            {
+              "pid": 8348,
+              "created": "134378469228062923",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1839,
+              "parent": 4400
+            },
+            {
+              "pid": 8732,
+              "created": "134378469291680435",
+              "workingSetBytes": 48095232,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43470848,
+              "pageFaultCount": 11876,
+              "parent": 4400
+            },
+            {
+              "pid": 3544,
+              "created": "134378469291819061",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1837,
+              "parent": 8732
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 87760896,
+          "privateBytes": 61505536,
+          "cpuSeconds": 0.25,
+          "availableSystemBytes": 14258483200,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 197.48450000000594,
+      "warmMs": [
+        0.5298999999940861,
+        0.5249999999941792,
+        0.5371000000013737,
+        0.4988000000012107,
+        0.48889999999664724,
+        0.5203999999939697,
+        0.5849999999918509,
+        0.5264999999926658,
+        0.5200000000040745,
+        0.5773999999946682
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 77.81549999999697,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.15834999084472656,
+        "roots": [
+          {
+            "pid": 4400,
+            "created": "134378469228036112",
+            "cpuSeconds": 0.015625,
+            "pageFaultCount": 2693
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0.015625,
+        "pageFaultCount": 2693
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 7055.976999999999,
+      "passed": true
+    },
+    {
+      "variant": "warden-gateway",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373334.0973902,
+          "roots": [
+            5808,
+            7984
+          ],
+          "rootIdentities": {
+            "5808": "134378469298395452",
+            "7984": "134378469302602948"
+          },
+          "processes": [
+            {
+              "pid": 5808,
+              "created": "134378469298395452",
+              "workingSetBytes": 18591744,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11472896,
+              "pageFaultCount": 4628,
+              "parent": 744
+            },
+            {
+              "pid": 7360,
+              "created": "134378469298424368",
+              "workingSetBytes": 7249920,
+              "cpuSeconds": 0,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1860,
+              "parent": 5808
+            },
+            {
+              "pid": 5608,
+              "created": "134378469299180726",
+              "workingSetBytes": 69873664,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51777536,
+              "pageFaultCount": 22633,
+              "parent": 5808
+            },
+            {
+              "pid": 7488,
+              "created": "134378469299210383",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0,
+              "privateBytes": 1343488,
+              "pageFaultCount": 1872,
+              "parent": 5608
+            },
+            {
+              "pid": 5792,
+              "created": "134378469307523445",
+              "workingSetBytes": 20783104,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 12533760,
+              "pageFaultCount": 5459,
+              "parent": 5608
+            },
+            {
+              "pid": 2912,
+              "created": "134378469307558288",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1839,
+              "parent": 5792
+            },
+            {
+              "pid": 8136,
+              "created": "134378469308652168",
+              "workingSetBytes": 48263168,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43577344,
+              "pageFaultCount": 11928,
+              "parent": 5792
+            },
+            {
+              "pid": 2216,
+              "created": "134378469308694969",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1840,
+              "parent": 8136
+            },
+            {
+              "pid": 7984,
+              "created": "134378469302602948",
+              "workingSetBytes": 19681280,
+              "cpuSeconds": 0.125,
+              "privateBytes": 13336576,
+              "pageFaultCount": 7930,
+              "parent": 744
+            },
+            {
+              "pid": 8368,
+              "created": "134378469302640770",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 7984
+            },
+            {
+              "pid": 7432,
+              "created": "134378469303623789",
+              "workingSetBytes": 68730880,
+              "cpuSeconds": 0.625,
+              "privateBytes": 51019776,
+              "pageFaultCount": 26766,
+              "parent": 7984
+            },
+            {
+              "pid": 6812,
+              "created": "134378469303761513",
+              "workingSetBytes": 7225344,
+              "cpuSeconds": 0,
+              "privateBytes": 1269760,
+              "pageFaultCount": 1851,
+              "parent": 7432
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 289251328,
+          "privateBytes": 191389696,
+          "cpuSeconds": 1.546875,
+          "availableSystemBytes": 14165479424,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373337.1808014,
+          "roots": [
+            5808,
+            7984
+          ],
+          "rootIdentities": {
+            "5808": "134378469298395452",
+            "7984": "134378469302602948"
+          },
+          "processes": [
+            {
+              "pid": 5808,
+              "created": "134378469298395452",
+              "workingSetBytes": 18591744,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11472896,
+              "pageFaultCount": 4628,
+              "parent": 744
+            },
+            {
+              "pid": 7360,
+              "created": "134378469298424368",
+              "workingSetBytes": 7249920,
+              "cpuSeconds": 0,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1860,
+              "parent": 5808
+            },
+            {
+              "pid": 5608,
+              "created": "134378469299180726",
+              "workingSetBytes": 69885952,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51806208,
+              "pageFaultCount": 22637,
+              "parent": 5808
+            },
+            {
+              "pid": 7488,
+              "created": "134378469299210383",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0,
+              "privateBytes": 1343488,
+              "pageFaultCount": 1872,
+              "parent": 5608
+            },
+            {
+              "pid": 7984,
+              "created": "134378469302602948",
+              "workingSetBytes": 19681280,
+              "cpuSeconds": 0.125,
+              "privateBytes": 13336576,
+              "pageFaultCount": 7930,
+              "parent": 744
+            },
+            {
+              "pid": 8368,
+              "created": "134378469302640770",
+              "workingSetBytes": 7180288,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1838,
+              "parent": 7984
+            },
+            {
+              "pid": 7432,
+              "created": "134378469303623789",
+              "workingSetBytes": 68730880,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 51019776,
+              "pageFaultCount": 26766,
+              "parent": 7984
+            },
+            {
+              "pid": 6812,
+              "created": "134378469303761513",
+              "workingSetBytes": 7225344,
+              "cpuSeconds": 0,
+              "privateBytes": 1269760,
+              "pageFaultCount": 1851,
+              "parent": 7432
+            }
+          ],
+          "processCount": 8,
+          "unavailable": [],
+          "workingSetBytes": 205848576,
+          "privateBytes": 132812800,
+          "cpuSeconds": 1.375,
+          "availableSystemBytes": 14221910016,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373337.9512868,
+          "roots": [
+            5808,
+            7984,
+            8392
+          ],
+          "rootIdentities": {
+            "5808": "134378469298395452",
+            "8392": "134378469372208719"
+          },
+          "processes": [
+            {
+              "pid": 5808,
+              "created": "134378469298395452",
+              "workingSetBytes": 18591744,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 11472896,
+              "pageFaultCount": 4628,
+              "parent": 744
+            },
+            {
+              "pid": 7360,
+              "created": "134378469298424368",
+              "workingSetBytes": 7249920,
+              "cpuSeconds": 0,
+              "privateBytes": 1318912,
+              "pageFaultCount": 1860,
+              "parent": 5808
+            },
+            {
+              "pid": 5608,
+              "created": "134378469299180726",
+              "workingSetBytes": 69931008,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 51806208,
+              "pageFaultCount": 22648,
+              "parent": 5808
+            },
+            {
+              "pid": 7488,
+              "created": "134378469299210383",
+              "workingSetBytes": 7303168,
+              "cpuSeconds": 0,
+              "privateBytes": 1343488,
+              "pageFaultCount": 1872,
+              "parent": 5608
+            },
+            {
+              "pid": 7364,
+              "created": "134378469376802420",
+              "workingSetBytes": 20750336,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 12726272,
+              "pageFaultCount": 5494,
+              "parent": 5608
+            },
+            {
+              "pid": 6980,
+              "created": "134378469376831174",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1840,
+              "parent": 7364
+            },
+            {
+              "pid": 9080,
+              "created": "134378469377770448",
+              "workingSetBytes": 48119808,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 43499520,
+              "pageFaultCount": 11881,
+              "parent": 7364
+            },
+            {
+              "pid": 8824,
+              "created": "134378469377800486",
+              "workingSetBytes": 7188480,
+              "cpuSeconds": 0,
+              "privateBytes": 1273856,
+              "pageFaultCount": 1839,
+              "parent": 9080
+            },
+            {
+              "pid": 8392,
+              "created": "134378469372208719",
+              "workingSetBytes": 19304448,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 12447744,
+              "pageFaultCount": 7821,
+              "parent": 744
+            },
+            {
+              "pid": 1248,
+              "created": "134378469372237682",
+              "workingSetBytes": 7184384,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1841,
+              "parent": 8392
+            },
+            {
+              "pid": 5184,
+              "created": "134378469373089661",
+              "workingSetBytes": 68718592,
+              "cpuSeconds": 0.484375,
+              "privateBytes": 51122176,
+              "pageFaultCount": 26466,
+              "parent": 8392
+            },
+            {
+              "pid": 3836,
+              "created": "134378469373230607",
+              "workingSetBytes": 7221248,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1265664,
+              "pageFaultCount": 1850,
+              "parent": 5184
+            }
+          ],
+          "processCount": 12,
+          "unavailable": [],
+          "workingSetBytes": 288747520,
+          "privateBytes": 190771200,
+          "cpuSeconds": 1.390625,
+          "availableSystemBytes": 14164029440,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": true,
+      "coldMs": 1126.7530000000115,
+      "warmMs": [
+        5.7722000000067055,
+        4.816200000001118,
+        4.907600000005914,
+        6.631100000013248,
+        6.470200000010664,
+        4.538300000000163,
+        5.112200000003213,
+        3.9627000000036787,
+        3.9478000000090105,
+        3.3009999999922
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 680.2934999999998,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.7704854011535645,
+        "roots": [
+          {
+            "pid": 5808,
+            "created": "134378469298395452",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [
+          {
+            "pid": 7984,
+            "reason": "not_alive_at_both_samples"
+          }
+        ],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 18634.910600000003,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373351.7186387,
+          "roots": [
+            4132
+          ],
+          "rootIdentities": {
+            "4132": "134378469484769159"
+          },
+          "processes": [
+            {
+              "pid": 4132,
+              "created": "134378469484769159",
+              "workingSetBytes": 20885504,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 13578240,
+              "pageFaultCount": 6113,
+              "parent": 744
+            },
+            {
+              "pid": 5924,
+              "created": "134378469484795940",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1836,
+              "parent": 4132
+            },
+            {
+              "pid": 4100,
+              "created": "134378469485709356",
+              "workingSetBytes": 48254976,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43548672,
+              "pageFaultCount": 11919,
+              "parent": 4132
+            },
+            {
+              "pid": 5700,
+              "created": "134378469485740474",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1836,
+              "parent": 4100
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83492864,
+          "privateBytes": 59609088,
+          "cpuSeconds": 0.171875,
+          "availableSystemBytes": 14289186816,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373354.7969244,
+          "roots": [
+            4132
+          ],
+          "rootIdentities": {
+            "4132": "134378469484769159"
+          },
+          "processes": [
+            {
+              "pid": 4132,
+              "created": "134378469484769159",
+              "workingSetBytes": 20856832,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13479936,
+              "pageFaultCount": 6116,
+              "parent": 744
+            },
+            {
+              "pid": 5924,
+              "created": "134378469484795940",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1836,
+              "parent": 4132
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 28033024,
+          "privateBytes": 14721024,
+          "cpuSeconds": 0.125,
+          "availableSystemBytes": 14331973632,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373354.9440522,
+          "roots": [
+            4132
+          ],
+          "rootIdentities": {
+            "4132": "134378469484769159"
+          },
+          "processes": [
+            {
+              "pid": 4132,
+              "created": "134378469484769159",
+              "workingSetBytes": 20901888,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 13578240,
+              "pageFaultCount": 6129,
+              "parent": 744
+            },
+            {
+              "pid": 5924,
+              "created": "134378469484795940",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1241088,
+              "pageFaultCount": 1836,
+              "parent": 4132
+            },
+            {
+              "pid": 5328,
+              "created": "134378469548078400",
+              "workingSetBytes": 48009216,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 43384832,
+              "pageFaultCount": 11853,
+              "parent": 4132
+            },
+            {
+              "pid": 7964,
+              "created": "134378469548105880",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1839,
+              "parent": 5328
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83263488,
+          "privateBytes": 59449344,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14289641472,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 164.79670000000624,
+      "warmMs": [
+        0.500400000018999,
+        0.49560000002384186,
+        0.5176000000210479,
+        0.49410000001080334,
+        0.5176999999966938,
+        0.6173000000126194,
+        0.595499999995809,
+        0.5842000000120606,
+        0.635599999979604,
+        0.583199999993667
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 69.21919999999227,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.14712786674499512,
+        "roots": [
+          {
+            "pid": 4132,
+            "created": "134378469484769159",
+            "cpuSeconds": 0,
+            "pageFaultCount": 13
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 13
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6973.518100000016,
+      "passed": true
+    },
+    {
+      "variant": "warden-stdio-release",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373358.7012172,
+          "roots": [
+            6092
+          ],
+          "rootIdentities": {
+            "6092": "134378469554530984"
+          },
+          "processes": [
+            {
+              "pid": 6092,
+              "created": "134378469554530984",
+              "workingSetBytes": 20742144,
+              "cpuSeconds": 0.125,
+              "privateBytes": 13189120,
+              "pageFaultCount": 6046,
+              "parent": 744
+            },
+            {
+              "pid": 6388,
+              "created": "134378469554558317",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6092
+            },
+            {
+              "pid": 6096,
+              "created": "134378469555457887",
+              "workingSetBytes": 48300032,
+              "cpuSeconds": 0.09375,
+              "privateBytes": 43606016,
+              "pageFaultCount": 11929,
+              "parent": 6092
+            },
+            {
+              "pid": 7420,
+              "created": "134378469555487127",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1840,
+              "parent": 6096
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 83394560,
+          "privateBytes": 59293696,
+          "cpuSeconds": 0.21875,
+          "availableSystemBytes": 14289846272,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373361.7858808,
+          "roots": [
+            6092
+          ],
+          "rootIdentities": {
+            "6092": "134378469554530984"
+          },
+          "processes": [
+            {
+              "pid": 6092,
+              "created": "134378469554530984",
+              "workingSetBytes": 4292608,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 13090816,
+              "pageFaultCount": 7108,
+              "parent": 744
+            },
+            {
+              "pid": 6388,
+              "created": "134378469554558317",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6092
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 11468800,
+          "privateBytes": 14340096,
+          "cpuSeconds": 0.140625,
+          "availableSystemBytes": 14331609088,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373361.9422755,
+          "roots": [
+            6092
+          ],
+          "rootIdentities": {
+            "6092": "134378469554530984"
+          },
+          "processes": [
+            {
+              "pid": 6092,
+              "created": "134378469554530984",
+              "workingSetBytes": 7016448,
+              "cpuSeconds": 0.140625,
+              "privateBytes": 13189120,
+              "pageFaultCount": 7776,
+              "parent": 744
+            },
+            {
+              "pid": 6388,
+              "created": "134378469554558317",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6092
+            },
+            {
+              "pid": 7368,
+              "created": "134378469617987250",
+              "workingSetBytes": 47935488,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43311104,
+              "pageFaultCount": 11897,
+              "parent": 6092
+            },
+            {
+              "pid": 2636,
+              "created": "134378469618017799",
+              "workingSetBytes": 7176192,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1837,
+              "parent": 7368
+            }
+          ],
+          "processCount": 4,
+          "unavailable": [],
+          "workingSetBytes": 69304320,
+          "privateBytes": 58994688,
+          "cpuSeconds": 0.203125,
+          "availableSystemBytes": 14289870848,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 159.44960000002175,
+      "warmMs": [
+        0.4641999999876134,
+        0.46359999998821877,
+        0.5817000000097323,
+        0.46179999999003485,
+        0.568200000008801,
+        0.48269999999320135,
+        0.5074000000022352,
+        0.4962999999988824,
+        0.4588999999978114,
+        0.48749999998835847
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 70.2327000000223,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.15639472007751465,
+        "roots": [
+          {
+            "pid": 6092,
+            "created": "134378469554530984",
+            "cpuSeconds": 0,
+            "pageFaultCount": 668
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 668
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 7007.361500000028,
+      "passed": true
+    },
+    {
+      "variant": "direct",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373365.5062551,
+          "roots": [
+            6316
+          ],
+          "rootIdentities": {
+            "6316": "134378469623652597"
+          },
+          "processes": [
+            {
+              "pid": 6316,
+              "created": "134378469623652597",
+              "workingSetBytes": 48201728,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43528192,
+              "pageFaultCount": 11909,
+              "parent": 744
+            },
+            {
+              "pid": 9068,
+              "created": "134378469623679913",
+              "workingSetBytes": 7172096,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6316
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44777472,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14302646272,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373368.5859294,
+          "roots": [
+            6316
+          ],
+          "rootIdentities": {
+            "6316": "134378469623652597"
+          },
+          "processes": [
+            {
+              "pid": 6316,
+              "created": "134378469623652597",
+              "workingSetBytes": 48201728,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43528192,
+              "pageFaultCount": 11909,
+              "parent": 744
+            },
+            {
+              "pid": 9068,
+              "created": "134378469623679913",
+              "workingSetBytes": 7172096,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6316
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44777472,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14302420992,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373368.6631944,
+          "roots": [
+            6316
+          ],
+          "rootIdentities": {
+            "6316": "134378469623652597"
+          },
+          "processes": [
+            {
+              "pid": 6316,
+              "created": "134378469623652597",
+              "workingSetBytes": 48201728,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43528192,
+              "pageFaultCount": 11909,
+              "parent": 744
+            },
+            {
+              "pid": 9068,
+              "created": "134378469623679913",
+              "workingSetBytes": 7172096,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 1249280,
+              "pageFaultCount": 1838,
+              "parent": 6316
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 55373824,
+          "privateBytes": 44777472,
+          "cpuSeconds": 0.078125,
+          "availableSystemBytes": 14298800128,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 67.04670000000624,
+      "warmMs": [
+        0.2385000000067521,
+        0.22100000001955777,
+        0.21470000001136214,
+        0.20879999999306165,
+        0.21170000001438893,
+        0.20720000000437722,
+        0.1757999999972526,
+        0.20430000001215376,
+        0.2091999999829568,
+        0.20410000000265427
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 0.5066999999980908,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.07726502418518066,
+        "roots": [
+          {
+            "pid": 6316,
+            "created": "134378469623652597",
+            "cpuSeconds": 0,
+            "pageFaultCount": 0
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0,
+        "pageFaultCount": 0
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6716.360599999985,
+      "passed": true
+    },
+    {
+      "variant": "snooze",
+      "repetition": 3,
+      "measurements": {
+        "active": {
+          "sampledAt": 1793373372.2710092,
+          "roots": [
+            8004
+          ],
+          "rootIdentities": {
+            "8004": "134378469690843329"
+          },
+          "processes": [
+            {
+              "pid": 8004,
+              "created": "134378469690843329",
+              "workingSetBytes": 8785920,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 47702016,
+              "pageFaultCount": 2240,
+              "parent": 744
+            },
+            {
+              "pid": 7944,
+              "created": "134378469690876283",
+              "workingSetBytes": 7057408,
+              "cpuSeconds": 0,
+              "privateBytes": 1245184,
+              "pageFaultCount": 1804,
+              "parent": 8004
+            },
+            {
+              "pid": 8960,
+              "created": "134378469691349992",
+              "workingSetBytes": 48160768,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 43491328,
+              "pageFaultCount": 11898,
+              "parent": 8004
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64004096,
+          "privateBytes": 92438528,
+          "cpuSeconds": 0.09375,
+          "availableSystemBytes": 14298202112,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "idle": {
+          "sampledAt": 1793373375.351685,
+          "roots": [
+            8004
+          ],
+          "rootIdentities": {
+            "8004": "134378469690843329"
+          },
+          "processes": [
+            {
+              "pid": 8004,
+              "created": "134378469690843329",
+              "workingSetBytes": 8962048,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 47972352,
+              "pageFaultCount": 2284,
+              "parent": 744
+            },
+            {
+              "pid": 7944,
+              "created": "134378469690876283",
+              "workingSetBytes": 7069696,
+              "cpuSeconds": 0,
+              "privateBytes": 1257472,
+              "pageFaultCount": 1807,
+              "parent": 8004
+            }
+          ],
+          "processCount": 2,
+          "unavailable": [],
+          "workingSetBytes": 16031744,
+          "privateBytes": 49229824,
+          "cpuSeconds": 0.03125,
+          "availableSystemBytes": 14333689856,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        },
+        "awake": {
+          "sampledAt": 1793373375.491366,
+          "roots": [
+            8004
+          ],
+          "rootIdentities": {
+            "8004": "134378469690843329"
+          },
+          "processes": [
+            {
+              "pid": 8004,
+              "created": "134378469690843329",
+              "workingSetBytes": 9207808,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 48291840,
+              "pageFaultCount": 2345,
+              "parent": 744
+            },
+            {
+              "pid": 7944,
+              "created": "134378469690876283",
+              "workingSetBytes": 7069696,
+              "cpuSeconds": 0,
+              "privateBytes": 1257472,
+              "pageFaultCount": 1807,
+              "parent": 8004
+            },
+            {
+              "pid": 3380,
+              "created": "134378469753623175",
+              "workingSetBytes": 47833088,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 43184128,
+              "pageFaultCount": 11811,
+              "parent": 8004
+            }
+          ],
+          "processCount": 3,
+          "unavailable": [],
+          "workingSetBytes": 64110592,
+          "privateBytes": 92733440,
+          "cpuSeconds": 0.09375,
+          "availableSystemBytes": 14291394560,
+          "rejectedParentEdges": 0,
+          "rejectedRootIdentities": [],
+          "scope": "explicit_roots_and_creation_validated_descendants"
+        }
+      },
+      "errors": [],
+      "expectedFirstWakeError": false,
+      "coldMs": 112.2496000000101,
+      "warmMs": [
+        0.4096000000135973,
+        0.41990000000805594,
+        0.3623999999836087,
+        0.3620999999984633,
+        0.45409999997355044,
+        0.41819999998551793,
+        0.4416999999957625,
+        0.39009999998961575,
+        0.384699999995064,
+        0.4342999999935273
+      ],
+      "callbackPassed": true,
+      "longCallPassed": true,
+      "wakePassed": true,
+      "wakeMs": 58.46950000000652,
+      "wakeStableRoots": {
+        "scope": "same_explicit_root_pid_and_creation_only",
+        "intervalSeconds": 0.1396808624267578,
+        "roots": [
+          {
+            "pid": 8004,
+            "created": "134378469690843329",
+            "cpuSeconds": 0.015625,
+            "pageFaultCount": 61
+          }
+        ],
+        "excludedRoots": [],
+        "invalidRoots": [],
+        "cpuSeconds": 0.015625,
+        "pageFaultCount": 61
+      },
+      "diagnosticBytes": 0,
+      "cleanupRemaining": [],
+      "elapsedMs": 6852.729800000001,
+      "passed": true
+    }
+  ]
+}
