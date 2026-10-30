@@ -17,7 +17,7 @@ The plan file matched the hash stored in the result.
 | Observed total duration | 902.675 seconds |
 | Actual idle expiry observation | 900.089 seconds after the idle tool call |
 | Fresh connection after expiry | Passed |
-| Final cleanup | Zero remaining sampled owned identities |
+| Final cleanup reported by the original harness | Zero remaining identities in its current tree; orphan verification was incomplete |
 | Resource samples | 31 |
 | Peak sampled full test-tree working set | 292,483,072 bytes (278.93 MiB) |
 | Last sampled working set | 142,262,272 bytes (135.67 MiB) |
@@ -39,3 +39,12 @@ the original objective, independently of the harness error.
 Working-set sums can double-count shared pages, and these are discrete samples,
 not continuous peak/CPU measurements. No comparative savings or native-agent
 compatibility can be inferred from this run.
+
+Later review found that the original sampler used parent PIDs without checking
+creation times at each edge, and cleanup inspected only the current tree. That
+could misattribute an older process after parent-PID reuse or miss an orphan
+whose parent already exited. A separate STDIO attempt demonstrated that
+misattribution, so this run's resource and cleanup figures remain qualified.
+No older-than-root rows were found in these 31 gateway samples, but that alone
+does not retrospectively validate every parent edge or prove orphan absence.
+The sampler was corrected and regression-tested before the next endurance run.
