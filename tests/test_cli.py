@@ -15,6 +15,7 @@ import tomllib
 import unittest
 from unittest.mock import patch
 import subprocess
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("warden", ROOT / "warden.py")
@@ -65,6 +66,16 @@ class StateContracts(unittest.TestCase):
         self.assertIn(str(self.state), codex_entry["args"])
         self.assertEqual(codex_entry["args"][-1], "example")
         self.assertNotIn(warden.read_token(self.state), json.dumps(claude_entry))
+
+    def test_codex_configuration_preserves_non_bmp_paths(self):
+        unicode_state = self.state / 'state-\U0001f4bb'
+        warden.initialize(unicode_state, transport='stdio')
+        with patch.object(warden, 'ROOT', self.state / 'source-\U0001f680'), \
+                patch.object(warden.sys, 'executable', str(self.state / 'python-\U0001f40d.exe')):
+            codex = tomllib.loads(warden.configuration(unicode_state, 'example', 'codex'))
+            claude = json.loads(warden.configuration(unicode_state, 'example', 'claude'))
+        self.assertEqual(codex['mcp_servers']['warden-example'], claude['mcpServers']['warden-example'])
+        self.assertIn(str(unicode_state), codex['mcp_servers']['warden-example']['args'])
 
     def test_bad_configuration_returns_fixed_error_without_state_data(self):
         self.state.mkdir()
@@ -154,6 +165,132 @@ class HealthContract(unittest.TestCase):
                 data = warden.doctor(missing)
             self.assertFalse(data["checks"]["state_valid"])
             self.assertFalse(missing.exists())
+
+    def test_doctor_rejects_missing_required_runtime_sources(self):
+        required = {
+            'stdio': ('idle_stdio.py', 'lazy_stdio.py', 'owned_bridge.py'),
+            'gateway': ('gateway.mjs', 'connect.mjs', 'lazy_stdio.py', 'owned_bridge.py'),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / 'runtime').mkdir()
+            for package in ('supergateway', '@modelcontextprotocol/sdk'):
+                package_path = root / 'node_modules' / package
+                package_path.mkdir(parents=True)
+                (package_path / 'package.json').write_text('{}')
+            for name in set(sum(required.values(), ())):
+                (root / 'runtime' / name).write_text('')
+            with patch.object(warden, 'ROOT', root), \
+                    patch.object(shutil, 'which', return_value='node.exe'), \
+                    patch.object(warden.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, stdout='v22.1.0\n')):
+                for transport, filenames in required.items():
+                    checks = warden.doctor(None, transport)['checks']
+                    self.assertTrue(all(value for key, value in checks.items() if key != 'windows_runtime'))
+                    for filename in filenames:
+                        with self.subTest(transport=transport, missing=filename):
+                            path = root / 'runtime' / filename
+                            path.unlink()
+                            self.assertFalse(warden.doctor(None, transport)['ready'])
+                            path.write_text('')
+
+    def test_doctor_validates_stdio_profile_without_starting_backend(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            config = warden.initialize(state, transport='stdio')
+            path = state / 'config.json'
+            valid_profile = config['profiles']['example']
+            invalid_profiles = [
+                {'transport': 'stdio'},
+                {'transport': 'stdio', 'manifest': {}},
+                {'transport': 'stdio', 'manifest': {'command': warden.sys.executable, 'args': 'not-a-list'}},
+                {'transport': 'stdio', 'manifest': {'command': warden.sys.executable, 'env': []}},
+                {'transport': 'stdio', 'idle_session_timeout_seconds': -1, 'manifest': valid_profile['manifest']},
+                {'transport': 'stdio', 'manifest': {'command': str(state / 'absent.exe')}},
+            ]
+            with patch.object(warden.subprocess, 'Popen', side_effect=AssertionError('unexpected backend spawn')):
+                before = sorted(str(item.relative_to(state)) for item in state.rglob('*'))
+                self.assertTrue(warden.doctor(state, 'stdio')['checks']['profiles_valid'])
+                self.assertEqual(before, sorted(str(item.relative_to(state)) for item in state.rglob('*')))
+                for profile in invalid_profiles:
+                    with self.subTest(profile=profile):
+                        config['profiles']['example'] = profile
+                        path.write_text(json.dumps(config), encoding='utf-8')
+                        data = warden.doctor(state, 'stdio')
+                        self.assertFalse(data['ready'])
+                        self.assertFalse(data['checks']['profiles_valid'])
+
+    def test_doctor_accepts_relative_command_resolved_by_client_environment(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            config = warden.initialize(state, transport='stdio')
+            config['profiles']['example']['manifest'] = {
+                'command': 'custom-backend', 'args': [], 'env': {'PATH': 'client-specific-path'}}
+            (state / 'config.json').write_text(json.dumps(config), encoding='utf-8')
+            with patch.object(warden.subprocess, 'Popen', side_effect=AssertionError('unexpected backend spawn')):
+                self.assertTrue(warden.doctor(state, 'stdio')['checks']['profiles_valid'])
+
+    def test_doctor_checks_gateway_runtime_paths_without_resolving_relative_backend(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            config = warden.initialize(state)
+            config['profiles']['example']['manifest'] = {
+                'command': 'npx', 'args': ['a-client-specific-package'], 'env': {'PATH': 'client-specific-path'}}
+            config_path = state / 'config.json'
+            config_path.write_text(json.dumps(config), encoding='utf-8')
+            with patch.object(shutil, 'which', return_value='node.exe'), \
+                    patch.object(warden.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, stdout='v22.1.0\n')), \
+                    patch.object(warden.subprocess, 'Popen', side_effect=AssertionError('unexpected backend spawn')):
+                initial = warden.doctor(state, 'gateway')['checks']
+                self.assertTrue(initial['profiles_valid'])
+                self.assertTrue(initial['configured_runtime_paths'])
+                config['owned_bridge'] = str(state / 'absent-bridge.py')
+                config_path.write_text(json.dumps(config), encoding='utf-8')
+                data = warden.doctor(state, 'gateway')
+                self.assertFalse(data['ready'])
+                self.assertFalse(data['checks']['configured_runtime_paths'])
+
+    def test_connect_rejects_missing_manifest_with_fixed_error(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            config = warden.initialize(state, transport='stdio')
+            config['profiles']['example'] = {'transport': 'stdio', 'private': 'must-not-appear'}
+            (state / 'config.json').write_text(json.dumps(config), encoding='utf-8')
+            stderr = io.StringIO()
+            with patch.object(warden, 'require_windows'), redirect_stderr(stderr):
+                result = warden.main(['connect', '--state', str(state), '--profile', 'example'])
+            self.assertEqual(result, 2)
+            self.assertNotIn('Traceback', stderr.getvalue())
+            self.assertNotIn('must-not-appear', stderr.getvalue())
+
+    def test_stdio_status_preserves_idle_block_reason(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            warden.initialize(state, transport='stdio')
+            folder = state / 'run' / 'stdio' / 'fixture'
+            folder.mkdir(parents=True)
+            sample = {'active': True, 'ownerPid': 123, 'ownerCreated': '456',
+                      'idleExpiryBlockedReason': 'mcp_tasks_capability'}
+            (folder / 'status.json').write_text(json.dumps(sample), encoding='utf-8')
+            owner = SimpleNamespace(alive=lambda: True, close=lambda: None)
+            metrics = SimpleNamespace(PinnedProcess=lambda *args: owner)
+            with patch.object(warden, 'require_windows'), patch.object(warden, 'runtime_module', return_value=metrics):
+                status = warden.get_stdio_status(state)
+            self.assertEqual(status['samples'][0]['idleExpiryBlockedReason'], 'mcp_tasks_capability')
+
+    def test_stdio_sampler_records_idle_block_reason(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary) / 'state'
+            config = warden.initialize(state, transport='stdio')
+            bridge_module = SimpleNamespace(
+                IdleBridge=lambda manifest: SimpleNamespace(proc=None, idle_expiry_blocked_reason='mcp_tasks_capability', run=lambda: 0),
+                redirect_diagnostics=lambda *args: None)
+            owner = SimpleNamespace(pid=123, created=456, usage=lambda: (100, 0.0), close=lambda: None)
+            metrics_module = SimpleNamespace(PinnedProcess=lambda *args: owner)
+            with patch.object(warden, 'runtime_module', side_effect=[bridge_module, metrics_module]):
+                self.assertEqual(warden.connect_stdio(state, 'example', config), 0)
+            samples = list((state / 'run' / 'stdio').glob('*/status.json'))
+            self.assertEqual(len(samples), 1)
+            self.assertEqual(json.loads(samples[0].read_text())['idleExpiryBlockedReason'], 'mcp_tasks_capability')
 
 
 @unittest.skipUnless(shutil.which("node") and (ROOT / "node_modules" / "@modelcontextprotocol" / "sdk").is_dir(),

@@ -250,6 +250,53 @@ test('Windows MCP session lifecycle', { skip: process.platform !== 'win32', time
     await waitFor(async () => (await h.health()).sessionCount === 0);
   });
 
+  await t.test('a task-creation reply does not expire its still-working HTTP backend', async t => {
+    const h = await harness(t, .15);
+    const backend = path.join(h.directory, 'task-backend.py');
+    const completed = path.join(h.directory, 'task-completed');
+    await writeFile(backend, `import datetime,json,sys,threading,time
+from pathlib import Path
+lock=threading.Lock()
+task={'taskId':'fixture-task','status':'working','createdAt':'2026-11-01T00:00:00Z','lastUpdatedAt':'2026-11-01T00:00:00Z','ttl':5000,'pollInterval':100}
+def emit(ident,result):
+ with lock:
+  print(json.dumps({'jsonrpc':'2.0','id':ident,'result':result}),flush=True)
+def work():
+ time.sleep(.6)
+ task['status']='completed'
+ Path(sys.argv[1]).write_text('completed')
+for line in sys.stdin:
+ msg=json.loads(line); method=msg.get('method')
+ if 'id' not in msg: continue
+ if method=='initialize':
+  emit(msg['id'],{'protocolVersion':msg['params']['protocolVersion'],'capabilities':{'tools':{},'tasks':{}},'serverInfo':{'name':'task-fixture','version':'1'}})
+ elif method=='tools/call':
+  emit(msg['id'],{'task':dict(task)})
+  threading.Thread(target=work,daemon=True).start()
+ elif method=='tasks/get': emit(msg['id'],dict(task))
+ elif method=='ping': emit(msg['id'],{})
+`);
+    h.gateway.profiles.example.manifest.args = ['-I', '-B', '-u', backend, completed];
+    const c = await h.client();
+    const created = await c.post({ jsonrpc:'2.0', id:'create-task', method:'tools/call',
+      params:{ name:'background', arguments:{}, task:{ ttl:5000 } } });
+    assert.equal(created.status, 200);
+    assert.equal(created.messages.find(message => message.id === 'create-task')?.result?.task?.status, 'working');
+    await delay(350); // More than twice the configured idle interval.
+    const during = await h.health();
+    assert.equal(during.sessionCount, 1);
+    assert.equal(during.taskPinnedSessionCount, 1);
+    assert.equal(during.pendingRequestCount, 0, 'the creating RPC already ended');
+    assert.equal(during.idleExpiredSessionCount, 0);
+    await waitFor(async () => (await readFile(completed, 'utf8').catch(() => '')) === 'completed');
+    const result = await c.post({ jsonrpc:'2.0', id:'get-task', method:'tasks/get', params:{ taskId:'fixture-task' } });
+    assert.equal(result.status, 200);
+    assert.equal(result.messages.find(message => message.id === 'get-task')?.result?.status, 'completed');
+    const removed = await exchange(h.port, c.headers(), null, { method:'DELETE', path:'/mcp/example' });
+    assert.equal(removed.status, 200);
+    await waitFor(async () => (await h.health()).sessionCount === 0);
+  });
+
   await t.test('pending server callback survives the idle timeout', async t => {
     const h = await harness(t);
     const c = await h.client();

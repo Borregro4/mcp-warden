@@ -54,6 +54,10 @@ reduced working set further with extra page faults; it stays off by default.
 
 ## Know the limits
 
+- MCP Tasks can outlive their initial JSON-RPC response. Sessions that advertise
+  Tasks or use task-augmented requests retain their backend until disconnect;
+  idle expiry is disabled conservatively. This is a safety fallback, not full
+  task tracking or task recovery. See [task lifecycle](docs/task-lifecycle.md).
 - Stateless restart loses backend memory, cursors, and selections. Use it only when that is acceptable. Default/manual profiles require a client reconnect after expiry; completed calls are never replayed.
 - Windows Job cleanup is for owned private children. Shared descendants need a different policy, and the creation-to-Job-assignment gap is not qualified.
 - This is a lifecycle supervisor for trusted local programs, with no hard RAM/CPU sandbox, model routing, token savings, or subscription-quota management.

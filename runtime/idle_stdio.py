@@ -1,6 +1,7 @@
 """Bounded, lightweight stdio lifecycle policy around the existing Bridge.
 
 No daemon, Node process, HTTP listener or persisted discovery cache is used.
+RPC lines default to 1 MiB; a profile may explicitly opt into at most 8 MiB.
 Only a clean idle expiry may restart a backend, and only when its profile
 explicitly declares restart_policy="stateless". No completed or uncertain tool
 request is replayed. WindowsJob, launch, forwarding and handshake replay come
@@ -30,9 +31,17 @@ encoded = _base.encoded
 parse = _base.parse
 redirect_diagnostics = _base.redirect_diagnostics
 
+DEFAULT_RPC_LINE_BYTES = 1024 * 1024
+# A Nexo memory_original CallToolResult is capped at 6 MiB before its small
+# JSON-RPC envelope. Keep headroom bounded and opt-in, not a larger default.
+MAX_RPC_LINE_BYTES = 8 * 1024 * 1024
+
 
 class ProtocolStop(Exception):
     """Fixed diagnostics only; request contents never enter logs."""
+    def __init__(self, code, client_message=None):
+        super().__init__(code)
+        self.client_message = client_message
 
 
 class TaggedQueue:
@@ -96,6 +105,8 @@ class IdleBridge(Bridge):
                 or not isinstance(v, str) or '\0' in v for k, v in environment.items()):
             raise ValueError('invalid_configuration')
         self.spec = dict(manifest)
+        self.windows_detached_console = manifest.get('windows_detached_console', False)
+        _base.windows_creation_flags(self.windows_detached_console)
         self.cleanup_scope = manifest.get('cleanup_scope', 'tree')
         if self.cleanup_scope not in {'tree', 'process'}:
             raise ValueError('invalid_configuration')
@@ -110,8 +121,8 @@ class IdleBridge(Bridge):
         self.partial_seconds = _number(manifest.get('partial_message_timeout_seconds', 30), .1, 600)
         self.write_seconds = _number(manifest.get('backend_write_timeout_seconds', 30), .1, 600)
         self.spec['shutdown_grace_seconds'] = _number(manifest.get('shutdown_grace_seconds', .5), 0, 5)
-        limit = manifest.get('max_rpc_line_bytes', 1024 * 1024)
-        if type(limit) is not int or not 1024 <= limit <= 1024 * 1024:
+        limit = manifest.get('max_rpc_line_bytes', DEFAULT_RPC_LINE_BYTES)
+        if type(limit) is not int or not 1024 <= limit <= MAX_RPC_LINE_BYTES:
             raise ValueError('invalid_configuration')
         self.max_line_bytes = limit
         self.environment = os.environ.copy()
@@ -126,6 +137,11 @@ class IdleBridge(Bridge):
         self.events = queue.Queue(maxsize=16)
         self._events = self.events
         self.stopping = threading.Event()
+        self.client_closed = threading.Event()
+        self.stdout_failed = threading.Event()
+        self.stdout_writer = None
+        self.reporting_failure = False
+        self.failure_output_can_drain = False
         self.partial_lock = threading.Lock()
         self.partial = {}
         self.generation = 0
@@ -149,6 +165,9 @@ class IdleBridge(Bridge):
         self.replay_tools_id = None
         self.replay_initialized = False
         self.uncertain = False
+        # A completed JSON-RPC request is not evidence that an MCP Task ended.
+        # Without task leases, retaining this connection is the safe policy.
+        self.idle_expiry_blocked_reason = None
         self.disconnect = False
         self.write_queue = self.writer_stop = None
         self.writes = {}
@@ -163,6 +182,10 @@ class IdleBridge(Bridge):
                 if not chunk:
                     if buffered:
                         destination.put((source + '_invalid', 'incomplete_message'))
+                    elif source == 'client':
+                        # EOF must interrupt output backpressure even if events
+                        # is full. Framing errors keep their failure semantics.
+                        self.client_closed.set()
                     break
                 if not buffered:
                     with self.partial_lock:
@@ -175,12 +198,13 @@ class IdleBridge(Bridge):
                         return
                     raw = bytes(buffered[:end])
                     del buffered[:end]
-                    if not destination.put((source, raw)):
-                        return
                     with self.partial_lock:
                         self.partial.pop(key, None)
-                        if buffered:
-                            self.partial[key] = time.monotonic()
+                    if not destination.put((source, raw)):
+                        return
+                if buffered:
+                    with self.partial_lock:
+                        self.partial.setdefault(key, time.monotonic())
                 if len(buffered) > self.max_line_bytes:
                     destination.put((source + '_invalid', 'message_too_large'))
                     return
@@ -246,6 +270,26 @@ class IdleBridge(Bridge):
         self.output(encoded({'jsonrpc': '2.0', 'id': ident,
             'error': {'code': code, 'message': message}}) + b'\n')
 
+    def _check_output_transport(self):
+        if self.client_closed.is_set():
+            raise _base.BridgeClientClosed('client_closed')
+        if self.stdout_writer is not None:
+            self.stdout_writer.poll()
+
+    def _check_output_wait(self):
+        self._check_output_transport()
+        if not self.reporting_failure:
+            self._poll_deadlines()
+
+    def output(self, raw):
+        if self.stdout_writer is None:
+            return super().output(raw)  # Deterministic unit use, before run().
+        self.stdout_writer.send(raw, self._check_output_wait)
+
+    def drain_output(self):
+        if self.stdout_writer is not None:
+            self.stdout_writer.drain(self._check_output_transport)
+
     @staticmethod
     def message(raw):
         message = parse(raw)
@@ -271,9 +315,29 @@ class IdleBridge(Bridge):
             self.discovery_requests[key] = isinstance(params, dict) and 'cursor' in params
         return True
 
+    def observe_task_support(self, message, initialize_result=False):
+        """Conservatively retain sessions using Tasks; never infer completion.
+
+        Empty task capability objects count as negotiation. Unexpected task
+        augmentation also blocks expiry, in either direction, even when the
+        peer omitted its capability. The reason is sticky for this connection;
+        this does not implement Task state, polling, TTL, or result retention.
+        """
+        body = message.get('result' if initialize_result else 'params')
+        if not isinstance(body, dict):
+            return
+        if initialize_result or message.get('method') == 'initialize':
+            capabilities = body.get('capabilities')
+            if isinstance(capabilities, dict) and 'tasks' in capabilities:
+                self.idle_expiry_blocked_reason = 'mcp_tasks_capability'
+        if (not initialize_result and 'method' in message and 'id' in message
+                and 'task' in body and self.idle_expiry_blocked_reason is None):
+            self.idle_expiry_blocked_reason = 'task_augmented_request'
+
     def accept_client(self, raw):
         message = self.message(raw)
         method = message.get('method')
+        self.observe_task_support(message)
         self.last_activity = time.monotonic()
         if self.init is None and method == 'server/discover' and 'id' in message:
             self.error(message['id'], 'Method not found; use the initialize handshake.', -32601)
@@ -345,6 +409,11 @@ class IdleBridge(Bridge):
         message = self.message(raw)
         self.last_activity = time.monotonic()
         method = message.get('method')
+        self.observe_task_support(message)
+        if (method is None and self.init is not None
+                and (message['id'] == self.init['id'] or
+                     (self.state == 'replaying' and message['id'] == self.internal_id))):
+            self.observe_task_support(message, initialize_result=True)
         if method is not None and 'id' in message:
             if not self.track_request(message, self.server_pending):
                 raise ProtocolStop('callback_capacity_reached')
@@ -410,11 +479,17 @@ class IdleBridge(Bridge):
             self.send(raw)
 
     def fail_pending(self, text):
-        for ident in list(self.client_pending.values()):
-            self.error(ident, text)
-        self.client_pending.clear()
-        self.discovery_requests.clear()
-        self.held.clear()
+        self.reporting_failure = True
+        can_drain = self.stdout_writer is None or not self.stdout_writer.pending()
+        try:
+            for ident in list(self.client_pending.values()):
+                self.error(ident, text)
+            self.failure_output_can_drain |= can_drain
+        finally:
+            self.client_pending.clear()
+            self.discovery_requests.clear()
+            self.held.clear()
+            self.reporting_failure = False
 
     def stop_backend(self):
         old = self.proc
@@ -449,25 +524,33 @@ class IdleBridge(Bridge):
         if old and old.stdout and not blocked_process_only:
             old.stdout.close()
 
-    def poll_idle(self):
+    def _poll_deadlines(self):
         now = time.monotonic()
         with self.partial_lock:
             partial = [began for (source, generation), began in self.partial.items()
                 if source == 'client' or generation == self.generation]
         if partial and now - min(partial) >= self.partial_seconds:
-            self.fail_pending('MCP partial message timed out. Reconnect the client.')
-            raise ProtocolStop('partial_message_timeout')
+            raise ProtocolStop('partial_message_timeout',
+                'MCP partial message timed out. Reconnect the client.')
         if self.writes and now - min(self.writes.values()) >= self.write_seconds:
-            self.fail_pending('MCP backend write timed out; outcome may be unknown. Reconnect the client.')
-            raise ProtocolStop('backend_write_timeout')
+            raise ProtocolStop('backend_write_timeout',
+                'MCP backend write timed out; outcome may be unknown. Reconnect the client.')
+        if (self.proc is not None and (not self.ready or self.state == 'replaying')
+                and now - self.started_at >= self.handshake_seconds):
+            raise ProtocolStop('initialize_timeout',
+                'MCP backend initialization timed out. Reconnect the client.')
+        return now, partial
+
+    def poll_idle(self):
+        self._check_output_transport()
+        now, partial = self._poll_deadlines()
         if self.proc is None:
             return
-        if (not self.ready or self.state == 'replaying') and now - self.started_at >= self.handshake_seconds:
-            self.fail_pending('MCP backend initialization timed out. Reconnect the client.')
-            raise ProtocolStop('initialize_timeout')
         if (self.ready and self.idle_seconds > 0 and self.state != 'replaying'
+                and self.idle_expiry_blocked_reason is None
                 and not self.client_pending and not self.server_pending
                 and not self.writes
+                and (self.stdout_writer is None or not self.stdout_writer.pending())
                 and not partial
                 and self._events.empty() and now - self.last_activity >= self.idle_seconds):
             self.stop_backend()
@@ -497,6 +580,9 @@ class IdleBridge(Bridge):
         if os.name != 'nt':
             raise ValueError('windows_required')
         destination = TaggedQueue(self._events, None, self.stopping)
+        self.stdout_writer = _base.BoundedWriter(
+            getattr(sys.stdout.buffer, 'raw', sys.stdout.buffer), self.stopping,
+            self.stdout_failed.set, self.write_seconds)
         # Bypass the interpreter's standard BufferedReader lock in daemon input
         # reads. Raw pipe reads return available chunks, are bounded here, and
         # do not hold the standard stream's lock during process shutdown.
@@ -505,6 +591,7 @@ class IdleBridge(Bridge):
             args=(client_stream, destination, 'client'), daemon=True).start()
         try:
             while not self.disconnect:
+                self._check_output_transport()
                 try:
                     source, generation, raw = self._events.get(timeout=.05)
                 except queue.Empty:
@@ -530,11 +617,26 @@ class IdleBridge(Bridge):
                     self.fail_pending('MCP backend exited. Outcome of pending work is unknown; reconnect the client.')
                     raise ProtocolStop('backend_exited')
                 self.poll_idle()
+            self.drain_output()
             return 0
+        except _base.BridgeClientClosed:
+            return 0
+        except _base.BridgeTransportStop as error:
+            print('mcp-warden: ' + str(error), file=sys.stderr, flush=True)
+            return 2
         except (BrokenPipeError, OSError):
             return 2
         except ProtocolStop as error:
-            self.fail_pending('MCP transport closed; pending outcomes may be unknown. Reconnect the client.')
+            try:
+                # An already backpressured output cannot carry a timely final
+                # error. Preserve the original deadline and close cleanly.
+                if self.stdout_writer is None or not self.stdout_writer.pending():
+                    self.fail_pending(error.client_message or
+                        'MCP transport closed; pending outcomes may be unknown. Reconnect the client.')
+                if self.failure_output_can_drain:
+                    self.drain_output()
+            except (ProtocolStop, _base.BridgeTransportStop, OSError):
+                pass  # A failed/closed output cannot carry a final error.
             print('mcp-warden: ' + str(error), file=sys.stderr, flush=True)
             return 2
         finally:

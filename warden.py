@@ -20,7 +20,7 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.3.0-alpha.1"
+VERSION = "0.3.1-alpha.1"
 
 
 class WardenError(Exception):
@@ -189,12 +189,34 @@ def stop_owned_process(process: subprocess.Popen) -> int:
         return process.wait(timeout=5)
 
 
+def selected_profile(config: dict, profile: str) -> dict:
+    """Validate the shared profile shape before indexing user configuration."""
+    profiles = config.get('profiles')
+    if not isinstance(profiles, dict) or profile not in profiles:
+        raise WardenError('unknown profile')
+    selected = profiles[profile]
+    if not isinstance(selected, dict) or not isinstance(selected.get('manifest'), dict):
+        raise WardenError('invalid profile configuration')
+    if selected.get('transport', 'gateway') not in {'gateway', 'stdio'}:
+        raise WardenError('unknown profile transport')
+    return selected
+
+
+def stdio_manifest(config: dict, selected: dict) -> dict:
+    """Use exactly the same effective settings for preflight and connection."""
+    manifest = dict(selected['manifest'])
+    manifest.update(cwd=os.getcwd(),
+                    idle_session_timeout_seconds=selected.get('idle_session_timeout_seconds',
+                        config.get('idle_session_timeout_seconds', 900)),
+                    restart_policy=selected.get('restart_policy', 'manual'))
+    return manifest
+
+
 def connect(state: Path, profile: str) -> int:
     require_windows()
     config = load_config(state)
-    if profile not in config["profiles"]:
-        raise WardenError("unknown profile")
-    transport = config['profiles'][profile].get('transport', 'gateway')
+    selected = selected_profile(config, profile)
+    transport = selected.get('transport', 'gateway')
     if transport == 'stdio':
         return connect_stdio(state_path(state), profile, config)
     if transport != 'gateway':
@@ -244,12 +266,8 @@ def runtime_module(name: str, filename: str):
 
 def connect_stdio(state: Path, profile: str, config: dict) -> int:
     """One Python proxy and its backend: no HTTP supervisor or Node connector."""
-    selected = config['profiles'][profile]
-    manifest = dict(selected['manifest'])
-    manifest.update(cwd=os.getcwd(),
-                    idle_session_timeout_seconds=selected.get('idle_session_timeout_seconds',
-                        config.get('idle_session_timeout_seconds', 900)),
-                    restart_policy=selected.get('restart_policy', 'manual'))
+    selected = selected_profile(config, profile)
+    manifest = stdio_manifest(config, selected)
     directory = state / 'run' / 'stdio' / uuid.uuid4().hex
     directory.mkdir(parents=True, mode=0o700)
     manifest['stderr_log_dir'] = str(directory / 'stderr')
@@ -277,6 +295,7 @@ def connect_stdio(state: Path, profile: str, config: dict) -> int:
             pass
         value = {'active': active, 'profile': profile, 'ownerPid': owner.pid,
                  'ownerCreated': str(owner.created), 'backendPid': backend_pid,
+                 'idleExpiryBlockedReason': getattr(bridge, 'idle_expiry_blocked_reason', None),
                  'sampledAt': time.time(), 'workingSetBytes': sum(x[0] for x in samples),
                  'cpuSeconds': sum(x[1] for x in samples), 'sampledProcesses': len(samples),
                  'usageScope': 'proxy_and_direct_backend_only'}
@@ -340,8 +359,10 @@ def configuration(state: Path, profile: str, client: str) -> str:
         return json.dumps({"mcpServers": {"warden-" + profile: {"command": command, "args": args}}}, indent=2)
     return "\n".join([
         '[mcp_servers.' + json.dumps("warden-" + profile) + ']',
-        "command = " + json.dumps(command),
-        "args = " + json.dumps(args),
+        # JSON's ASCII encoding represents non-BMP characters as surrogate
+        # pairs. TOML rejects those escapes; literal Unicode is valid in both.
+        "command = " + json.dumps(command, ensure_ascii=False),
+        "args = " + json.dumps(args, ensure_ascii=False),
     ])
 
 
@@ -366,19 +387,56 @@ def doctor(state: Path | None, transport: str = 'gateway') -> dict:
         "node_22_or_newer": node_supported,
         "gateway_source": (ROOT / "runtime" / "gateway.mjs").is_file(),
         "connector_source": (ROOT / "runtime" / "connect.mjs").is_file(),
+        "lazy_runtime_source": (ROOT / "runtime" / "lazy_stdio.py").is_file(),
+        "ownership_runtime_source": (ROOT / "runtime" / "owned_bridge.py").is_file(),
         "dependencies_installed": (ROOT / "node_modules" / "supergateway" / "package.json").is_file(),
         "sdk_installed": (ROOT / "node_modules" / "@modelcontextprotocol" / "sdk" / "package.json").is_file(),
     }
     if transport == 'stdio':
-        checks = {key: value for key, value in checks.items() if key in ('windows_runtime', 'python_311_or_newer')}
+        checks = {key: value for key, value in checks.items() if key in (
+            'windows_runtime', 'python_311_or_newer', 'lazy_runtime_source', 'ownership_runtime_source')}
         checks['stdio_runtime_source'] = (ROOT / 'runtime' / 'idle_stdio.py').is_file()
     if state is not None:
         try:
-            load_config(state)
+            config = load_config(state)
             read_token(state)
             checks["state_valid"] = True
         except WardenError:
             checks["state_valid"] = False
+        else:
+            try:
+                for name in config['profiles']:
+                    selected = selected_profile(config, name)
+                    manifest = selected['manifest']
+                    command = manifest.get('command')
+                    if not isinstance(command, str) or not command or '\0' in command:
+                        raise ValueError()
+                    arguments = manifest.get('args', [])
+                    if not isinstance(arguments, list) or any(
+                            not isinstance(arg, str) or '\0' in arg for arg in arguments):
+                        raise ValueError()
+                    if not isinstance(manifest.get('env', {}), dict):
+                        raise ValueError()
+                    if manifest.get('cleanup_scope', 'tree') not in {'tree', 'process'}:
+                        raise ValueError()
+                    if selected.get('transport', 'gateway') == 'stdio':
+                        # Construction validates the runtime contract without
+                        # starting threads, children, or creating cache files.
+                        module = runtime_module('warden_doctor_stdio', 'idle_stdio.py')
+                        module.IdleBridge(stdio_manifest(config, selected))
+                    # Bare/relative commands can validly resolve in the client's
+                    # environment. Only an explicit absolute executable is
+                    # checkable here without running it or guessing its PATH.
+                    if Path(command).is_absolute() and not Path(command).is_file():
+                        raise ValueError()
+                checks['profiles_valid'] = True
+            except (WardenError, OSError, ValueError, KeyError, TypeError, AttributeError, ImportError, SyntaxError):
+                checks['profiles_valid'] = False
+            if transport == 'gateway':
+                checks['configured_runtime_paths'] = all(
+                    isinstance(config.get(key), str) and Path(config[key]).is_absolute()
+                    and Path(config[key]).is_file()
+                    for key in ('bridge_python', 'owned_bridge', 'bridge'))
     return {"version": VERSION, "ready": all(checks.values()), "checks": checks}
 
 

@@ -55,6 +55,11 @@ y la [validación de v0.2](docs/validation-v0.2.0-alpha.1.md).
 
 ## Límites que debes conocer
 
+- Las tareas MCP pueden seguir activas tras la respuesta JSON-RPC inicial. Las
+  sesiones que anuncian Tasks o envían solicitudes con `params.task` conservan
+  su servidor hasta la desconexión: se desactiva el cierre por inactividad como
+  protección. No equivale a seguimiento ni recuperación completos de tareas.
+  Consulta el [ciclo de tareas](docs/task-lifecycle.md).
 - El reinicio stateless pierde la memoria del servidor, sus cursores y selecciones. Úsalo sólo si eso es aceptable. Los perfiles manuales, que son la opción predeterminada, piden reconectar después del vencimiento; no se repiten llamadas completadas.
 - La limpieza con Windows Job Objects corresponde a procesos hijos privados del servidor. Los descendientes compartidos necesitan otra política, y no está calificado el intervalo entre crear el proceso y asignarlo al Job.
 - Administra el ciclo de vida de programas locales de confianza. No impone un límite estricto de RAM o CPU, elige modelos ni acredita ahorro de tokens o gestión de cuotas.
