@@ -25,6 +25,25 @@ const object = value => value !== null && typeof value === 'object' && !Array.is
 const decimal = value => typeof value === 'string' && /^[1-9][0-9]*$/.test(value) && BigInt(value) < (1n << 64n);
 const canonicalEnv = value => JSON.stringify(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));
 
+export function ownedBridgeSpawnOptions(windowsDetached = false, platform = process.platform) {
+  if (typeof windowsDetached !== 'boolean') throw new Error('invalid_windows_detached_bridge');
+  return { windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'pipe'],
+    detached: platform === 'win32' && windowsDetached };
+}
+
+const childHasExited = record => !record.child || record.spawnFailed === true
+  || record.child.exitCode != null || record.child.signalCode != null;
+
+// A kill request is not proof of exit. Keep both close stages bounded while
+// retaining an unconfirmed child in the session-capacity accounting.
+async function settlesWithin(promise, milliseconds) {
+  let timer;
+  try {
+    return await Promise.race([Promise.resolve(promise).then(() => true, () => true),
+      new Promise(resolve => { timer = setTimeout(() => resolve(false), milliseconds); })]);
+  } finally { clearTimeout(timer); }
+}
+
 export function idleTimeoutMilliseconds(seconds = 900) {
   if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds < 0
       || seconds > Number.MAX_SAFE_INTEGER / 1000) throw new Error('invalid_idle_timeout');
@@ -68,6 +87,12 @@ export function validIdentity(identity, context, childPid) {
 export function validInitialize(body) {
   return object(body) && Object.hasOwn(body, 'id') && body.method === 'initialize'
     && JSONRPCMessageSchema.safeParse(body).success && InitializeRequestSchema.safeParse(body).success;
+}
+
+export function usesTasks(message, initializeResult = false) {
+  return object(message?.params?.task) || object(message?.result?.task)
+    || (message?.method === 'initialize' && object(message.params?.capabilities?.tasks))
+    || (initializeResult && object(message?.result?.capabilities?.tasks));
 }
 
 export function normalizeAccept(value, needsJson = true) {
@@ -136,6 +161,7 @@ function bodyOf(req, timeoutMs, maximumBytes) {
 export class Gateway {
   constructor(config) {
     this.config = config;
+    this.bridgeSpawnOptions = ownedBridgeSpawnOptions(config.windows_detached_bridge);
     this.runDir = realpathSync(config.run_dir);
     this.allowedRoot = config.allowed_cwd_root == null ? null : realpathSync(config.allowed_cwd_root);
     this.token = readFileSync(config.token_file, 'utf8').trim();
@@ -195,6 +221,16 @@ export class Gateway {
     if (release) { pending.delete(id); release(); }
   }
 
+  protectTasks(record, message, initializeResult = false) {
+    if (record.taskPinned || !usesTasks(message, initializeResult)) return;
+    // A task-creation result completes its RPC while work continues in the
+    // backend. Until task lifetimes/resume are supported, expiry must fail
+    // safe: keep the session until explicit DELETE, EOF/owner exit or shutdown.
+    record.taskPinned = true;
+    record.releaseTasks = this.hold(record, 'task-capable session');
+    this.event('session_task_pinned', record);
+  }
+
   holdPost(record, res) {
     const release = this.hold(record, 'POST body or response');
     res.once('finish', release); res.once('close', release);
@@ -222,21 +258,42 @@ export class Gateway {
     if (record.childStop) return record.childStop;
     record.childStop = (async () => {
       const child = record.child;
-      if (!child) return;
-      child.stdin.end();
+      if (!child) return true;
+      if (childHasExited(record)) return true;
+      try { child.stdin.end(); } catch { /* forced cleanup below still runs */ }
       const grace = (Number(this.profiles[record.profile].shutdown_grace_seconds ?? 0.5) + 7) * 1000;
-      let timer;
-      const exited = await Promise.race([record.exited.then(() => true),
-        new Promise(resolve => { timer = setTimeout(() => resolve(false), grace); })]);
-      clearTimeout(timer);
-      if (!exited) {
+      await settlesWithin(record.exited, grace);
+      // Check the actual child state after the timer: an overloaded event loop
+      // can have both its timer and its exit notification ready to run.
+      if (!childHasExited(record)) {
         this.event('bridge_cleanup_timeout', record);
-        child.kill(); // Exact ChildProcess handle; never enumerate or kill a PID tree.
-        await record.exited;
+        let requested = false;
+        try { requested = child.kill(); } catch { /* retain and report below */ }
+        // Exact ChildProcess handle only; never enumerate or kill a PID tree.
+        await settlesWithin(record.exited, 3000);
+        if (!childHasExited(record)) {
+          record.cleanupIncomplete = true;
+          this.event('bridge_cleanup_incomplete', record, { kill_requested: requested });
+          return false;
+        }
       }
-      this.event('bridge_closed', record, { exit_code: child.exitCode });
+      return true;
     })();
     return record.childStop;
+  }
+
+  finishRecord(record) {
+    if (record.closed || !childHasExited(record)) return;
+    record.closed = true;
+    record.cleanupIncomplete = false;
+    if (record.child) this.event('bridge_closed', record,
+      { exit_code: record.child.exitCode, signal: record.child.signalCode });
+    this.active.delete(record);
+    this.event('session_closed', record, { reason: record.reason });
+    if (this.shutdownCleanupIncomplete && this.active.size === 0) {
+      this.shutdownCleanupIncomplete = false;
+      this.event('gateway_closed');
+    }
   }
 
   async closeRecord(record, reason, closeTransport = true) {
@@ -248,11 +305,17 @@ export class Gateway {
     if (record.id) this.sessions.delete(record.id);
     record.closePromise = (async () => {
       if (closeTransport) {
-        try { await record.transport?.close(); } catch { /* child cleanup still runs */ }
+        try {
+          if (!await settlesWithin(record.transport?.close(), 3000))
+            this.event('transport_close_timeout', record);
+        } catch { /* child cleanup still runs */ }
       }
-      await this.stopChild(record);
-      this.active.delete(record);
-      this.event('session_closed', record, { reason: record.reason });
+      if (await this.stopChild(record)) this.finishRecord(record);
+      else {
+        // No polling and no success claim: the live child remains quarantined
+        // in active until its pinned ChildProcess reports its actual exit.
+        void record.exited.then(() => this.finishRecord(record));
+      }
     })();
     return record.closePromise;
   }
@@ -263,6 +326,7 @@ export class Gateway {
     this.active.add(record);
     this.records.set(record.key, record);
     record.releaseHandshake = this.hold(record, 'initialization');
+    this.protectTasks(record, initialize);
     const budget = this.timeouts.get(profile);
     record.deadline = Date.now() + budget;
     record.handshakeTimer = setTimeout(() => { void this.closeRecord(record, 'initialize_timeout'); }, budget);
@@ -280,10 +344,15 @@ export class Gateway {
       const child = spawn(this.config.bridge_python, ['-I', '-B', '-u', this.config.owned_bridge,
         '--manifest', manifest, '--owner-pid', String(context.pid), '--owner-created', context.created,
         '--identity-file', identityPath, '--bridge', this.config.bridge],
-      { cwd: context.cwd, env: context.env, windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
+      { ...this.bridgeSpawnOptions, cwd: context.cwd, env: context.env });
       record.child = child;
       record.exited = new Promise(resolve => {
-        child.once('exit', resolve); child.once('error', () => { record.spawnFailed = true; resolve(); });
+        child.once('spawn', () => { record.childSpawned = true; });
+        child.once('exit', resolve);
+        child.on('error', () => {
+          // An error while signalling an existing child does not prove exit.
+          if (!record.childSpawned && child.pid == null) { record.spawnFailed = true; resolve(); }
+        });
       });
       void record.exited.then(() => {
         if (!record.peerAttached && !record.closing) void this.closeRecord(record, 'session_start_failed');
@@ -316,6 +385,8 @@ export class Gateway {
           record.peerAttached = true;
           return peerStart({ ...owner,
           message: (message, line) => {
+            this.protectTasks(record, message,
+              message.id === record.initId && !Object.hasOwn(message, 'method'));
             this.hold(record, 'backend activity')();
             if (Object.hasOwn(message, 'id')) {
               if (Object.hasOwn(message, 'method')) this.beginRpc(record, record.callbacks, message.id);
@@ -349,6 +420,7 @@ export class Gateway {
       if (record.closing) { await record.transport.close(); throw new Error('initialize_interrupted'); }
       const upstreamMessage = record.transport.onmessage;
       record.transport.onmessage = (message, extra) => {
+        this.protectTasks(record, message);
         if (Object.hasOwn(message, 'id')) {
           if (Object.hasOwn(message, 'method')) this.beginRpc(record, record.pending, message.id);
           else this.finishRpc(record.callbacks, message.id);
@@ -376,9 +448,12 @@ export class Gateway {
         ...(urlPath === '/_health' ? { sessionCount: records.length,
           pendingRequestCount: records.reduce((sum, record) => sum + record.pending.size, 0),
           pendingCallbackCount: records.reduce((sum, record) => sum + record.callbacks.size, 0),
+          closingSessionCount: records.filter(record => record.closing).length,
+          cleanupIncompleteSessionCount: records.filter(record => record.cleanupIncomplete).length,
+          taskPinnedSessionCount: records.filter(record => record.taskPinned).length,
           idleExpiredSessionCount: this.idleExpiredSessionCount,
           idleSessionTimeoutSeconds: Object.fromEntries([...this.idleTimeouts].map(([name, ms]) => [name, ms / 1000])),
-          initializingSessionCount: records.filter(record => !record.initialized).length,
+          initializingSessionCount: records.filter(record => !record.initialized && !record.closing).length,
           limits: { maxSessions: this.maxSessions, maxSessionsPerProfile: this.maxSessionsPerProfile,
             maxRequestBytes: this.maxRequestBytes },
           profiles: Object.fromEntries(Object.keys(this.profiles).map(profile => {
@@ -393,6 +468,7 @@ export class Gateway {
             });
             return [profile, { sessions: own.length, pendingRequests: own.reduce((n, r) => n + r.pending.size, 0),
               pendingCallbacks: own.reduce((n, r) => n + r.callbacks.size, 0),
+              taskPinnedSessions: own.filter(record => record.taskPinned).length,
               usageScope: 'bridge_and_direct_backend_only', samples }];
           })) } : {}) });
       return;
@@ -484,7 +560,9 @@ export class Gateway {
       await Promise.all([...this.active].map(record => this.closeRecord(record, 'gateway_shutdown')));
       this.server?.closeAllConnections();
       await serverClosed;
-      this.event('gateway_closed');
+      this.shutdownCleanupIncomplete = this.active.size > 0;
+      this.event(this.shutdownCleanupIncomplete ? 'gateway_cleanup_incomplete' : 'gateway_closed', null,
+        this.shutdownCleanupIncomplete ? { remaining_session_count: this.active.size } : {});
     })();
     return this.closePromise;
   }

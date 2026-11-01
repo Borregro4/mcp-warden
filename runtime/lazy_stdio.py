@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import queue
@@ -19,6 +20,153 @@ import uuid
 VERSION = 1
 LIST_KEYS = {"tools/list": "tools", "resources/list": "resources",
              "resources/templates/list": "resourceTemplates", "prompts/list": "prompts"}
+
+
+class BridgeTransportStop(RuntimeError):
+    """Fixed diagnostics, never protocol payloads."""
+
+
+class BridgeClientClosed(BridgeTransportStop):
+    pass
+
+
+class BridgeEvents:
+    """Bounded data plus out-of-band client shutdown/error notification.
+
+    Backend EOF stays ordered behind its data. Client EOF must interrupt a
+    blocked output/write even when both data queues are full.
+    """
+    def __init__(self, stopping):
+        self.data = queue.Queue(maxsize=16)
+        self.control = queue.Queue(maxsize=8)
+        self.stopping = stopping
+        self.client_closed = threading.Event()
+
+    def put(self, event):
+        source, _ = event
+        if source == 'client_eof':
+            self.client_closed.set()
+        if source == 'client_eof' or source.endswith('_invalid'):
+            try:
+                self.control.put_nowait(event)
+            except queue.Full:
+                self.stopping.set()
+            return not self.stopping.is_set()
+        while not self.stopping.is_set():
+            try:
+                self.data.put(event, timeout=.05)
+                return True
+            except queue.Full:
+                continue
+        return False
+
+    def get(self, timeout=.1):
+        try:
+            return self.control.get_nowait()
+        except queue.Empty:
+            return self.data.get(timeout=min(timeout, .05))
+
+
+def _write_all(stream, raw):
+    # Same short-write contract as the bounded lightweight transport.
+    view = memoryview(raw)
+    while view:
+        count = stream.write(view)
+        if not isinstance(count, int) or count <= 0 or count > len(view):
+            raise OSError('stream_write_failed')
+        view = view[count:]
+    stream.flush()
+
+
+def _bounded_seconds(value):
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or not .1 <= value <= 600):
+        raise ValueError('invalid_transport_timeout')
+    return float(value)
+
+
+class BoundedWriter:
+    """Stoppable, bounded pipe writes shared by both local transports.
+
+    Use a raw stream: a daemon blocked on a BufferedWriter holds its lock
+    during interpreter finalization. The main thread checks EOF and deadlines
+    while waiting for room; a blocked OS write never runs on that thread.
+    """
+    def __init__(self, stream, stopping, on_error, timeout_seconds, capacity=16):
+        self.stream = stream
+        self.stopping = stopping
+        self.on_error = on_error
+        self.timeout_seconds = timeout_seconds
+        self.queue = queue.Queue(maxsize=capacity)
+        self.lock = threading.Lock()
+        self.writes = {}
+        self.sequence = 0
+        self.failed = False
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self):
+        while not self.stopping.is_set():
+            try:
+                ident, raw = self.queue.get(timeout=.05)
+            except queue.Empty:
+                continue
+            if self.stopping.is_set():
+                return
+            try:
+                _write_all(self.stream, raw)
+            except (OSError, ValueError):
+                self.failed = True
+                self.on_error()
+                return
+            with self.lock:
+                self.writes.pop(ident, None)
+
+    def poll(self):
+        if self.failed:
+            raise BridgeTransportStop('stream_write_failed')
+        if self.stopping.is_set():
+            raise BridgeTransportStop('transport_stopped')
+        with self.lock:
+            if self.writes and time.monotonic() - min(self.writes.values()) >= self.timeout_seconds:
+                raise BridgeTransportStop('stream_write_timeout')
+
+    def pending(self):
+        with self.lock:
+            return bool(self.writes)
+
+    def send(self, raw, check=None):
+        self.sequence += 1
+        ident = self.sequence
+        while True:
+            if check:
+                check()
+            self.poll()
+            try:
+                with self.lock:
+                    self.queue.put_nowait((ident, raw))
+                    self.writes[ident] = time.monotonic()
+                return
+            except queue.Full:
+                time.sleep(.01)
+
+    def drain(self, check=None):
+        while self.pending():
+            if check:
+                check()
+            self.poll()
+            time.sleep(.01)
+
+
+def windows_creation_flags(detached_console=False):
+    """Opt out of console attachment only for explicitly qualified backends.
+
+    DETACHED_PROCESS keeps the explicit stdio pipes. It does not remove the
+    suspended-before-Job launch or grant a backend independent ownership.
+    """
+    if type(detached_console) is not bool:
+        raise ValueError("Invalid windows_detached_console")
+    console_flag = 0x00000008 if detached_console else 0x08000000
+    return console_flag | 0x00000004  # CREATE_SUSPENDED; assign Job before resume.
 
 
 def redirect_diagnostics(manifest, manifest_path):
@@ -291,12 +439,25 @@ class Bridge:
         self.cleanup_scope = manifest.get("cleanup_scope", "tree")
         if self.cleanup_scope not in {"tree", "process"}:
             raise ValueError("Invalid cleanup scope")
+        self.windows_detached_console = manifest.get("windows_detached_console", False)
+        windows_creation_flags(self.windows_detached_console)  # Strict bool, on every platform.
         self.environment = os.environ.copy()
         self.environment.update({str(k): str(v) for k, v in manifest.get("env", {}).items()})
         self.cwd = manifest.get("cwd") or os.getcwd()
         self.proc = None
         self.job = None
-        self.events = queue.Queue()
+        self.stopping = threading.Event()
+        self.events = BridgeEvents(self.stopping)
+        limit = manifest.get('max_rpc_line_bytes', 1024 * 1024)
+        if type(limit) is not int or not 1024 <= limit <= 8 * 1024 * 1024:
+            raise ValueError('invalid_rpc_line_limit')
+        self.max_line_bytes = limit
+        self.write_seconds = _bounded_seconds(manifest.get('backend_write_timeout_seconds', 30))
+        self.partial_seconds = _bounded_seconds(manifest.get('partial_message_timeout_seconds', 30))
+        self.io_lock = threading.Lock()
+        self.partial = {}
+        self.io_writers = {}
+        self.io_managed = False
         self.state = "new"
         self.init = None
         self.initialized = None
@@ -321,6 +482,7 @@ class Bridge:
                 name: self.environment.get(name) for name in set(names) | set(manifest.get("env", {}))}
             self.base_key = digest({"version": VERSION, "command": manifest["command"],
                                     "args": manifest.get("args", []), "files": files,
+                                    "windows_detached_console": self.windows_detached_console,
                                     "env_hash": digest(env_key), "static_lists": sorted(self.static_lists),
                                     "cwd": None if manifest.get("catalog_cwd_independent", False) else self.cwd})
             self.cache_dir = Path(manifest["cache_dir"])
@@ -332,15 +494,46 @@ class Bridge:
     def log(self, message):
         print("lazy-mcp: " + message, file=sys.stderr, flush=True)
 
-    @staticmethod
-    def read_stream(stream, destination, source):
+    def read_stream(self, stream, destination, source):
+        buffered = bytearray()
         try:
-            for raw in iter(stream.readline, b""):
-                destination.put((source, raw))
+            while not self.stopping.is_set():
+                chunk = stream.read(min(8192, self.max_line_bytes + 1))
+                if not chunk:
+                    if buffered:
+                        destination.put((source + '_invalid', 'incomplete_message'))
+                    break
+                buffered.extend(chunk)
+                while b'\n' in buffered:
+                    end = buffered.index(b'\n') + 1
+                    if end > self.max_line_bytes:
+                        destination.put((source + '_invalid', 'message_too_large'))
+                        return
+                    raw = bytes(buffered[:end])
+                    del buffered[:end]
+                    # A complete frame waiting for queue capacity is
+                    # backpressure, not a stalled partial protocol message.
+                    with self.io_lock:
+                        self.partial.pop(source, None)
+                    if not destination.put((source, raw)):
+                        return
+                if len(buffered) > self.max_line_bytes:
+                    destination.put((source + '_invalid', 'message_too_large'))
+                    return
+                if buffered:
+                    with self.io_lock:
+                        self.partial.setdefault(source, time.monotonic())
+        except (OSError, ValueError):
+            destination.put((source + '_invalid', 'stream_unavailable'))
         finally:
+            with self.io_lock:
+                self.partial.pop(source, None)
             destination.put((source + "_eof", None))
 
     def output(self, raw):
+        if getattr(self, 'io_managed', False):
+            self._queue_write('client', raw)
+            return
         sys.stdout.buffer.write(raw)
         sys.stdout.buffer.flush()
 
@@ -348,8 +541,38 @@ class Bridge:
         self.output(encoded({"jsonrpc": "2.0", "id": request["id"], "result": result}) + b"\n")
 
     def send(self, raw):
+        if self.io_managed:
+            self._queue_write('backend', raw)
+            return
         self.proc.stdin.write(raw)
         self.proc.stdin.flush()
+
+    def _start_writer(self, name, stream):
+        self.io_writers[name] = BoundedWriter(stream, self.stopping,
+            lambda: self.events.put((name + '_invalid', 'stream_write_failed')), self.write_seconds)
+
+    def _poll_transport(self):
+        if self.events.client_closed.is_set():
+            raise BridgeClientClosed('client_closed')
+        if self.stopping.is_set():
+            raise BridgeTransportStop('transport_stopped')
+        for writer in self.io_writers.values():
+            writer.poll()
+        now = time.monotonic()
+        with self.io_lock:
+            if self.partial and now - min(self.partial.values()) >= self.partial_seconds:
+                raise BridgeTransportStop('partial_message_timeout')
+
+    def _queue_write(self, name, raw):
+        if len(raw) > self.max_line_bytes:
+            raise BridgeTransportStop('message_too_large')
+        writer = self.io_writers.get(name)
+        if writer is None:
+            raise BridgeTransportStop('stream_unavailable')
+        writer.send(raw, self._poll_transport)
+
+    def _drain_output(self):
+        self.io_writers['client'].drain(self._poll_transport)
 
     def start(self):
         args = [self.spec["command"], *self.spec.get("args", [])]
@@ -362,7 +585,7 @@ class Bridge:
             self.job = WindowsJob(include_descendants=self.cleanup_scope == "tree")
             try:
                 self.proc = _OwnedPopen(args, job=self.job,
-                    creationflags=0x08000000 | 0x00000004, **kwargs)
+                    creationflags=windows_creation_flags(self.windows_detached_console), **kwargs)
             except BaseException:
                 try:
                     if self.proc is not None:
@@ -373,6 +596,8 @@ class Bridge:
                 raise
         else:
             self.proc = subprocess.Popen(args, start_new_session=self.cleanup_scope == "tree", **kwargs)
+        if getattr(self, 'io_managed', False):
+            self._start_writer('backend', self.proc.stdin)
         threading.Thread(target=self.read_stream, args=(self.proc.stdout, self.events, "backend"), daemon=True).start()
 
     def request_key(self, message):
@@ -469,11 +694,18 @@ class Bridge:
                     self.catalog_phase = False
                     self.unlock()
                 else:
+                    if len(self.pending) >= 16:
+                        raise BridgeTransportStop('discovery_capacity_reached')
                     self.pending[digest(message["id"])] = (method, self.request_key(message))
             elif method != "ping":
                 self.catalog_phase = False
                 self.unlock()
         self.send(raw)
+
+    def hold_message(self, raw):
+        if len(self.held) >= 16 or sum(map(len, self.held)) + len(raw) > max(4 * 1024 * 1024, self.max_line_bytes):
+            raise BridgeTransportStop('pending_capacity_reached')
+        self.held.append(raw)
 
     def accept_client(self, raw):
         message = parse(raw)
@@ -492,7 +724,7 @@ class Bridge:
             self.forward(raw, message)
             return
         if self.state == "waiting":
-            self.held.append(raw)
+            self.hold_message(raw)
             return
         if self.state == "deferred":
             if method == "notifications/initialized" and "id" not in message:
@@ -506,14 +738,14 @@ class Bridge:
                 if cached:
                     self.reply(message, cached["result"])
                     return
-            self.held.append(raw)
+            self.hold_message(raw)
             self.activate()
             return
         if self.state == "replaying":
             if message and "method" not in message and "id" in message:
                 self.send(raw)  # Client answers to backend-initiated requests must not wait on initialize.
             else:
-                self.held.append(raw)
+                self.hold_message(raw)
             return
         self.forward(raw, message)
 
@@ -554,6 +786,11 @@ class Bridge:
                     if method == "initialize":
                         self.cache["initialize"] = result
                     else:
+                        if key not in self.cache['responses'] and len(self.cache['responses']) >= 16:
+                            self.catalog_phase = False
+                            self.unlock()
+                            self.output(raw)
+                            return
                         self.cache["responses"][key] = {"method": method, "result": result}
                     self.save_cache()
                     if method == "tools/list":
@@ -582,7 +819,24 @@ class Bridge:
 
     def shutdown(self):
         self.unlock()
+        if getattr(self, 'io_managed', False):
+            self.stopping.set()
         if not self.proc:
+            return
+        backend_writer = getattr(self, 'io_writers', {}).get('backend')
+        blocked_write = backend_writer is not None and backend_writer.pending()
+        if blocked_write and self.job:
+            self.job.close()  # Unblock an owned write before touching its pipe.
+        if blocked_write and self.cleanup_scope == 'process':
+            # Shared descendants may retain the pipe. End only the pinned root
+            # and leave daemon readers/writers for process exit to release.
+            if self.proc.poll() is None:
+                self.proc.terminate()
+                try:
+                    self.proc.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    self.proc.kill()
+                    self.proc.wait(timeout=3)
             return
         try:
             if self.proc.stdin:
@@ -612,9 +866,13 @@ class Bridge:
                     self.proc.wait(timeout=3)
 
     def run(self):
-        threading.Thread(target=self.read_stream, args=(sys.stdin.buffer, self.events, "client"), daemon=True).start()
+        self.io_managed = True
+        self._start_writer('client', getattr(sys.stdout.buffer, 'raw', sys.stdout.buffer))
+        client_stream = getattr(sys.stdin.buffer, 'raw', sys.stdin.buffer)
+        threading.Thread(target=self.read_stream, args=(client_stream, self.events, "client"), daemon=True).start()
         try:
             while True:
+                self._poll_transport()
                 try:
                     source, raw = self.events.get(timeout=0.1)
                 except queue.Empty:
@@ -626,12 +884,20 @@ class Bridge:
                     self.accept_backend(raw)
                 elif source == "client_eof":
                     return 0
+                elif source.endswith('_invalid'):
+                    raise BridgeTransportStop(str(raw))
                 elif source == "backend_eof":
+                    self._drain_output()
                     try:
                         return self.proc.wait(timeout=3) or 0
                     except subprocess.TimeoutExpired:
                         return 1  # finally closes only the owned tree; no command-bearing traceback.
                 self.poll_wait()
+        except BridgeClientClosed:
+            return 0
+        except BridgeTransportStop as error:
+            self.log(str(error))
+            return 2
         finally:
             self.shutdown()
 

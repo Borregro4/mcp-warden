@@ -12,7 +12,14 @@ acotadas en Codex CLI y Claude Code; revisa los
 
 **[Sigue la guía de primera ejecución →](docs/first-run.es.md)** ·
 [English guide](docs/first-run.md) ·
-[Descarga v0.3.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1)
+[Descarga v0.3.1-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.1-alpha.1)
+
+La versión 0.3.1-alpha.1 corrige el manejo de tareas en segundo plano, la
+contrapresión en las tuberías y el diagnóstico previo de la CLI. La
+[auditoría del ciclo de vida](docs/audit-2026-11-01.md) documenta los fallos
+reproducidos, las comprobaciones y los límites pendientes. Las pruebas de
+cuatro horas que aparecen abajo corresponden a v0.3.0-alpha.1; no se repitieron
+para este parche.
 
 ## Empieza con un servidor de prueba
 
@@ -55,6 +62,11 @@ y la [validación de v0.2](docs/validation-v0.2.0-alpha.1.md).
 
 ## Límites que debes conocer
 
+- Las tareas MCP pueden seguir activas tras la respuesta JSON-RPC inicial. Las
+  sesiones que anuncian Tasks o envían solicitudes con `params.task` conservan
+  su servidor hasta la desconexión: se desactiva el cierre por inactividad como
+  protección. No equivale a seguimiento ni recuperación completos de tareas.
+  Consulta el [ciclo de tareas](docs/task-lifecycle.md).
 - El reinicio stateless pierde la memoria del servidor, sus cursores y selecciones. Úsalo sólo si eso es aceptable. Los perfiles manuales, que son la opción predeterminada, piden reconectar después del vencimiento; no se repiten llamadas completadas.
 - La limpieza con Windows Job Objects corresponde a procesos hijos privados del servidor. Los descendientes compartidos necesitan otra política, y no está calificado el intervalo entre crear el proceso y asignarlo al Job.
 - Administra el ciclo de vida de programas locales de confianza. No impone un límite estricto de RAM o CPU, elige modelos ni acredita ahorro de tokens o gestión de cuotas.

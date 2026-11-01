@@ -11,7 +11,12 @@ stateless profile can start a fresh backend for the next call. This is a
 
 **[Try the first-run guide →](docs/first-run.md)** ·
 [Guía en español](docs/first-run.es.md) ·
-[Download v0.3.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1)
+[Download v0.3.1-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.1-alpha.1)
+
+Version 0.3.1-alpha.1 corrects task-lifetime handling, pipe backpressure and
+CLI preflight. See the [lifecycle audit](docs/audit-2026-11-01.md) for reproduced
+defects, validation and remaining limits. The four-hour results below belong
+to v0.3.0-alpha.1; they were not rerun for this patch.
 
 ## Start with one test server
 
@@ -54,6 +59,10 @@ reduced working set further with extra page faults; it stays off by default.
 
 ## Know the limits
 
+- MCP Tasks can outlive their initial JSON-RPC response. Sessions that advertise
+  Tasks or use task-augmented requests retain their backend until disconnect;
+  idle expiry is disabled conservatively. This is a safety fallback, not full
+  task tracking or task recovery. See [task lifecycle](docs/task-lifecycle.md).
 - Stateless restart loses backend memory, cursors, and selections. Use it only when that is acceptable. Default/manual profiles require a client reconnect after expiry; completed calls are never replayed.
 - Windows Job cleanup is for owned private children. Shared descendants need a different policy, and the creation-to-Job-assignment gap is not qualified.
 - This is a lifecycle supervisor for trusted local programs, with no hard RAM/CPU sandbox, model routing, token savings, or subscription-quota management.
