@@ -1,5 +1,10 @@
 # Validation for v0.3.0-alpha.1
 
+This page preserves the v0.3.0-alpha.1 evidence. For the v0.3.1-alpha.1
+corrections, reproduced defects and current validation, read the
+[2026-11-01 lifecycle audit](docs/audit-2026-11-01.md). The four-hour runs and
+performance comparisons below were not repeated for that patch.
+
 Evidence completed on 2026-10-31 JST. Native filesystem workflows, synthetic
 performance comparisons and regression tests are separate below. The
 [v0.2 record](docs/validation-v0.2.0-alpha.1.md) and

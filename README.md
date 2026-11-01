@@ -11,7 +11,12 @@ stateless profile can start a fresh backend for the next call. This is a
 
 **[Try the first-run guide →](docs/first-run.md)** ·
 [Guía en español](docs/first-run.es.md) ·
-[Download v0.3.0-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.0-alpha.1)
+[Download v0.3.1-alpha.1](https://github.com/Borregro4/mcp-warden/releases/tag/v0.3.1-alpha.1)
+
+Version 0.3.1-alpha.1 corrects task-lifetime handling, pipe backpressure and
+CLI preflight. See the [lifecycle audit](docs/audit-2026-11-01.md) for reproduced
+defects, validation and remaining limits. The four-hour results below belong
+to v0.3.0-alpha.1; they were not rerun for this patch.
 
 ## Start with one test server
 
